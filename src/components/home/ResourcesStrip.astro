@@ -9,13 +9,18 @@ const resources = [
 
 <section aria-labelledby="resources-h" class="surface-warm reveal">
   <div class="inner">
+    <span class="mono-label eyebrow">Find your way in</span>
     <h2 id="resources-h">Resources</h2>
-    <div class="grid">
+    <div class="rows">
       {
-        resources.map((r) => (
-          <a href={r.href} class="tile">
-            <h3>{r.title} <span aria-hidden="true" class="arrow">→</span></h3>
-            <p>{r.description}</p>
+        resources.map((r, i) => (
+          <a href={r.href} class="row">
+            <span class="row-n mono-label">{String(i + 1).padStart(2, '0')}</span>
+            <span class="row-body">
+              <h3>{r.title}</h3>
+              <p>{r.description}</p>
+            </span>
+            <span class="arrow" aria-hidden="true">→</span>
           </a>
         ))
       }
@@ -25,42 +30,72 @@ const resources = [
 
 <style>
   .inner {
-    padding: var(--space-3) var(--space-1);
+    padding: var(--space-4) var(--space-1);
   }
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 18px;
+  .eyebrow {
+    color: var(--surface-warm-muted);
   }
 
-  .tile {
-    text-decoration: none;
+  h2 {
     color: var(--surface-warm-text);
-    background: rgba(23, 20, 15, 0.05);
-    border: 1px solid rgba(23, 20, 15, 0.12);
-    border-radius: 16px;
-    padding: 26px;
-    display: block;
-    transition: transform 0.25s ease, border-color 0.25s ease;
+    font-size: var(--step-3);
+    margin-top: 14px;
   }
 
-  .tile:hover {
-    transform: translateY(-4px);
-    border-color: var(--surface-warm-text);
+  .rows {
+    margin-top: var(--space-3);
+    border-top: 1px solid rgba(23, 20, 15, 0.14);
   }
 
-  .tile h3 {
-    font-size: 1.25rem;
+  .row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 24px 4px;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(23, 20, 15, 0.14);
+    transition: gap 0.2s ease;
+  }
+
+  .row:hover,
+  .row:focus-visible {
+    gap: calc(var(--space-2) + 6px);
+  }
+
+  .row:focus-visible {
+    outline: 2px solid var(--surface-warm-text);
+    outline-offset: -2px;
+  }
+
+  .row-n {
+    color: var(--surface-warm-muted);
+  }
+
+  .row-body h3 {
+    color: var(--surface-warm-text);
+    font-size: 1.2rem;
+  }
+
+  .row-body p {
+    color: var(--surface-warm-muted);
+    font-size: 0.92rem;
+    margin: 6px 0 0;
   }
 
   .arrow {
     color: var(--surface-warm-text);
+    font-size: 1.1rem;
   }
 
-  .tile p {
-    color: var(--surface-warm-muted);
-    font-size: 0.9rem;
-    margin: 10px 0 0;
+  @media (max-width: 40em) {
+    .row {
+      grid-template-columns: auto 1fr;
+    }
+
+    .arrow {
+      display: none;
+    }
   }
 </style>

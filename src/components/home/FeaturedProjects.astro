@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import AxisDivider from '../ui/AxisDivider.astro';
 
 const allFeatured = await getCollection(
   'projects',
@@ -18,22 +19,26 @@ const featured = allFeatured.sort((a, b) => (a.data.order ?? 99) - (b.data.order
         genuinely impactful system-design tools and processes.
       </p>
     </div>
-    <a href="/projects/" class="all-link">All projects →</a>
+    <a href="/projects/" class="all-link">All projects <span aria-hidden="true">→</span></a>
   </div>
-  <div class="cards">
+
+  <div class="rows">
     {
-      featured.map((project) => (
-        <a href={`/projects/${project.id}/`} class="card">
-          <span class="status">
-            <span class="dot" aria-hidden="true" />
-            Active{project.data.sectors?.[0] ? ` · ${project.data.sectors[0]}` : ''}
-          </span>
-          <h3>{project.data.title}</h3>
-          <p>{project.data.summary}</p>
-          <span class="view-link">View programme →</span>
-        </a>
+      featured.map((project, i) => (
+        <>
+          <AxisDivider label={project.data.sectors?.[0] ?? 'Active'} />
+          <a href={`/projects/${project.id}/`} class="row">
+            <span class="row-n mono-label">{String(i + 1).padStart(2, '0')}</span>
+            <span class="row-body">
+              <h3>{project.data.title}</h3>
+              <p>{project.data.summary}</p>
+            </span>
+            <span class="view-link">View programme <span aria-hidden="true">→</span></span>
+          </a>
+        </>
       ))
     }
+    <AxisDivider />
   </div>
 </section>
 
@@ -44,7 +49,7 @@ const featured = allFeatured.sort((a, b) => (a.data.order ?? 99) - (b.data.order
     align-items: flex-end;
     gap: 20px;
     flex-wrap: wrap;
-    margin-bottom: 28px;
+    margin-bottom: var(--space-2);
   }
 
   .section-head h2 {
@@ -62,66 +67,63 @@ const featured = allFeatured.sort((a, b) => (a.data.order ?? 99) - (b.data.order
     text-decoration: none;
     color: var(--accent);
     font-weight: 600;
-    font-family: var(--font-display);
+    font-family: var(--font-body);
   }
 
-  .cards {
+  .row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 22px;
-  }
-
-  .card {
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 26px 4px;
     text-decoration: none;
     color: var(--text);
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   }
 
-  .card:hover {
-    transform: translateY(-5px);
-    border-color: var(--accent);
-    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.4);
-  }
-
-  .status {
-    display: inline-flex;
-    align-self: flex-start;
-    align-items: center;
-    gap: 7px;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
+  .row-n {
     color: var(--accent);
-  }
-
-  .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 8px var(--accent);
-  }
-
-  .card h3 {
-    font-size: 1.25rem;
-    margin: 12px 0 8px;
-  }
-
-  .card p {
-    color: var(--muted);
     font-size: 0.9rem;
-    margin: 0 0 16px;
+  }
+
+  .row-body h3 {
+    font-size: 1.35rem;
+  }
+
+  .row-body p {
+    color: var(--muted);
+    margin: 8px 0 0;
+    max-width: 60ch;
   }
 
   .view-link {
-    margin-top: auto;
-    font-family: var(--font-display);
+    white-space: nowrap;
+    font-family: var(--font-body);
     font-weight: 600;
     color: var(--accent);
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .row:hover .view-link,
+  .row:focus-visible .view-link {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .row:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  @media (max-width: 46em) {
+    .row {
+      grid-template-columns: auto 1fr;
+    }
+
+    .view-link {
+      display: none;
+    }
   }
 </style>

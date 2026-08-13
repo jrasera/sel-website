@@ -3,6 +3,9 @@ import FutureFan from '../ui/FutureFan.astro';
 ---
 
 <section class="hero" aria-labelledby="hero-h">
+  <div class="hero-backdrop">
+    <FutureFan />
+  </div>
   <div class="hero-copy">
     <span class="mono-label eyebrow">Imperial College London</span>
     <h1 id="hero-h">Strategic Engineering Laboratory</h1>
@@ -20,42 +23,64 @@ import FutureFan from '../ui/FutureFan.astro';
       <a href="/people/" class="btn btn-secondary">Meet the team</a>
     </div>
   </div>
-  <div class="hero-visual">
-    <FutureFan />
-  </div>
 </section>
 
 <style>
   .hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    gap: var(--space-3);
+    position: relative;
+    display: flex;
     align-items: center;
-    padding-top: var(--space-3);
+    min-height: min(720px, 88vh);
+    padding-top: var(--space-2);
+    overflow: hidden;
+  }
+
+  .hero-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    /* The fan reads as full-bleed atmosphere, not a boxed illustration — but
+       it must never sit directly behind the text column, so it's masked out
+       there entirely (transparent, not just dim) and grows in past it. This
+       also reads thematically: the space of futures opens up as you move
+       away from the present moment the text occupies. Fixed px stops, not
+       percentages: .hero-copy has a fixed 640px max-width, so the mask must
+       track that in px too, not a proportion of the (much wider, and
+       differently-capped) hero section — a percentage-based mask drifts out
+       of sync with the text column and lets rays cross directly behind it
+       on wide viewports. */
+    mask-image: linear-gradient(to right, transparent 0, transparent 680px, black 900px);
+    -webkit-mask-image: linear-gradient(to right, transparent 0, transparent 680px, black 900px);
+  }
+
+  .hero-copy {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
   }
 
   .eyebrow {
     color: var(--accent);
-    font-size: 0.8rem;
   }
 
   .hero h1 {
     font-size: var(--step-4);
-    margin: 16px 0 0;
-    font-weight: 700;
+    margin: 18px 0 0;
+    font-weight: 600;
   }
 
   .standfirst {
+    font-family: var(--font-display);
     font-size: var(--step-1);
     color: var(--text);
-    margin: 22px 0 0;
-    max-width: 40ch;
+    margin: 26px 0 0;
+    max-width: 38ch;
     font-weight: 500;
   }
 
   .supporting {
     color: var(--muted);
-    margin: 20px 0 0;
+    margin: 22px 0 0;
     max-width: 54ch;
   }
 
@@ -63,7 +88,7 @@ import FutureFan from '../ui/FutureFan.astro';
     display: flex;
     gap: 14px;
     flex-wrap: wrap;
-    margin-top: 32px;
+    margin-top: 36px;
   }
 
   .btn {
@@ -74,7 +99,7 @@ import FutureFan from '../ui/FutureFan.astro';
     border-radius: 999px;
     font-weight: 600;
     text-decoration: none;
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     transition: filter 0.2s ease, border-color 0.2s ease;
   }
 
@@ -97,19 +122,14 @@ import FutureFan from '../ui/FutureFan.astro';
     border-color: var(--accent);
   }
 
-  .hero-visual {
-    position: relative;
-    aspect-ratio: 4 / 5;
-    border-radius: 20px;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
-    background: var(--bg2);
-  }
-
   @media (max-width: 860px) {
     .hero {
-      grid-template-columns: 1fr;
+      min-height: min(640px, 80vh);
+    }
+
+    .hero-backdrop {
+      mask-image: linear-gradient(to bottom, transparent 0%, transparent 58%, black 88%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 58%, black 88%);
     }
   }
 </style>

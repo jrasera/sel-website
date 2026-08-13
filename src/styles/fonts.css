@@ -1,10 +1,18 @@
 /* Self-hosted, not loaded from a font CDN — see README for the ICT-facing rationale. */
 @font-face {
-  font-family: 'Space Grotesk';
+  font-family: 'Fraunces';
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 100 900;
   font-display: swap;
-  src: url('/fonts/space-grotesk-variable.woff2') format('woff2');
+  src: url('/fonts/fraunces-variable.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Public Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/public-sans-variable.woff2') format('woff2');
 }
 
 @font-face {

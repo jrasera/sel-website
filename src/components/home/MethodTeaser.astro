@@ -1,0 +1,46 @@
+---
+import AxisDivider from '../ui/AxisDivider.astro';
+---
+
+<section aria-label="Our method" class="method-teaser reveal">
+  <AxisDivider label="Method" />
+  <div class="teaser-row">
+    <p>
+      Every project follows the same seven-step method for engineering under uncertainty, from
+      framing the decision through to balancing risk and reward.
+    </p>
+    <a href="/method/" class="all-link">Explore our method <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+
+<style>
+  .method-teaser {
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+
+  .teaser-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: 22px;
+    flex-wrap: wrap;
+  }
+
+  .teaser-row p {
+    color: var(--muted);
+    max-width: 56ch;
+    margin: 0;
+    font-size: var(--step-1);
+    font-family: var(--font-display);
+  }
+
+  .all-link {
+    white-space: nowrap;
+    text-decoration: none;
+    color: var(--accent);
+    font-weight: 600;
+    font-family: var(--font-body);
+  }
+</style>

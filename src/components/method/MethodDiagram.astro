@@ -1,5 +1,5 @@
 ---
-import RadialSelector from '../ui/RadialSelector.astro';
+import SequenceSelector from '../ui/SequenceSelector.astro';
 
 const principles = [
   {
@@ -54,7 +54,7 @@ const principles = [
     infrastructure, applies the same underlying method — focused on decision quality under
     uncertainty.
   </p>
-  <RadialSelector hubLabel="SEL" items={principles} size="large" />
+  <SequenceSelector items={principles} />
 </section>
 
 <style>
@@ -68,7 +68,7 @@ const principles = [
     max-width: 60ch;
   }
 
-  .method-diagram-section :global(.radial-selector) {
+  .method-diagram-section :global(.sequence-selector) {
     margin-top: var(--space-3);
   }
 </style>

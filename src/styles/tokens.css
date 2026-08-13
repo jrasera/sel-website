@@ -10,20 +10,34 @@
   --accent-soft: rgba(76, 196, 255, 0.14);
   --on-accent: #03121c;
 
-  /* New: warm off-white secondary surface, for breaking up dark-on-dark on long pages. */
+  /* Second series colour: where a plot needs two distinguishable traces
+     (baseline vs. divergent scenario), this is the second one — the
+     "range" beyond a single accent on near-black. */
+  --accent-warm: #f2975a;
+  --accent-warm-soft: rgba(242, 151, 90, 0.14);
+  --on-accent-warm: #1c0f04;
+
+  /* Warm off-white secondary surface, for breaking up dark-on-dark on long pages. */
   --surface-warm: #f4f1ea;
   --surface-warm-text: #17140f;
   --surface-warm-muted: #5c574c;
 
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  /* Display: Fraunces, restrained (SOFT/WONK pinned off), variable
+     optical-size + weight — real character at large scale. */
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  /* Body: Public Sans, a humanist sans that holds up at long paragraph
+     lengths on a dark field. */
+  --font-body: 'Public Sans', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
 
-  /* Fluid type scale. */
-  --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-  --step-1: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
-  --step-2: clamp(1.75rem, 1.55rem + 1vw, 2.25rem);
-  --step-3: clamp(2.5rem, 2.1rem + 2vw, 3.5rem);
-  --step-4: clamp(3.25rem, 2.5rem + 3.75vw, 5.5rem);
+  /* Fluid type scale — genuine range: instrument-label small end,
+     editorial-headline large end, not a compressed middle band. */
+  --step-caption: clamp(0.7rem, 0.68rem + 0.1vw, 0.75rem);
+  --step-0: clamp(1rem, 0.95rem + 0.3vw, 1.15rem);
+  --step-1: clamp(1.3rem, 1.15rem + 0.7vw, 1.6rem);
+  --step-2: clamp(1.9rem, 1.6rem + 1.4vw, 2.6rem);
+  --step-3: clamp(2.75rem, 2.2rem + 2.6vw, 4rem);
+  --step-4: clamp(4rem, 2.8rem + 5.5vw, 7.5rem);
 
   --space-1: clamp(0.75rem, 0.7rem + 0.25vw, 1rem);
   --space-2: clamp(1.5rem, 1.3rem + 1vw, 2.25rem);

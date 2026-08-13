@@ -1,0 +1,217 @@
+---
+interface Item {
+  n: string;
+  heading: string;
+  description: string;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="sequence-selector" data-sequence-selector>
+  <div class="rail-panel">
+    <div class="rail">
+      {
+        items.map((item, i) => (
+          <button
+            type="button"
+            class="tick-btn"
+            data-index={i}
+            aria-label={`${item.n}. ${item.heading}`}
+          >
+            {item.n}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="detail-panel" aria-live="polite" hidden>
+      <span class="detail-n mono-label"></span>
+      <h3 class="detail-heading"></h3>
+      <p class="detail-description"></p>
+    </div>
+  </div>
+
+  <ol class="item-list">
+    {
+      items.map((item, i) => (
+        <li data-index={i}>
+          <span class="item-n mono-label" aria-hidden="true">{item.n}</span>
+          <h3>{item.heading}</h3>
+          <p>{item.description}</p>
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<script>
+  function initSequenceSelector(root: Element) {
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('.tick-btn'));
+    const list = root.querySelector<HTMLElement>('.item-list');
+    const panel = root.querySelector<HTMLElement>('.detail-panel');
+    if (!buttons.length || !list || !panel) return;
+
+    const items = Array.from(list.querySelectorAll<HTMLElement>('li'));
+    const panelN = panel.querySelector('.detail-n');
+    const panelHeading = panel.querySelector('.detail-heading');
+    const panelDescription = panel.querySelector('.detail-description');
+    if (!panelN || !panelHeading || !panelDescription) return;
+
+    function activate(index: number) {
+      const item = items[index];
+      if (!item) return;
+      panelN!.textContent = item.querySelector('.item-n')?.textContent ?? '';
+      panelHeading!.textContent = item.querySelector('h3')?.textContent ?? '';
+      panelDescription!.textContent = item.querySelector('p')?.textContent ?? '';
+      for (const btn of buttons) {
+        btn.classList.toggle('is-active', Number(btn.dataset.index) === index);
+      }
+    }
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => activate(Number(btn.dataset.index)));
+    });
+
+    panel.hidden = false;
+    // A CSS class, not the `hidden` attribute: whether this actually hides
+    // the list depends on a media query (see below), so the rail+panel
+    // view only replaces the list at widths where the rail is actually
+    // shown — including on live resize, with no JS resize listener needed.
+    list.classList.add('js-collapsed');
+    activate(0);
+  }
+
+  document.querySelectorAll('[data-sequence-selector]').forEach(initSequenceSelector);
+</script>
+
+<style>
+  .rail-panel {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-3);
+    align-items: start;
+  }
+
+  .rail {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 2px 0;
+  }
+
+  .rail::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 20px;
+    bottom: 20px;
+    width: 1px;
+    background: var(--line);
+  }
+
+  .tick-btn {
+    position: relative;
+    z-index: 1;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg2);
+    border: 1.5px solid var(--line);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+
+  .tick-btn:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .tick-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .tick-btn.is-active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: scale(1.08);
+  }
+
+  .detail-panel {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px 32px;
+    min-height: 168px;
+  }
+
+  .detail-n {
+    color: var(--accent);
+  }
+
+  .detail-heading {
+    font-size: 1.3rem;
+    margin: 12px 0 12px;
+  }
+
+  .detail-description {
+    color: var(--muted);
+    margin: 0;
+    max-width: 62ch;
+  }
+
+  .item-list {
+    list-style: none;
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    display: grid;
+    gap: 16px;
+  }
+
+  @media (min-width: 48em) {
+    .item-list.js-collapsed {
+      display: none;
+    }
+  }
+
+  .item-list li {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px 22px;
+  }
+
+  .item-n {
+    color: var(--accent);
+  }
+
+  .item-list h3 {
+    font-size: 1.05rem;
+    margin: 8px 0 6px;
+  }
+
+  .item-list p {
+    color: var(--muted);
+    margin: 0;
+    font-size: 0.92rem;
+  }
+
+  /* Deliberately one step below the .item-list.js-collapsed breakpoint
+     (47.9375em vs 48em), not the same value — at the exact same breakpoint
+     both rules would match simultaneously and hide everything. */
+  @media (max-width: 47.9375em) {
+    .rail-panel {
+      display: none;
+    }
+  }
+</style>
