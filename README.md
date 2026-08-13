@@ -5,11 +5,13 @@ London): a static site built with [Astro](https://astro.build), content-collecti
 zero JavaScript by default. Every page renders full content and navigation with JavaScript
 disabled.
 
+**Live at: https://sel-website.pages.dev**
+
 ## ⚠️ Open dependency: Imperial ICT
 
 This site is **not yet on an Imperial subdomain**. Per Imperial ICT's stated process, the plan
-is to get the site live at a working URL first (currently a Cloudflare Pages `*.pages.dev`
-URL), then have ICT review it for accessibility, then have them assign the subdomain. As of
+is to get the site live at a working URL first (currently the Cloudflare Pages URL above),
+then have ICT review it for accessibility, then have them assign the subdomain. As of
 this build, ICT has not confirmed any specific technical mandate (SSO, a required CMS, a
 specific stack) beyond that process. **Domain, redirects, and any ICT-specified constraint are
 open items to revisit once ICT responds** — nothing here should be assumed final until then.
@@ -70,9 +72,19 @@ Node **22+** is required (see `.nvmrc`).
 
 ## Deployment
 
-Static output (`astro build` → `dist/`), deployed via Cloudflare Pages connected to this
-GitHub repository. No adapter, server functions, database, or environment variables are
-required — the entire site is static HTML/CSS with no build-time secrets.
+Static output (`astro build` → `dist/`), deployed to Cloudflare Pages (project `sel-website`).
+No adapter, server functions, database, or environment variables are required — the entire
+site is static HTML/CSS with no build-time secrets.
+
+Connected to the `jrasera/sel-website` GitHub repository via Cloudflare's GitHub App — pushes
+to `main` trigger an automatic build and deploy. PR branches get their own preview deployment.
+
+A manual deploy remains available if ever needed:
+
+```sh
+npm run build
+npx wrangler pages deploy dist --project-name=sel-website --branch=main
+```
 
 ## Accessibility
 
