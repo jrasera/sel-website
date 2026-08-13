@@ -6,6 +6,20 @@
 
 html {
   scroll-behavior: smooth;
+  /* Keeps content that scrolls to the top of the page (e.g. the home
+     methodology diagram, or a future in-page anchor) from landing underneath
+     the sticky header. Measured via headless browser across breakpoints: the
+     header wraps to 3 lines (~195px) below ~768px, 2 lines (~120px) from
+     768px up to roughly 1200px, and a single row (~70px) beyond that. Two
+     tiers, each with a small buffer, avoid an oversized gap on desktop
+     while still comfortably clearing the tallest mobile header. */
+  scroll-padding-top: 220px;
+}
+
+@media (min-width: 48em) {
+  html {
+    scroll-padding-top: 150px;
+  }
 }
 
 body {

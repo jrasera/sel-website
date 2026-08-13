@@ -1,5 +1,6 @@
 ---
 name: Nisha Saduagkan
+initials: NS
 role: Alumna — PhD Student
 careerStage: alumni
 bio: >

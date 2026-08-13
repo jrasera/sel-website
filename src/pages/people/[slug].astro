@@ -35,9 +35,7 @@ const projects = data.projectSlugs
         data.photo ? (
           <img src={data.photo} alt={data.photoAlt ?? ''} />
         ) : (
-          <span class="mono-label initials">
-            {data.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
-          </span>
+          <span class="mono-label initials">{data.initials}</span>
         )
       }
     </div>

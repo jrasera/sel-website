@@ -8,9 +8,12 @@ interface Props {
 const { partner } = Astro.props;
 const { data } = partner;
 const Tag = data.url ? 'a' : 'div';
+const linkProps = data.url
+  ? { href: data.url, target: '_blank', rel: 'noopener noreferrer', 'aria-label': `Visit ${data.name} (opens in new tab)` }
+  : {};
 ---
 
-<Tag class="partner-tile" {...(data.url ? { href: data.url } : {})}>
+<Tag class="partner-tile" {...linkProps}>
   {
     data.logo ? (
       <img src={data.logo} alt={data.name} />
@@ -25,9 +28,10 @@ const Tag = data.url ? 'a' : 'div';
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 84px;
-    padding: 16px 22px;
-    background: var(--surface-warm);
+    width: 168px;
+    height: 88px;
+    padding: 18px 22px;
+    background: #ffffff;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     text-decoration: none;

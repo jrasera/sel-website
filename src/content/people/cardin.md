@@ -1,5 +1,6 @@
 ---
 name: Dr Michel-Alexandre Cardin
+initials: MC
 role: Director, Strategic Engineering Laboratory
 careerStage: director
 bio: >

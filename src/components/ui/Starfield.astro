@@ -12,30 +12,33 @@ function mulberry32(seed: number) {
   };
 }
 
-function stars(count: number, seed: number, rMin: number, rMax: number) {
+function stars(count: number, seed: number, rMin: number, rMax: number, oMin: number, oMax: number) {
   const rand = mulberry32(seed);
   return Array.from({ length: count }, () => ({
-    cx: rand() * 100,
-    cy: rand() * 100,
+    cx: rand() * 1000,
+    cy: rand() * 1000,
     r: rMin + rand() * (rMax - rMin),
-    o: 0.35 + rand() * 0.55,
+    o: oMin + rand() * (oMax - oMin),
   }));
 }
 
-const farStars = stars(70, 1, 0.25, 0.55);
-const nearStars = stars(45, 2, 0.5, 1);
+// viewBox is 1000 units; real rendered diameters land in the ~1-5px range at
+// typical viewport widths (a unit is roughly 1.6-2px on a 1400-1700px-wide
+// screen) — stars must read as pinpricks, not blobs.
+const farStars = stars(45, 1, 1.2, 2.2, 0.12, 0.28);
+const nearStars = stars(28, 2, 1.8, 3, 0.18, 0.4);
 ---
 
 <div class="starfield" aria-hidden="true">
   <div class="glow glow-a"></div>
   <div class="glow glow-b"></div>
 
-  <svg class="stars-far" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
-    {farStars.map((s) => <circle cx={s.cx} cy={s.cy} r={s.r} opacity={s.o} />)}
+  <svg class="stars-far" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
+    {farStars.map((s) => <circle cx={s.cx} cy={s.cy} r={s.r} opacity={s.o} style={`--peak:${s.o}`} />)}
   </svg>
 
-  <svg class="stars-near" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
-    {nearStars.map((s) => <circle cx={s.cx} cy={s.cy} r={s.r} opacity={s.o} />)}
+  <svg class="stars-near" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
+    {nearStars.map((s) => <circle cx={s.cx} cy={s.cy} r={s.r} opacity={s.o} style={`--peak:${s.o}`} />)}
   </svg>
 </div>
 
@@ -57,15 +60,14 @@ const nearStars = stars(45, 2, 0.5, 1);
     height: 140%;
   }
 
-  .stars-far circle {
+  .stars-far circle,
+  .stars-near circle {
     fill: var(--text);
-    filter: blur(0.6px);
     animation: twinkle 7s ease-in-out infinite;
   }
 
-  .stars-near circle {
-    fill: var(--text);
-    animation: twinkle 5s ease-in-out infinite;
+  .stars-far circle {
+    filter: blur(0.3px);
   }
 
   .stars-near circle:nth-child(odd) {
@@ -95,10 +97,10 @@ const nearStars = stars(45, 2, 0.5, 1);
   @keyframes twinkle {
     0%,
     100% {
-      opacity: 0.3;
+      opacity: calc(var(--peak) * 0.5);
     }
     50% {
-      opacity: 1;
+      opacity: var(--peak);
     }
   }
 

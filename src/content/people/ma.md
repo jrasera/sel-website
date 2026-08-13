@@ -1,5 +1,6 @@
 ---
 name: Site Ma
+initials: SM
 role: PhD Student
 careerStage: phd
 bio: Bio coming soon.

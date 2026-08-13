@@ -7,6 +7,7 @@ const people = defineCollection({
   schema: z
     .object({
       name: z.string(),
+      initials: z.string(),
       role: z.string(),
       careerStage: z.enum(['director', 'postdoc', 'phd', 'masters', 'alumni']),
       photo: z.string().optional(),

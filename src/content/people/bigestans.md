@@ -1,5 +1,6 @@
 ---
 name: Davis Bigestans
+initials: DB
 role: PhD Student
 careerStage: phd
 bio: Bio coming soon.

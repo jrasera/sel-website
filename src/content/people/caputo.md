@@ -1,5 +1,6 @@
 ---
 name: Cesare Caputo
+initials: CC
 role: Alumnus — EPSRC Funded PhD Student
 careerStage: alumni
 bio: >

@@ -5,6 +5,17 @@ import ProjectSection from '../../components/project/ProjectSection.astro';
 import ToolSlot from '../../components/project/ToolSlot.astro';
 import PartnerLogoTile from '../../components/ui/PartnerLogoTile.astro';
 import ProcessFlowDiagram from '../../components/ui/ProcessFlowDiagram.astro';
+import ValueChainDiagram from '../../components/ui/ValueChainDiagram.astro';
+
+const ESA_ISRU_VALUE_CHAIN = {
+  stages: [
+    { n: '01', label: 'Lunar extraction' },
+    { n: '02', label: 'ISRU processing' },
+    { n: '03', label: 'Logistics & deployment' },
+    { n: '04', label: 'Mission utilisation' },
+  ],
+  outputs: ['Cost', 'Revenue', 'NPV · IRR · ROI'],
+};
 
 export async function getStaticPaths() {
   const active = await getCollection('projects', (e) => e.data.status === 'active');
@@ -79,7 +90,11 @@ const partners = data.partnerSlugs
       <ProjectSection id="methodology" heading="Methodology & capabilities">
         {data.methodology.intro && <p class="intro">{data.methodology.intro}</p>}
         {data.methodology.showDiagram && (
-          <ProcessFlowDiagram nodes={data.methodology.items.map((item) => ({ title: item.title }))} />
+          project.id === 'esa-isru' ? (
+            <ValueChainDiagram stages={ESA_ISRU_VALUE_CHAIN.stages} outputs={ESA_ISRU_VALUE_CHAIN.outputs} />
+          ) : (
+            <ProcessFlowDiagram nodes={data.methodology.items.map((item) => ({ title: item.title }))} />
+          )
         )}
         <dl class="capability-list">
           {data.methodology.items.map((item) => (
@@ -341,8 +356,8 @@ const partners = data.partnerSlugs
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 16px;
   }
 

@@ -1,5 +1,6 @@
 ---
 name: Luka Malone
+initials: LM
 role: Alumnus — PhD Student
 careerStage: alumni
 bio: >

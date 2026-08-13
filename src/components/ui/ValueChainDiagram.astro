@@ -1,0 +1,121 @@
+---
+interface Stage {
+  n: string;
+  label: string;
+}
+
+interface Props {
+  stages: Stage[];
+  outputs: string[];
+}
+
+const { stages, outputs } = Astro.props;
+
+const W = 900;
+const STAGE_Y = 96;
+const STAGE_R = 30;
+const startX = 64;
+const endX = 620;
+const stageX = stages.map((_, i) => startX + ((endX - startX) / (stages.length - 1)) * i);
+
+const outX = 820;
+const outputYs = outputs.map((_, i) => {
+  const span = 44 * (outputs.length - 1);
+  return STAGE_Y - span / 2 + i * 44;
+});
+---
+
+<figure class="value-chain" aria-hidden="true">
+  <svg viewBox={`0 0 ${W} 200`} preserveAspectRatio="xMidYMid meet">
+    {stageX.slice(0, -1).map((x, i) => (
+      <line class="stage-link" x1={x + STAGE_R} y1={STAGE_Y} x2={stageX[i + 1] - STAGE_R} y2={STAGE_Y} marker-end="url(#arrow)" />
+    ))}
+
+    {outputYs.map((y) => (
+      <line class="branch-link" x1={stageX[stageX.length - 1] + STAGE_R} y1={STAGE_Y} x2={outX - 46} y2={y} marker-end="url(#arrow)" />
+    ))}
+
+    {stageX.map((x, i) => (
+      <g>
+        <circle class="stage-node" cx={x} cy={STAGE_Y} r={STAGE_R} />
+        <text class="stage-n" x={x} y={STAGE_Y}>{stages[i].n}</text>
+        <text class="stage-label" x={x} y={STAGE_Y + STAGE_R + 22}>{stages[i].label}</text>
+      </g>
+    ))}
+
+    {outputYs.map((y, i) => (
+      <g>
+        <rect class="output-pill" x={outX - 44} y={y - 16} width={W - (outX - 44) - 16} height="32" rx="16" />
+        <text class="output-label" x={outX - 44 + (W - (outX - 44) - 16) / 2} y={y}>{outputs[i]}</text>
+      </g>
+    ))}
+
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z" class="arrow-head" />
+      </marker>
+    </defs>
+  </svg>
+</figure>
+
+<style>
+  .value-chain {
+    margin: 0 0 var(--space-2);
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .stage-link,
+  .branch-link {
+    stroke: var(--line);
+    stroke-width: 2;
+  }
+
+  .branch-link {
+    stroke-dasharray: 3 4;
+  }
+
+  .arrow-head {
+    fill: var(--line);
+  }
+
+  .stage-node {
+    fill: var(--bg2);
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+
+  .stage-n {
+    fill: var(--accent);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 20px;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+
+  .stage-label {
+    fill: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+
+  .output-pill {
+    fill: var(--accent-soft);
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+
+  .output-label {
+    fill: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+</style>

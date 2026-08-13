@@ -1,5 +1,6 @@
 ---
 name: João Garça Gomes
+initials: JG
 role: PhD Student
 careerStage: phd
 bio: Bio coming soon.

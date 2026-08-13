@@ -1,5 +1,6 @@
 ---
 name: Zibo Fang
+initials: ZF
 role: PhD Student
 careerStage: phd
 bio: Bio coming soon.

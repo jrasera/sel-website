@@ -1,5 +1,6 @@
 ---
 name: Dr Joshua Rasera
+initials: JR
 role: Postdoctoral Researcher
 careerStage: postdoc
 bio: Bio coming soon.
