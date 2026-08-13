@@ -1,0 +1,59 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  publication: CollectionEntry<'publications'>;
+}
+
+const { publication } = Astro.props;
+const { data } = publication;
+
+const typeLabels: Record<string, string> = {
+  'journal-article': 'Journal article',
+  preprint: 'Preprint',
+  thesis: 'Thesis',
+};
+
+const href = data.link.kind === 'download' ? data.link.file : data.link.url;
+---
+
+<li class="entry">
+  <span class="mono-label type">{typeLabels[data.type]}</span>
+  <h3><a href={href}>{data.title}</a></h3>
+  <p class="meta">
+    {data.authors.join(', ')} · {data.venue ? `${data.venue} · ` : ''}{data.year}
+  </p>
+</li>
+
+<style>
+  .entry {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px;
+  }
+
+  .type {
+    color: var(--accent);
+  }
+
+  .entry h3 {
+    font-size: 1.05rem;
+    margin: 10px 0 6px;
+  }
+
+  .entry h3 a {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .entry h3 a:hover {
+    color: var(--accent);
+  }
+
+  .meta {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 0;
+  }
+</style>

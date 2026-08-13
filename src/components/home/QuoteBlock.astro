@@ -1,0 +1,107 @@
+<section class="mission" aria-label="Our approach">
+  <div class="mission-grid">
+    <div>
+      <h2>Designing for flexibility under deep uncertainty</h2>
+      <p>
+        With threats stemming from climate change, resource scarcity, and geopolitical
+        instability, long-lived systems can become highly vulnerable in the decades to come. We
+        need to change the way we design systems to be ready for these challenges.
+      </p>
+      <p>
+        Our work exploits the concept of <strong>flexibility</strong> — enabling systems to
+        adapt, reconfigure, and evolve so they deliver strong economic performance alongside
+        better sustainability and resilience over the long term. We build tools to model
+        uncertainty, analyse risk, support creativity, optimise operations, and inform the
+        decisions of policymakers and business leaders.
+      </p>
+    </div>
+    <blockquote class="quote">
+      <p>
+        "Our research develops and evaluates new data-driven methods, digital processes, and
+        computational algorithms to help designers create the systems of tomorrow, and to
+        generate better value for society. Our goal is to develop the tools and techniques for
+        future-generation engineers, so they are ready to tackle the challenges of designing
+        complex engineered systems."
+      </p>
+      <footer>
+        <span class="initials" aria-hidden="true">MC</span>
+        <span>
+          <strong>Dr Michel-Alexandre Cardin</strong><br />
+          <span class="muted">Director, SEL</span>
+        </span>
+      </footer>
+    </blockquote>
+  </div>
+</section>
+
+<style>
+  .mission-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+    align-items: start;
+  }
+
+  .mission h2 {
+    font-size: var(--step-2);
+  }
+
+  .mission p {
+    color: var(--muted);
+    margin-top: 18px;
+  }
+
+  .mission strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .quote {
+    background: linear-gradient(135deg, var(--accent-soft), transparent 75%);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 16px;
+    padding: 30px;
+  }
+
+  .quote p {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    line-height: 1.5;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .quote footer {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .initials {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .muted {
+    color: var(--muted);
+  }
+
+  @media (max-width: 860px) {
+    .mission-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

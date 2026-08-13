@@ -1,0 +1,35 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import PersonCard from './PersonCard.astro';
+
+interface Props {
+  heading: string;
+  people: CollectionEntry<'people'>[];
+}
+
+const { heading, people } = Astro.props;
+---
+
+{
+  people.length > 0 && (
+    <section aria-labelledby={`group-${heading.replace(/\s+/g, '-').toLowerCase()}`}>
+      <h2 id={`group-${heading.replace(/\s+/g, '-').toLowerCase()}`}>{heading}</h2>
+      <div class="grid">
+        {people.map((person) => <PersonCard person={person} />)}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  h2 {
+    font-size: 1.4rem;
+    margin-bottom: 18px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 18px;
+  }
+</style>

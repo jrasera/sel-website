@@ -1,0 +1,167 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import ListLayout from '../../layouts/ListLayout.astro';
+
+export async function getStaticPaths() {
+  const people = await getCollection('people');
+  return people.map((person) => ({
+    params: { slug: person.id },
+    props: { person },
+  }));
+}
+
+const { person } = Astro.props;
+const { data } = person;
+
+const stageLabels: Record<string, string> = {
+  director: 'Director',
+  postdoc: 'Postdoctoral Researcher',
+  phd: 'PhD Student',
+  masters: 'Masters Student',
+  alumni: 'Alumnus / Alumna',
+};
+
+const projects = data.projectSlugs
+  ? (await Promise.all(data.projectSlugs.map((slug) => getEntry('projects', slug)))).filter(
+      (p) => p !== undefined
+    )
+  : [];
+---
+
+<ListLayout title={data.name} description={`${data.name} — ${data.role}, Strategic Engineering Laboratory.`} heading={data.name}>
+  <div class="profile">
+    <div class="photo" aria-hidden={data.photo ? undefined : 'true'}>
+      {
+        data.photo ? (
+          <img src={data.photo} alt={data.photoAlt ?? ''} />
+        ) : (
+          <span class="mono-label initials">
+            {data.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
+          </span>
+        )
+      }
+    </div>
+    <div class="profile-body">
+      <p class="role">{data.role}</p>
+      <span class="mono-label stage">{stageLabels[data.careerStage]}</span>
+      {data.bio && <p class="bio">{data.bio}</p>}
+      {data.email && (
+        <a href={`mailto:${data.email}`} class="contact-btn">Contact</a>
+      )}
+
+      {
+        projects.length > 0 && (
+          <div class="projects">
+            <span class="mono-label">Projects</span>
+            <ul>
+              {projects.map((p) => (
+                <li>
+                  <a href={p!.data.status === 'active' ? `/projects/${p!.id}/` : '/projects/past/'}>
+                    {p!.data.title} →
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </div>
+  <p class="back-link"><a href="/people/">← Back to people</a></p>
+</ListLayout>
+
+<style>
+  .profile {
+    display: flex;
+    gap: var(--space-2);
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .photo {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid var(--line);
+    background: var(--bg2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .initials {
+    font-size: 1.5rem;
+    color: var(--muted);
+  }
+
+  .profile-body {
+    flex: 1;
+    min-width: 240px;
+  }
+
+  .role {
+    font-size: var(--step-1);
+    margin: 0;
+  }
+
+  .stage {
+    color: var(--accent);
+    display: inline-block;
+    margin-top: 6px;
+  }
+
+  .bio {
+    color: var(--muted);
+    margin-top: 20px;
+    max-width: 60ch;
+  }
+
+  .contact-btn {
+    margin-top: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    font-family: var(--font-display);
+  }
+
+  .projects {
+    margin-top: 30px;
+  }
+
+  .projects ul {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+  }
+
+  .projects li {
+    margin-top: 6px;
+  }
+
+  .projects a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .back-link {
+    margin-top: var(--space-3);
+  }
+
+  .back-link a {
+    color: var(--accent);
+  }
+</style>

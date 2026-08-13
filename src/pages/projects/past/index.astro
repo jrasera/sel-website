@@ -1,0 +1,77 @@
+---
+import { getCollection } from 'astro:content';
+import ListLayout from '../../../layouts/ListLayout.astro';
+
+const past = await getCollection('projects', (e) => e.data.status === 'past');
+---
+
+<ListLayout
+  title="Past Projects"
+  description="Completed research programmes at the Strategic Engineering Laboratory."
+  heading="Past projects"
+  intro="Completed programmes from across the lab's history, carried over from our previous site."
+>
+  <ul class="list">
+    {
+      past.map((project) => (
+        <li class="entry">
+          <h2>{project.data.title}</h2>
+          <p class="byline">{project.data.personName}</p>
+          <p>{project.data.summary}</p>
+          {project.data.collaborators && (
+            <p class="collaborators">
+              With {project.data.collaborators.join(', ')}
+            </p>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+  <p class="back-link"><a href="/projects/">← Back to active projects</a></p>
+</ListLayout>
+
+<style>
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 18px;
+  }
+
+  .entry {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px;
+  }
+
+  .entry h2 {
+    font-size: 1.3rem;
+  }
+
+  .byline {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin: 8px 0 12px;
+  }
+
+  .entry p {
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .collaborators {
+    margin-top: 10px;
+    font-size: 0.85rem;
+  }
+
+  .back-link {
+    margin-top: var(--space-3);
+  }
+
+  .back-link a {
+    color: var(--accent);
+  }
+</style>

@@ -1,0 +1,66 @@
+---
+const resources = [
+  { href: '/projects/', title: 'Projects', description: 'Impactful system-design tools applied with partners worldwide, across aerospace, energy, resource extraction, and transportation.' },
+  { href: '/publications/', title: 'Publications', description: 'Methods and applications across leading design, systems, and economics journals.' },
+  { href: '/people/', title: 'People', description: 'A team drawn from across continents, with a wide range of backgrounds and expertise.' },
+  { href: '/opportunities/', title: 'Opportunities', description: 'PhD study in resilient and sustainable infrastructure systems design and analysis.' },
+];
+---
+
+<section aria-labelledby="resources-h" class="surface-warm">
+  <div class="inner">
+    <h2 id="resources-h">Resources</h2>
+    <div class="grid">
+      {
+        resources.map((r) => (
+          <a href={r.href} class="tile">
+            <h3>{r.title} <span aria-hidden="true" class="arrow">→</span></h3>
+            <p>{r.description}</p>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .inner {
+    padding: var(--space-3) var(--space-1);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+  }
+
+  .tile {
+    text-decoration: none;
+    color: var(--surface-warm-text);
+    background: rgba(23, 20, 15, 0.05);
+    border: 1px solid rgba(23, 20, 15, 0.12);
+    border-radius: 16px;
+    padding: 26px;
+    display: block;
+    transition: transform 0.25s ease, border-color 0.25s ease;
+  }
+
+  .tile:hover {
+    transform: translateY(-4px);
+    border-color: var(--surface-warm-text);
+  }
+
+  .tile h3 {
+    font-size: 1.25rem;
+  }
+
+  .arrow {
+    color: var(--surface-warm-text);
+  }
+
+  .tile p {
+    color: var(--surface-warm-muted);
+    font-size: 0.9rem;
+    margin: 10px 0 0;
+  }
+</style>

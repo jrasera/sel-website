@@ -1,0 +1,141 @@
+---
+import ListLayout from '../../layouts/ListLayout.astro';
+---
+
+<ListLayout
+  title="Accessibility Statement"
+  description="Accessibility statement for the Strategic Engineering Laboratory website."
+  heading="Accessibility statement"
+  intro="This accessibility statement applies to the Strategic Engineering Laboratory research hub."
+>
+  <div class="statement">
+    <p>
+      This website is run by the Strategic Engineering Laboratory at the Dyson School of Design
+      Engineering, Imperial College London. We want as many people as possible to be able to use
+      this website. For example, that means you should be able to:
+    </p>
+    <ul>
+      <li>change colours, contrast levels and fonts using browser or device settings</li>
+      <li>zoom in up to 400% without the text spilling off the screen</li>
+      <li>navigate most of the website using a keyboard or speech-recognition software</li>
+      <li>
+        listen to most of the website using a screen reader (including recent versions of JAWS,
+        NVDA and VoiceOver)
+      </li>
+    </ul>
+    <p>
+      We have also made the website text as simple as possible to understand.
+      <a href="https://mcmw.abilitynet.org.uk/">AbilityNet</a> has advice on making your device
+      easier to use if you have a disability.
+    </p>
+
+    <h2>How accessible this website is</h2>
+    <p>
+      We aim to meet the WCAG 2.2 AA standard throughout. We know some parts of this website are
+      not yet fully accessible:
+    </p>
+    <ul>
+      <li>some images are placeholders and do not yet have a meaningful text alternative</li>
+      <li>
+        some documents linked from this site (for example, older PDFs) may not be fully
+        accessible to screen-reader software
+      </li>
+      <li>
+        some content links out to third-party sites (such as staff profile pages) whose
+        accessibility we do not control
+      </li>
+    </ul>
+
+    <h2>Feedback and contact information</h2>
+    <p>
+      If you find any problems not listed on this page, think we are not meeting accessibility
+      requirements, or need information on this website in a different format such as accessible
+      PDF, large print, easy read, audio recording or braille, please contact us:
+    </p>
+    <ul>
+      <li>email <a href="mailto:design.engineering@imperial.ac.uk">design.engineering@imperial.ac.uk</a></li>
+      <li>call +44 (0)20 7589 5111</li>
+    </ul>
+    <p>We will consider your request and get back to you within 10 working days.</p>
+
+    <h2>Enforcement procedure</h2>
+    <p>
+      The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public
+      Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018
+      (the "accessibility regulations"). If you are not happy with how we respond to your
+      complaint, <a href="https://www.equalityadvisoryservice.com/">contact the Equality Advisory
+      and Support Service (EASS)</a>.
+    </p>
+
+    <h2>Technical information about this website's accessibility</h2>
+    <p>
+      Imperial College London is committed to making its website accessible, in accordance with
+      the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility
+      Regulations 2018.
+    </p>
+
+    <h3>Compliance status</h3>
+    <p>
+      This website is partially compliant with the
+      <a href="https://www.w3.org/TR/WCAG22/">Web Content Accessibility Guidelines version 2.2</a>
+      AA standard, due to the non-compliances listed below.
+    </p>
+
+    <h2>Non-accessible content</h2>
+    <p>The content listed below is non-accessible for the following reasons.</p>
+    <h3>Non-compliance with the accessibility regulations</h3>
+    <p>
+      Some images are decorative or placeholder graphics and do not yet carry a text alternative
+      that conveys equivalent information. This can fail WCAG 2.2 success criterion 1.1.1
+      (non-text content). We plan to add appropriate text alternatives as final imagery is
+      published, and new content will meet accessibility standards when added.
+    </p>
+    <h3>Content that is not within the scope of the accessibility regulations</h3>
+    <p>
+      Some PDFs and other documents published before 23 September 2018 may not be fully
+      accessible. Any new PDFs or documents we publish will meet accessibility standards.
+      Third-party content, such as external staff-profile and partner websites, is outside the
+      scope of this statement.
+    </p>
+
+    <h2>Preparation of this accessibility statement</h2>
+    <p>
+      This statement was prepared on 17 July 2026. It was last reviewed on 17 July 2026. This
+      website was last tested on 17 July 2026 against the WCAG 2.2 AA standard. Testing was
+      carried out by the Strategic Engineering Laboratory website team using a combination of
+      automated tools and manual keyboard and screen-reader checks.
+    </p>
+  </div>
+</ListLayout>
+
+<style>
+  .statement {
+    max-width: 70ch;
+  }
+
+  .statement h2 {
+    font-size: 1.4rem;
+    margin-top: 44px;
+  }
+
+  .statement h3 {
+    font-size: 1.15rem;
+    margin-top: 28px;
+  }
+
+  .statement p {
+    margin-top: 14px;
+    color: var(--muted);
+  }
+
+  .statement ul {
+    color: var(--text);
+    margin-top: 14px;
+    padding-left: 22px;
+    line-height: 1.9;
+  }
+
+  .statement a {
+    color: var(--accent);
+  }
+</style>

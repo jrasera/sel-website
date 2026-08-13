@@ -1,0 +1,69 @@
+---
+const steps = [
+  { n: '01', title: 'Model uncertainty', description: 'Represent the ranges and drivers that shape long-horizon outcomes.' },
+  { n: '02', title: 'Analyse risk', description: 'Quantify exposure and identify the dominant economic and technical risks.' },
+  { n: '03', title: 'Optimise design', description: 'Search for architectures and strategies robust across many futures.' },
+  { n: '04', title: 'Support decisions', description: "Give policymakers and business leaders defensible, transparent evidence." },
+];
+---
+
+<section aria-label="Research approach">
+  <ul class="steps">
+    {
+      steps.map((step) => (
+        <li>
+          <span class="step-n" aria-hidden="true">{step.n}</span>
+          <h3>{step.title}</h3>
+          <p>{step.description}</p>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+
+  .steps li {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px;
+    transition: transform 0.25s ease, border-color 0.25s ease;
+  }
+
+  .steps li:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+  }
+
+  .step-n {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    color: var(--accent);
+  }
+
+  .steps h3 {
+    font-size: 1.15rem;
+    margin: 10px 0 8px;
+  }
+
+  .steps p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  @media (max-width: 720px) {
+    .steps {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

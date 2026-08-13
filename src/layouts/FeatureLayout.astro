@@ -1,0 +1,41 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="feature-page">
+    <slot />
+  </div>
+</BaseLayout>
+
+<style>
+  .feature-page :global(section) {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-3) var(--space-1);
+  }
+
+  .feature-page :global(section.surface-warm),
+  .feature-page :global(section.full-bleed) {
+    max-width: none;
+    padding: 0;
+  }
+
+  .feature-page :global(section.surface-warm) {
+    background: var(--surface-warm);
+    color: var(--surface-warm-text);
+  }
+
+  .feature-page :global(section.surface-warm > *),
+  .feature-page :global(section.full-bleed > *) {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+</style>

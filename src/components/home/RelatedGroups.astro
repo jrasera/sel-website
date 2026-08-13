@@ -1,0 +1,50 @@
+---
+const groups = [
+  { href: 'http://strategic.mit.edu', label: 'MIT Strategic Engineering' },
+  { href: 'https://cesun.org/', label: 'Council of Engineering Systems Universities' },
+  { href: 'https://www.imperial.ac.uk/systems-engineering-innovation', label: 'Centre for Systems Engineering & Innovation' },
+  { href: 'https://www.imperial.ac.uk/process-systems-engineering', label: 'Sargent Centre for Process Systems Engineering' },
+  { href: 'https://www.imperial.ac.uk/engineering/departments/earth-science/research/research-groups/amprg/', label: 'Advanced Mineral Processing Research Group' },
+];
+---
+
+<section aria-labelledby="keylinks-h">
+  <h2 id="keylinks-h">Related groups & communities</h2>
+  <ul class="chips">
+    {
+      groups.map((g) => (
+        <li>
+          <a href={g.href}>{g.label} ↗</a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .chips {
+    list-style: none;
+    margin: 18px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .chips a {
+    text-decoration: none;
+    background: var(--bg3);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 9px 16px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text);
+    display: inline-block;
+    transition: border-color 0.2s ease;
+  }
+
+  .chips a:hover {
+    border-color: var(--accent);
+  }
+</style>

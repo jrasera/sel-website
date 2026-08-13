@@ -1,0 +1,56 @@
+---
+import { getCollection } from 'astro:content';
+import ListLayout from '../../layouts/ListLayout.astro';
+import CareerStageGroup from '../../components/people/CareerStageGroup.astro';
+
+const all = await getCollection('people');
+const byStage = (stage: string) =>
+  all
+    .filter((p) => p.data.careerStage === stage)
+    .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+---
+
+<ListLayout
+  title="People"
+  description="The researchers and students of the Strategic Engineering Laboratory."
+  heading="People"
+  intro="Our team consists of researchers and students from different continents, and with a wide range of backgrounds and expertise. The SEL team provides deep insights and innovative approaches for designing and producing the engineering systems of the future."
+>
+  <div class="groups">
+    <CareerStageGroup heading="Director" people={byStage('director')} />
+    <CareerStageGroup heading="Postdoctoral researchers" people={byStage('postdoc')} />
+    <CareerStageGroup heading="PhD students" people={byStage('phd')} />
+
+    <section aria-labelledby="masters-h">
+      <h2 id="masters-h">Masters students</h2>
+      <p class="masters-note">
+        Names to follow — this section will be finalised once the current masters cohort is
+        confirmed.
+      </p>
+    </section>
+
+    <CareerStageGroup heading="Alumni" people={byStage('alumni')} />
+  </div>
+</ListLayout>
+
+<style>
+  .groups {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .masters-note {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    padding: 18px 22px;
+    max-width: 60ch;
+  }
+
+  .groups :global(h2) {
+    font-size: 1.4rem;
+    margin-bottom: 18px;
+  }
+</style>

@@ -1,0 +1,54 @@
+<section aria-label="Contact">
+  <div class="cta">
+    <div>
+      <h2>Interested in working with us?</h2>
+      <p>For academic details or collaboration enquiries, get in touch with the lab director.</p>
+    </div>
+    <a href="mailto:m.cardin@imperial.ac.uk" class="btn">
+      Contact the lab <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .cta {
+    background: linear-gradient(135deg, var(--accent-soft), transparent 70%);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .cta h2 {
+    font-size: var(--step-1);
+  }
+
+  .cta p {
+    color: var(--muted);
+    margin: 10px 0 0;
+    max-width: 52ch;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: var(--on-accent);
+    padding: 15px 24px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    font-family: var(--font-display);
+    white-space: nowrap;
+    transition: filter 0.2s ease;
+  }
+
+  .btn:hover {
+    filter: brightness(1.08);
+  }
+</style>

@@ -1,0 +1,42 @@
+---
+const sectors = ['Aerospace & Space', 'Energy', 'Resource Extraction', 'Transportation', 'Defence'];
+---
+
+<section aria-label="Sectors" class="full-bleed sectors-section">
+  <div class="sectors-inner">
+    <span class="mono-label">Sectors we work across</span>
+    {
+      sectors.map((sector, i) => (
+        <>
+          <span class="sector">{sector}</span>
+          {i < sectors.length - 1 && <span class="sep" aria-hidden="true">/</span>}
+        </>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .sectors-section {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg2) 55%, transparent);
+  }
+
+  .sectors-inner {
+    padding: 32px var(--space-1);
+    display: flex;
+    align-items: center;
+    gap: 14px 36px;
+    flex-wrap: wrap;
+  }
+
+  .sector {
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+
+  .sep {
+    color: var(--line);
+  }
+</style>

@@ -1,0 +1,87 @@
+---
+import { getCollection } from 'astro:content';
+import ListLayout from '../../layouts/ListLayout.astro';
+
+const active = (await getCollection('projects', (e) => e.data.status === 'active')).sort(
+  (a, b) => (a.data.order ?? 99) - (b.data.order ?? 99)
+);
+---
+
+<ListLayout
+  title="Projects"
+  description="Active research programmes at the Strategic Engineering Laboratory, spanning aerospace and space, energy, resource extraction, and transportation."
+  heading="Projects"
+  intro="Our work spans a range of industry sectors and systems, in particular in aerospace and space, energy, resource extraction, and transportation. We collaborate with institutions and companies around the world to develop and apply truly impactful system-design tools and processes. Each programme maintains its own space for overview, methodology, and ongoing findings."
+>
+  <div class="cards">
+    {
+      active.map((project) => (
+        <a href={`/projects/${project.id}/`} class="card">
+          <span class="mono-label status">Active{project.data.sectors?.[0] ? ` · ${project.data.sectors[0]}` : ''}</span>
+          <h2>{project.data.title}</h2>
+          <p>{project.data.summary}</p>
+          <span class="view-link">View programme →</span>
+        </a>
+      ))
+    }
+  </div>
+  <p class="past-link">
+    Looking for earlier work? See <a href="/projects/past/">past projects</a>.
+  </p>
+</ListLayout>
+
+<style>
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 22px;
+  }
+
+  .card {
+    text-decoration: none;
+    color: var(--text);
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease, border-color 0.25s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+  }
+
+  .status {
+    color: var(--accent);
+  }
+
+  .card h2 {
+    font-size: 1.3rem;
+    margin: 12px 0 8px;
+  }
+
+  .card p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin: 0 0 16px;
+  }
+
+  .view-link {
+    margin-top: auto;
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .past-link {
+    margin-top: var(--space-3);
+    color: var(--muted);
+  }
+
+  .past-link a {
+    color: var(--accent);
+  }
+</style>

@@ -1,0 +1,97 @@
+---
+import { getCollection } from 'astro:content';
+import ListLayout from '../../layouts/ListLayout.astro';
+import PublicationEntry from '../../components/publications/PublicationEntry.astro';
+
+const publications = (await getCollection('publications')).sort((a, b) => b.data.year - a.data.year);
+
+const journals = [
+  'ASME J. Mechanical Design',
+  'Research in Engineering Design',
+  'IISE Transactions',
+  'Energy Economics',
+  'Transportation Research',
+  'Renewable & Sustainable Energy Reviews',
+  'Water Research',
+];
+---
+
+<ListLayout
+  title="Publications"
+  description="Journal articles, preprints, and theses from the Strategic Engineering Laboratory."
+  heading="Publications"
+  intro="Methodological developments are published in journals like the ASME Journal of Mechanical Design, Research in Engineering Design, and IISE Transactions. Impactful applications are published in journals such as Energy Economics, Transportation Research, Renewable and Sustainable Energy Reviews, and Water Research."
+>
+  <a href="https://www.imperial.ac.uk/people/m.cardin/publications.html" class="full-list-btn">
+    Full publication list ↗
+  </a>
+
+  <section aria-labelledby="pubs-h" class="selected-work">
+    <h2 id="pubs-h">Selected work</h2>
+    <ul class="pub-list">
+      {publications.map((pub) => <PublicationEntry publication={pub} />)}
+    </ul>
+  </section>
+
+  <section aria-label="Target journals" class="journals">
+    <ul class="chips">
+      {journals.map((j) => <li>{j}</li>)}
+    </ul>
+  </section>
+</ListLayout>
+
+<style>
+  .full-list-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 4px;
+    background: var(--accent);
+    color: var(--on-accent);
+    padding: 13px 22px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    font-family: var(--font-display);
+  }
+
+  .selected-work {
+    margin-top: var(--space-3);
+  }
+
+  .selected-work h2 {
+    font-size: 1.4rem;
+    margin-bottom: 18px;
+  }
+
+  .pub-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 14px;
+  }
+
+  .journals {
+    margin-top: var(--space-3);
+  }
+
+  .chips {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .chips li {
+    background: var(--bg3);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 15px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+</style>

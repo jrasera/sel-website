@@ -1,0 +1,198 @@
+---
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+
+const isActive = (href: string) =>
+  href === '/' ? currentPath === '/' : currentPath.startsWith(href);
+---
+
+<header class="site-header">
+  <nav aria-label="Primary" class="nav">
+    <a href="/" class="wordmark">
+      <img src="/images/logos/imperial-logo.svg" alt="Imperial College London" class="logo" />
+      <span class="divider" aria-hidden="true"></span>
+      <span class="name-block">
+        <span class="name">Strategic Engineering Laboratory</span>
+        <span class="mono-label">Dyson School of Design Engineering</span>
+      </span>
+    </a>
+
+    <ul class="nav-list">
+      <li>
+        <a href="/" aria-current={isActive('/') && currentPath === '/' ? 'page' : undefined} class:list={{ active: currentPath === '/' }}>
+          Home
+        </a>
+      </li>
+      <li class="dropdown">
+        <details>
+          <summary aria-current={isActive('/projects') ? 'page' : undefined} class:list={{ active: isActive('/projects') }}>
+            Projects
+          </summary>
+          <ul class="dropdown-menu" role="menu" aria-label="Projects">
+            <li role="none"><a role="menuitem" href="/projects/">All active projects</a></li>
+            <li role="none"><a role="menuitem" href="/projects/past/">Past projects</a></li>
+          </ul>
+        </details>
+      </li>
+      <li>
+        <a href="/people/" aria-current={isActive('/people') ? 'page' : undefined} class:list={{ active: isActive('/people') }}>
+          People
+        </a>
+      </li>
+      <li>
+        <a href="/publications/" aria-current={isActive('/publications') ? 'page' : undefined} class:list={{ active: isActive('/publications') }}>
+          Publications
+        </a>
+      </li>
+      <li>
+        <a href="/opportunities/" aria-current={isActive('/opportunities') ? 'page' : undefined} class:list={{ active: isActive('/opportunities') }}>
+          Opportunities
+        </a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(14px);
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .nav {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 12px var(--space-1);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .wordmark {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-decoration: none;
+    color: var(--text);
+    margin-right: auto;
+  }
+
+  .logo {
+    height: 19px;
+    width: auto;
+    color: var(--text);
+  }
+
+  .divider {
+    width: 1px;
+    height: 30px;
+    background: var(--line);
+  }
+
+  .name-block {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+  }
+
+  .name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .nav-list {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+  }
+
+  .nav-list > li > a,
+  .nav-list summary {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .nav-list summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .nav-list summary::after {
+    content: '▾';
+    font-size: 0.7rem;
+    opacity: 0.7;
+  }
+
+  .nav-list > li > a:hover,
+  .nav-list summary:hover {
+    background: var(--bg3);
+  }
+
+  .nav-list > li > a.active::after,
+  .nav-list summary.active::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 2px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .dropdown {
+    position: relative;
+  }
+
+  .dropdown details[open] summary {
+    background: var(--bg3);
+  }
+
+  .dropdown-menu {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 8px;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 220px;
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  }
+
+  .dropdown-menu a {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text);
+    font-size: 0.95rem;
+  }
+
+  .dropdown-menu a:hover {
+    background: var(--bg3);
+  }
+</style>

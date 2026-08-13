@@ -1,0 +1,404 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import FeatureLayout from '../../layouts/FeatureLayout.astro';
+import ProjectSection from '../../components/project/ProjectSection.astro';
+import ToolSlot from '../../components/project/ToolSlot.astro';
+
+export async function getStaticPaths() {
+  const active = await getCollection('projects', (e) => e.data.status === 'active');
+  return active.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { data } = project;
+
+const person = data.personSlug ? await getEntry('people', data.personSlug) : undefined;
+---
+
+<FeatureLayout title={data.title} description={data.summary}>
+  <section aria-label="Project introduction" class="project-hero">
+    <nav aria-label="Breadcrumb" class="breadcrumb mono-label">
+      <a href="/projects/">Projects</a> <span aria-hidden="true">/</span> {data.title}
+    </nav>
+    <h1>{data.title}</h1>
+    <p class="lede">{data.summary}</p>
+    <div class="tags">
+      <span class="tag tag-active">Status: Active</span>
+      {data.sectors?.map((sector) => <span class="tag">{sector}</span>)}
+    </div>
+  </section>
+
+  {
+    data.overview && (
+      <ProjectSection id="overview" heading="Overview">
+        {data.overview.map((paragraph) => <p>{paragraph}</p>)}
+      </ProjectSection>
+    )
+  }
+
+  {
+    data.objectives && (
+      <ProjectSection id="objectives" heading="Objectives">
+        <ul class="objectives-list">
+          {data.objectives.map((objective) => <li>{objective}</li>)}
+        </ul>
+      </ProjectSection>
+    )
+  }
+
+  {
+    data.workProgramme && (
+      <ProjectSection id="work-programme" heading="Work programme">
+        {data.workProgramme.intro && <p class="intro">{data.workProgramme.intro}</p>}
+        <ol class="task-grid">
+          {data.workProgramme.tasks.map((task, i) => (
+            <li>
+              <span class="task-n mono-label">Task {i + 1}</span>
+              <h3>{task.title}</h3>
+              <p>{task.description}</p>
+            </li>
+          ))}
+        </ol>
+      </ProjectSection>
+    )
+  }
+
+  {
+    data.methodology && (
+      <ProjectSection id="methodology" heading="Methodology & capabilities">
+        {data.methodology.intro && <p class="intro">{data.methodology.intro}</p>}
+        <dl class="capability-list">
+          {data.methodology.items.map((item) => (
+            <div class="capability-row">
+              <dt>{item.title}</dt>
+              <dd>{item.description}</dd>
+            </div>
+          ))}
+        </dl>
+      </ProjectSection>
+    )
+  }
+
+  {
+    data.statusFindings && (
+      <ProjectSection id="status" heading="Programme status & findings">
+        {data.statusFindings.intro && <p class="intro">{data.statusFindings.intro}</p>}
+        {data.statusFindings.milestones && (
+          <ol class="milestones">
+            {data.statusFindings.milestones.map((m) => (
+              <li class:list={{ current: m.status === 'current' }}>
+                <span class="mono-label milestone-status">
+                  {m.status === 'current' ? 'Current' : m.status === 'done' ? 'Done' : 'Planned'}
+                </span>
+                <h3>{m.label}</h3>
+                <p>{m.description}</p>
+              </li>
+            ))}
+          </ol>
+        )}
+        {data.statusFindings.note && (
+          <div class="findings-note">
+            <p class="mono-label">{data.statusFindings.note}</p>
+          </div>
+        )}
+      </ProjectSection>
+    )
+  }
+
+  {
+    data.partners && (
+      <ProjectSection id="partners" heading="Partners & support">
+        <ul class="partner-chips">
+          {data.partners.map((partner) =>
+            partner.url ? (
+              <li><a href={partner.url}>{partner.name}</a></li>
+            ) : (
+              <li>{partner.name}</li>
+            )
+          )}
+        </ul>
+      </ProjectSection>
+    )
+  }
+
+  <ProjectSection id="team" heading="Team & contact">
+    <div class="team-card">
+      <div class="team-info">
+        <h3>{data.personName}</h3>
+        {person && <p class="role">{person.data.role}</p>}
+        {data.collaborators && <p class="collaborators">With {data.collaborators.join(', ')}</p>}
+      </div>
+      {person?.data.email && (
+        <a href={`mailto:${person.data.email}`} class="contact-btn">Contact</a>
+      )}
+    </div>
+  </ProjectSection>
+
+  <ToolSlot tool={data.tool} />
+</FeatureLayout>
+
+<style>
+  .project-hero {
+    padding-bottom: 0 !important;
+  }
+
+  .breadcrumb {
+    margin-bottom: 18px;
+    display: block;
+  }
+
+  .breadcrumb a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .project-hero h1 {
+    font-size: var(--step-3);
+  }
+
+  .lede {
+    font-size: var(--step-1);
+    color: var(--text);
+    margin: 20px 0 0;
+    max-width: 52ch;
+  }
+
+  .tags {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+
+  .tag {
+    background: var(--bg3);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 15px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .tag-active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .intro {
+    color: var(--muted);
+    margin-bottom: 30px;
+    max-width: 60ch;
+  }
+
+  .objectives-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .objectives-list li {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+  }
+
+  .task-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+
+  .task-grid li {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px;
+  }
+
+  .task-n {
+    color: var(--accent);
+  }
+
+  .task-grid h3 {
+    font-size: 1.1rem;
+    margin: 10px 0 8px;
+  }
+
+  .task-grid p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  .capability-list {
+    margin: 0;
+    display: grid;
+    gap: 0;
+  }
+
+  .capability-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    padding: 22px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .capability-row:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .capability-row dt {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  .capability-row dd {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .milestones {
+    list-style: none;
+    margin: 0 0 40px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .milestones li {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  .milestones li.current {
+    border-color: var(--accent);
+  }
+
+  .milestone-status {
+    display: inline-block;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px 10px;
+    color: var(--muted);
+  }
+
+  .milestones li.current .milestone-status {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .milestones h3 {
+    font-size: 1.05rem;
+    margin: 12px 0 4px;
+  }
+
+  .milestones p {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 0;
+  }
+
+  .findings-note {
+    border: 1px dashed var(--line);
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    background: var(--bg);
+  }
+
+  .findings-note p {
+    max-width: 52ch;
+    margin: 0 auto;
+  }
+
+  .partner-chips {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .partner-chips li,
+  .partner-chips a {
+    background: var(--bg3);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .team-card {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px;
+  }
+
+  .team-info {
+    flex: 1;
+    min-width: 220px;
+  }
+
+  .team-info h3 {
+    font-size: 1.25rem;
+  }
+
+  .role,
+  .collaborators {
+    color: var(--muted);
+    margin: 4px 0 0;
+  }
+
+  .contact-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    font-family: var(--font-display);
+  }
+
+  @media (max-width: 720px) {
+    .objectives-list,
+    .task-grid,
+    .milestones {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .capability-row {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+  }
+</style>
