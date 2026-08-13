@@ -1,0 +1,103 @@
+---
+interface Spoke {
+  n: string;
+  label: string;
+}
+
+interface Props {
+  hubLabel: string;
+  spokes: Spoke[];
+  size?: 'default' | 'large';
+}
+
+const { hubLabel, spokes, size = 'default' } = Astro.props;
+
+const CENTER = 100;
+const HUB_R = 30;
+const SPOKE_R = spokes.length > 5 ? 15 : 17;
+const ORBIT_R = spokes.length > 5 ? 76 : 70;
+
+const points = spokes.map((spoke, i) => {
+  const angle = (2 * Math.PI * i) / spokes.length - Math.PI / 2;
+  const x = CENTER + ORBIT_R * Math.cos(angle);
+  const y = CENTER + ORBIT_R * Math.sin(angle);
+  return { ...spoke, x, y };
+});
+---
+
+<figure class:list={['hub-diagram', size]} aria-hidden="true">
+  <svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">
+    {
+      points.map((p) => (
+        <line class="spoke-line" x1={CENTER} y1={CENTER} x2={p.x} y2={p.y} />
+      ))
+    }
+    {
+      points.map((p) => (
+        <g>
+          <circle class="spoke-node" cx={p.x} cy={p.y} r={SPOKE_R} />
+          <text class="spoke-n" x={p.x} y={p.y}>
+            {p.n}
+          </text>
+        </g>
+      ))
+    }
+    <circle class="hub" cx={CENTER} cy={CENTER} r={HUB_R} />
+    <text class="hub-label" x={CENTER} y={CENTER}>
+      {hubLabel}
+    </text>
+  </svg>
+</figure>
+
+<style>
+  .hub-diagram {
+    margin: 0 auto;
+    width: min(100%, 320px);
+  }
+
+  .hub-diagram.large {
+    width: min(100%, 480px);
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .spoke-line {
+    stroke: var(--line);
+    stroke-width: 1.5;
+  }
+
+  .hub {
+    fill: var(--accent-soft);
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+
+  .hub-label {
+    fill: var(--text);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+
+  .spoke-node {
+    fill: var(--bg2);
+    stroke: var(--line);
+    stroke-width: 1.5;
+    transition: stroke 0.25s ease, fill 0.25s ease;
+  }
+
+  .spoke-n {
+    fill: var(--accent);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 13px;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+</style>

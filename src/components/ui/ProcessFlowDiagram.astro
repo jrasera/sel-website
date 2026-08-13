@@ -1,0 +1,74 @@
+---
+interface Props {
+  nodes: { title: string }[];
+}
+
+const { nodes } = Astro.props;
+---
+
+<div class="flow-diagram" aria-hidden="true">
+  {
+    nodes.map((node, i) => (
+      <>
+        <div class="flow-node">
+          <span class="flow-n">{String(i + 1).padStart(2, '0')}</span>
+          <span class="flow-title">{node.title}</span>
+        </div>
+        {i < nodes.length - 1 && <span class="flow-arrow">→</span>}
+      </>
+    ))
+  }
+</div>
+
+<style>
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: var(--space-2);
+  }
+
+  .flow-node {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 10px 18px 10px 10px;
+  }
+
+  .flow-n {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    flex-shrink: 0;
+  }
+
+  .flow-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .flow-arrow {
+    color: var(--accent);
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 46em) {
+    .flow-arrow {
+      transform: rotate(90deg);
+    }
+  }
+</style>

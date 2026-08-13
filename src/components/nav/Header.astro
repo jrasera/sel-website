@@ -26,6 +26,11 @@ const isActive = (href: string) =>
           Home
         </a>
       </li>
+      <li>
+        <a href="/method/" aria-current={isActive('/method') ? 'page' : undefined} class:list={{ active: isActive('/method') }}>
+          Method
+        </a>
+      </li>
       <li class="dropdown">
         <details>
           <summary aria-current={isActive('/projects') ? 'page' : undefined} class:list={{ active: isActive('/projects') }}>

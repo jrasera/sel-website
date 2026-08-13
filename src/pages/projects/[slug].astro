@@ -3,6 +3,8 @@ import { getCollection, getEntry } from 'astro:content';
 import FeatureLayout from '../../layouts/FeatureLayout.astro';
 import ProjectSection from '../../components/project/ProjectSection.astro';
 import ToolSlot from '../../components/project/ToolSlot.astro';
+import PartnerLogoTile from '../../components/ui/PartnerLogoTile.astro';
+import ProcessFlowDiagram from '../../components/ui/ProcessFlowDiagram.astro';
 
 export async function getStaticPaths() {
   const active = await getCollection('projects', (e) => e.data.status === 'active');
@@ -16,6 +18,12 @@ const { project } = Astro.props;
 const { data } = project;
 
 const person = data.personSlug ? await getEntry('people', data.personSlug) : undefined;
+
+const partners = data.partnerSlugs
+  ? (await Promise.all(data.partnerSlugs.map((slug) => getEntry('partners', slug)))).filter(
+      (p) => p !== undefined
+    )
+  : [];
 ---
 
 <FeatureLayout title={data.title} description={data.summary}>
@@ -70,6 +78,9 @@ const person = data.personSlug ? await getEntry('people', data.personSlug) : und
     data.methodology && (
       <ProjectSection id="methodology" heading="Methodology & capabilities">
         {data.methodology.intro && <p class="intro">{data.methodology.intro}</p>}
+        {data.methodology.showDiagram && (
+          <ProcessFlowDiagram nodes={data.methodology.items.map((item) => ({ title: item.title }))} />
+        )}
         <dl class="capability-list">
           {data.methodology.items.map((item) => (
             <div class="capability-row">
@@ -109,16 +120,14 @@ const person = data.personSlug ? await getEntry('people', data.personSlug) : und
   }
 
   {
-    data.partners && (
+    partners.length > 0 && (
       <ProjectSection id="partners" heading="Partners & support">
-        <ul class="partner-chips">
-          {data.partners.map((partner) =>
-            partner.url ? (
-              <li><a href={partner.url}>{partner.name}</a></li>
-            ) : (
-              <li>{partner.name}</li>
-            )
-          )}
+        <ul class="partner-grid">
+          {partners.map((partner) => (
+            <li>
+              <PartnerLogoTile partner={partner} />
+            </li>
+          ))}
         </ul>
       </ProjectSection>
     )
@@ -328,26 +337,13 @@ const person = data.personSlug ? await getEntry('people', data.personSlug) : und
     margin: 0 auto;
   }
 
-  .partner-chips {
+  .partner-grid {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .partner-chips li,
-  .partner-chips a {
-    background: var(--bg3);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 14px 20px;
-    font-family: var(--font-display);
-    font-weight: 600;
-    color: var(--text);
-    text-decoration: none;
-    display: inline-block;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
   }
 
   .team-card {

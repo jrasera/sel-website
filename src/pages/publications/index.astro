@@ -26,6 +26,15 @@ const journals = [
     Full publication list ↗
   </a>
 
+  <p class="evidence-framing">
+    <span class="mono-label">Evidence-based</span>
+    These publications are the evidence base behind the method summarised on our{' '}
+    <a href="/method/">Method page</a> — not just a bibliography. Across our published work, the
+    finding is consistent: designs that preserve flexibility routinely outperform those optimised
+    around a single forecast, and conventional appraisal methods tend to underestimate that value
+    until it is modelled explicitly.
+  </p>
+
   <section aria-labelledby="pubs-h" class="selected-work">
     <h2 id="pubs-h">Selected work</h2>
     <ul class="pub-list">
@@ -53,6 +62,21 @@ const journals = [
     font-weight: 600;
     text-decoration: none;
     font-family: var(--font-display);
+  }
+
+  .evidence-framing {
+    color: var(--muted);
+    max-width: 60ch;
+    margin-top: var(--space-2);
+  }
+
+  .evidence-framing .mono-label {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .evidence-framing a {
+    color: var(--accent);
   }
 
   .selected-work {

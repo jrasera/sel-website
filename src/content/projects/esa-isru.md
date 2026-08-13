@@ -77,6 +77,7 @@ methodology:
     Requirements are consolidated by how ESA will use the tool and by the
     evidence provided at each review. Five capability domains structure the
     work.
+  showDiagram: true
   items:
     - title: Value-chain representation
       description: >-
@@ -126,14 +127,15 @@ statusFindings:
     Programme updates, interim results, and published findings will be
     posted here as the research progresses.
 
-partners:
-  - name: European Space Agency
-  - name: ESRIC
-  - name: Frazer-Nash Consultancy
-  - name: Factories in Space / Moliri
-  - name: Space RS
-  - name: UK Space Agency
-  - name: Zuken
+partnerSlugs:
+  - european-space-agency
+  - esric
+  - frazer-nash-consultancy
+  - factories-in-space
+  - moliri
+  - space-rs
+  - uk-space-agency
+  - zuken
 
 collaborators:
   - Dr Michel-Alexandre Cardin (Principal Investigator)

@@ -1,0 +1,134 @@
+---
+import HubSpokeDiagram from '../ui/HubSpokeDiagram.astro';
+
+const principles = [
+  {
+    n: '01',
+    title: 'Frame the decision',
+    description:
+      "We begin by defining the decision itself: its objectives, the stakeholders it affects, and the criteria against which success will be judged, before any modelling work starts.",
+  },
+  {
+    n: '02',
+    title: 'Model uncertainty explicitly',
+    description:
+      'Rather than relying on a single forecast, we represent the ranges and drivers that could plausibly shape long-horizon outcomes, and identify which uncertainties actually matter to the decision at hand.',
+  },
+  {
+    n: '03',
+    title: 'Map the wider system',
+    description:
+      'Engineering decisions rarely stand alone. We connect technical architecture to operations, economics, and stakeholder interests, so a design choice is evaluated in its full context, not in isolation.',
+  },
+  {
+    n: '04',
+    title: 'Design for change over time',
+    description:
+      'We distinguish what should be fixed at the outset from what can be staged, deferred, or built with the capacity to adapt as conditions become clearer.',
+  },
+  {
+    n: '05',
+    title: 'Explore the space of possibilities',
+    description:
+      'Using simulation ensembles and structured scenario analysis, we compare credible alternatives across many futures rather than optimising for one assumed outcome.',
+  },
+  {
+    n: '06',
+    title: 'Quantify the value of flexibility',
+    description:
+      "Where a design can adapt, we use real options analysis to determine whether that adaptability is worth its cost — turning flexibility from an intuition into a number decision-makers can act on.",
+  },
+  {
+    n: '07',
+    title: 'Balance risk and reward',
+    description:
+      "We bring stakeholders' differing priorities into a shared, transparent view of trade-offs, supporting recommendations and next steps that are defensible under scrutiny.",
+  },
+];
+---
+
+<section aria-labelledby="principles-h" class="method-diagram-section reveal">
+  <h2 id="principles-h">Seven principles</h2>
+  <p class="intro">
+    Every project we take on, from lunar in-situ resource utilisation to transport and energy
+    infrastructure, applies the same underlying method — focused on decision quality under
+    uncertainty.
+  </p>
+  <div class="layout">
+    <HubSpokeDiagram hubLabel="SEL" spokes={principles.map((p) => ({ n: p.n, label: p.title }))} size="large" />
+    <ol class="principle-list">
+      {
+        principles.map((p) => (
+          <li>
+            <span class="principle-n mono-label" aria-hidden="true">{p.n}</span>
+            <h3>{p.title}</h3>
+            <p>{p.description}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .method-diagram-section h2 {
+    font-size: var(--step-2);
+  }
+
+  .intro {
+    color: var(--muted);
+    margin: 14px 0 0;
+    max-width: 60ch;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) 1fr;
+    gap: var(--space-3);
+    align-items: start;
+    margin-top: var(--space-3);
+  }
+
+  .principle-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 20px;
+  }
+
+  .principle-list li {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px 24px;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .principle-list li:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35), 0 0 20px var(--accent-soft);
+  }
+
+  .principle-n {
+    color: var(--accent);
+  }
+
+  .principle-list h3 {
+    font-size: 1.1rem;
+    margin: 8px 0 8px;
+  }
+
+  .principle-list p {
+    color: var(--muted);
+    margin: 0;
+    font-size: 0.92rem;
+  }
+
+  @media (max-width: 64em) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

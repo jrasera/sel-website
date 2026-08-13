@@ -11,3 +11,19 @@
     scroll-behavior: auto;
   }
 }
+
+/* Scroll-reveal: only takes effect once the head's inline script has marked
+   <html class="js">, so with JavaScript disabled .reveal elements get no
+   opacity override at all and render immediately, normally. */
+@media (prefers-reduced-motion: no-preference) {
+  html.js .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  html.js .reveal.reveal-visible {
+    opacity: 1;
+    transform: none;
+  }
+}

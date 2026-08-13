@@ -27,6 +27,15 @@ const people = defineCollection({
     }),
 });
 
+const partners = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/partners' }),
+  schema: z.object({
+    name: z.string(),
+    logo: z.string().optional(),
+    url: z.url().optional(),
+  }),
+});
+
 const toolSchema = z
   .discriminatedUnion('state', [
     z.object({ state: z.literal('none') }),
@@ -59,6 +68,7 @@ const projects = defineCollection({
       .object({
         intro: z.string().optional(),
         items: z.array(z.object({ title: z.string(), description: z.string() })),
+        showDiagram: z.boolean().optional().default(false),
       })
       .optional(),
     statusFindings: z
@@ -76,14 +86,7 @@ const projects = defineCollection({
         note: z.string().optional(),
       })
       .optional(),
-    partners: z
-      .array(
-        z.object({
-          name: z.string(),
-          url: z.url().optional(),
-        })
-      )
-      .optional(),
+    partnerSlugs: z.array(z.string()).optional(),
     collaborators: z.array(z.string()).optional(),
 
     tool: toolSchema,
@@ -109,4 +112,4 @@ const publications = defineCollection({
   }),
 });
 
-export const collections = { people, projects, publications };
+export const collections = { people, projects, publications, partners };

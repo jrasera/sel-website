@@ -8,7 +8,7 @@ const allFeatured = await getCollection(
 const featured = allFeatured.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
 ---
 
-<section aria-labelledby="projects-h">
+<section aria-labelledby="projects-h" class="reveal">
   <div class="section-head">
     <div>
       <h2 id="projects-h">Projects</h2>

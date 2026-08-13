@@ -1,0 +1,42 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import PartnerLogoTile from '../ui/PartnerLogoTile.astro';
+
+const activeProjects = await getCollection('projects', (e) => e.data.status === 'active');
+const slugs = [...new Set(activeProjects.flatMap((p) => p.data.partnerSlugs ?? []))];
+const partners = (await Promise.all(slugs.map((slug) => getEntry('partners', slug)))).filter(
+  (p) => p !== undefined
+);
+---
+
+{
+  partners.length > 0 && (
+    <section aria-labelledby="partners-h" class="reveal">
+      <span class="mono-label" id="partners-h">
+        Delivered with
+      </span>
+      <ul class="partner-grid">
+        {partners.map((partner) => (
+          <li>
+            <PartnerLogoTile partner={partner} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  section {
+    margin-top: var(--space-1);
+  }
+
+  .partner-grid {
+    list-style: none;
+    margin: 18px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+  }
+</style>

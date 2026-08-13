@@ -28,3 +28,9 @@ pnpm-debug.log*
 
 # local Claude Code session state
 /.claude/
+
+# local-only reference doc, not for the repo
+/HANDOFF.md
+
+# raw partner logo source files — processed versions live in public/images/logos/partners/
+/assets/
