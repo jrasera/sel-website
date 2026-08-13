@@ -1,0 +1,126 @@
+---
+interface Props {
+  label?: string;
+}
+
+const { label = 'Exploring the space of possible futures' } = Astro.props;
+
+const originX = 28;
+const originY = 160;
+const endX = 372;
+// 7 endpoints, symmetric spread around the origin's height; index 3 is the
+// central, most-likely path.
+const offsets = [-84, -52, -26, 0, 26, 52, 84];
+const maxDist = Math.max(...offsets.map(Math.abs));
+
+const paths = offsets.map((off, i) => {
+  const endY = originY + off;
+  const c1x = originX + (endX - originX) * 0.32;
+  const c1y = originY + off * 0.12;
+  const c2x = originX + (endX - originX) * 0.68;
+  const c2y = endY - off * 0.08;
+  const dist = Math.abs(off);
+  const isCenter = i === 3;
+  return {
+    d: `M ${originX} ${originY} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${endX} ${endY}`,
+    endX,
+    endY,
+    isCenter,
+    opacity: isCenter ? 1 : 0.25 + 0.4 * (1 - dist / maxDist),
+    width: isCenter ? 3 : 1.2 + 1 * (1 - dist / maxDist),
+    delayMs: Math.abs(i - 3) * 90,
+  };
+});
+---
+
+<div class="future-fan" role="img" aria-label={label}>
+  <svg viewBox="0 0 400 320" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <circle class="origin" cx={originX} cy={originY} r="4" />
+    {
+      paths.map((p) => (
+        <path
+          class:list={['ray', { 'ray-center': p.isCenter }]}
+          d={p.d}
+          fill="none"
+          stroke-width={p.width}
+          style={`opacity:${p.opacity}; animation-delay:${p.delayMs}ms`}
+        />
+      ))
+    }
+    {
+      paths.map((p) => (
+        <circle
+          class:list={['end-dot', { 'end-dot-center': p.isCenter }]}
+          cx={p.endX}
+          cy={p.endY}
+          r={p.isCenter ? 4 : 2.4}
+          style={`opacity:${p.opacity}; animation-delay:${p.delayMs + 550}ms`}
+        />
+      ))
+    }
+  </svg>
+  <span class="mono-label caption">{label}</span>
+</div>
+
+<style>
+  .future-fan {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2);
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+  }
+
+  .origin {
+    fill: var(--accent);
+  }
+
+  .ray {
+    stroke: var(--muted);
+    stroke-linecap: round;
+    stroke-dasharray: 460;
+    stroke-dashoffset: 0;
+    animation: draw-ray 0.9s ease-out backwards;
+  }
+
+  .ray-center {
+    stroke: var(--accent);
+  }
+
+  .end-dot {
+    fill: var(--muted);
+    animation: fade-in 0.3s ease-out backwards;
+  }
+
+  .end-dot-center {
+    fill: var(--accent);
+  }
+
+  @keyframes draw-ray {
+    from {
+      stroke-dashoffset: 460;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .caption {
+    text-align: center;
+  }
+</style>

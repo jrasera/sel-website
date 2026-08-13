@@ -13,7 +13,7 @@ const partners = (await Promise.all(slugs.map((slug) => getEntry('partners', slu
   partners.length > 0 && (
     <section aria-labelledby="partners-h" class="reveal">
       <span class="mono-label" id="partners-h">
-        Delivered with
+        ESA programme partners
       </span>
       <ul class="partner-grid">
         {partners.map((partner) => (
