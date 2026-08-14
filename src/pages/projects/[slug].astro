@@ -39,7 +39,7 @@ const partners = data.partnerSlugs
 
 <FeatureLayout title={data.title} description={data.summary}>
   <section aria-label="Project introduction" class="project-hero">
-    <nav aria-label="Breadcrumb" class="breadcrumb mono-label">
+    <nav aria-label="Breadcrumb" class="breadcrumb label">
       <a href="/projects/">Projects</a> <span aria-hidden="true">/</span> {data.title}
     </nav>
     <h1>{data.title}</h1>
@@ -75,7 +75,7 @@ const partners = data.partnerSlugs
         <ol class="task-grid">
           {data.workProgramme.tasks.map((task, i) => (
             <li>
-              <span class="task-n mono-label">Task {i + 1}</span>
+              <span class="task-n label">Task {i + 1}</span>
               <h3>{task.title}</h3>
               <p>{task.description}</p>
             </li>
@@ -116,7 +116,7 @@ const partners = data.partnerSlugs
           <ol class="milestones">
             {data.statusFindings.milestones.map((m) => (
               <li class:list={{ current: m.status === 'current' }}>
-                <span class="mono-label milestone-status">
+                <span class="label milestone-status">
                   {m.status === 'current' ? 'Current' : m.status === 'done' ? 'Done' : 'Planned'}
                 </span>
                 <h3>{m.label}</h3>
@@ -127,7 +127,7 @@ const partners = data.partnerSlugs
         )}
         {data.statusFindings.note && (
           <div class="findings-note">
-            <p class="mono-label">{data.statusFindings.note}</p>
+            <p class="label">{data.statusFindings.note}</p>
           </div>
         )}
       </ProjectSection>
@@ -136,7 +136,7 @@ const partners = data.partnerSlugs
 
   {
     partners.length > 0 && (
-      <ProjectSection id="partners" heading="Partners & support">
+      <ProjectSection id="partners" heading="Partners & support" paper>
         <ul class="partner-grid">
           {partners.map((partner) => (
             <li>
@@ -175,7 +175,7 @@ const partners = data.partnerSlugs
   }
 
   .breadcrumb a {
-    color: var(--muted);
+    color: var(--trace);
     text-decoration: none;
   }
 
@@ -192,29 +192,32 @@ const partners = data.partnerSlugs
 
   .tags {
     display: flex;
-    gap: 10px;
     flex-wrap: wrap;
-    margin-top: 24px;
+    margin-top: 26px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
   }
 
   .tag {
-    background: var(--bg3);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 7px 15px;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    color: var(--muted);
+    padding: 11px 18px;
+    border-left: 1px solid var(--rule);
+    font-family: var(--font-display);
+    font-variation-settings: 'wdth' 88, 'wght' 560;
+    font-size: 0.86rem;
+    color: var(--trace);
+  }
+
+  .tag:first-child {
+    border-left: 0;
+    padding-left: 0;
   }
 
   .tag-active {
-    background: var(--accent-soft);
-    border-color: var(--accent);
-    color: var(--text);
+    color: var(--signal);
   }
 
   .intro {
-    color: var(--muted);
+    color: var(--trace);
     margin-bottom: 30px;
     max-width: 60ch;
   }
@@ -229,10 +232,8 @@ const partners = data.partnerSlugs
   }
 
   .objectives-list li {
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 24px;
+    padding: 20px 0 0;
+    border-top: 1px solid var(--rule);
   }
 
   .task-grid {
@@ -245,14 +246,12 @@ const partners = data.partnerSlugs
   }
 
   .task-grid li {
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 26px;
+    padding: 20px 0 0;
+    border-top: 1px solid var(--rule);
   }
 
   .task-n {
-    color: var(--accent);
+    color: var(--signal);
   }
 
   .task-grid h3 {
@@ -261,7 +260,7 @@ const partners = data.partnerSlugs
   }
 
   .task-grid p {
-    color: var(--muted);
+    color: var(--trace);
     font-size: 0.9rem;
     margin: 0;
   }
@@ -277,11 +276,11 @@ const partners = data.partnerSlugs
     grid-template-columns: 220px 1fr;
     gap: 24px;
     padding: 22px 0;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--rule);
   }
 
   .capability-row:last-child {
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--rule);
   }
 
   .capability-row dt {
@@ -292,7 +291,7 @@ const partners = data.partnerSlugs
 
   .capability-row dd {
     margin: 0;
-    color: var(--muted);
+    color: var(--trace);
   }
 
   .milestones {
@@ -304,28 +303,23 @@ const partners = data.partnerSlugs
     gap: 16px;
   }
 
+  /* Milestones read along one rule, with the current one marked. */
   .milestones li {
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 20px;
+    padding: 18px 0 0;
+    border-top: 1px solid var(--rule);
   }
 
   .milestones li.current {
-    border-color: var(--accent);
+    border-top-color: var(--signal);
   }
 
   .milestone-status {
     display: inline-block;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 3px 10px;
-    color: var(--muted);
+    color: var(--trace);
   }
 
   .milestones li.current .milestone-status {
-    border-color: var(--accent);
-    color: var(--accent);
+    color: var(--signal);
   }
 
   .milestones h3 {
@@ -334,31 +328,57 @@ const partners = data.partnerSlugs
   }
 
   .milestones p {
-    color: var(--muted);
+    color: var(--trace);
     font-size: 0.85rem;
     margin: 0;
   }
 
   .findings-note {
-    border: 1px dashed var(--line);
-    border-radius: 16px;
-    padding: 30px;
-    text-align: center;
-    background: var(--bg);
+    padding-left: 18px;
+    border-left: 1px solid var(--rule);
   }
 
   .findings-note p {
-    max-width: 52ch;
-    margin: 0 auto;
+    max-width: 60ch;
+    margin: 0;
   }
 
+  /* Logos sit directly on the paper band, divided by hairlines rather than
+     each getting its own white tile. */
   .partner-grid {
     list-style: none;
     margin: 0;
     padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border-top: 1px solid var(--paper-rule);
+    border-bottom: 1px solid var(--paper-rule);
+  }
+
+  .partner-grid li {
+    padding: 20px 24px;
+    border-left: 1px solid var(--paper-rule);
     display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
+    align-items: center;
+  }
+
+  .partner-grid li:nth-child(2n + 1) {
+    border-left: 0;
+  }
+
+  @media (min-width: 46em) {
+    .partner-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .partner-grid li:nth-child(2n + 1) {
+      border-left: 1px solid var(--paper-rule);
+    }
+
+    .partner-grid li:nth-child(4n + 1) {
+      border-left: 0;
+      padding-left: 0;
+    }
   }
 
   .team-card {
@@ -366,10 +386,9 @@ const partners = data.partnerSlugs
     gap: 20px;
     align-items: center;
     flex-wrap: wrap;
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 26px;
+    padding: 24px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
   }
 
   .team-info {
@@ -383,21 +402,22 @@ const partners = data.partnerSlugs
 
   .role,
   .collaborators {
-    color: var(--muted);
+    color: var(--trace);
     margin: 4px 0 0;
   }
 
   .contact-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    background: var(--accent);
-    color: var(--on-accent);
-    padding: 12px 20px;
-    border-radius: 999px;
-    font-weight: 600;
+    gap: 10px;
+    padding: 13px 20px;
+    border-radius: var(--radius);
+    background: var(--signal);
+    color: var(--on-signal);
     text-decoration: none;
     font-family: var(--font-display);
+    font-variation-settings: var(--vf-ui);
+    font-size: 0.95rem;
   }
 
   @media (max-width: 720px) {

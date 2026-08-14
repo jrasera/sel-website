@@ -11,32 +11,63 @@ const partners = (await Promise.all(slugs.map((slug) => getEntry('partners', slu
 
 {
   partners.length > 0 && (
-    <section aria-labelledby="partners-h" class="reveal">
-      <span class="mono-label" id="partners-h">
-        ESA programme partners
-      </span>
-      <ul class="partner-grid">
-        {partners.map((partner) => (
-          <li>
-            <PartnerLogoTile partner={partner} />
-          </li>
-        ))}
-      </ul>
+    /* The partner strip is why the paper band sits here: on white the logos
+       need no individual tiles, and the long dark page gets its interruption. */
+    <section aria-labelledby="partners-h" class="paper reveal">
+      <div class="inner">
+        <span class="label" id="partners-h">
+          ESA programme partners
+        </span>
+        <ul class="partner-row">
+          {partners.map((partner) => (
+            <li>
+              <PartnerLogoTile partner={partner} />
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   )
 }
 
 <style>
-  section {
-    margin-top: var(--space-1);
+  .inner {
+    padding: var(--space-3) var(--space-1) var(--space-2);
   }
 
-  .partner-grid {
+  .partner-row {
     list-style: none;
-    margin: 18px 0 0;
+    margin: 20px 0 0;
     padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border-top: 1px solid var(--paper-rule);
+    border-bottom: 1px solid var(--paper-rule);
+  }
+
+  .partner-row li {
+    padding: 20px 24px;
+    border-left: 1px solid var(--paper-rule);
     display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
+    align-items: center;
+  }
+
+  .partner-row li:nth-child(2n + 1) {
+    border-left: 0;
+  }
+
+  @media (min-width: 46em) {
+    .partner-row {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .partner-row li:nth-child(2n + 1) {
+      border-left: 1px solid var(--paper-rule);
+    }
+
+    .partner-row li:nth-child(4n + 1) {
+      border-left: 0;
+      padding-left: 0;
+    }
   }
 </style>

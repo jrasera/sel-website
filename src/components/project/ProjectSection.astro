@@ -2,20 +2,35 @@
 interface Props {
   id: string;
   heading: string;
+  /** Runs the section as a full-bleed paper band (used where logos or figures
+      need a light ground). */
+  paper?: boolean;
 }
 
-const { id, heading } = Astro.props;
+const { id, heading, paper = false } = Astro.props;
 ---
 
-<section aria-labelledby={`${id}-h`} class="reveal">
-  <h2 id={`${id}-h`}>{heading}</h2>
-  <div class="section-body">
-    <slot />
+<section aria-labelledby={`${id}-h`} class:list={['reveal', { paper }]}>
+  <div class="ps-inner">
+    <h2 id={`${id}-h`}>{heading}</h2>
+    <div class="section-body">
+      <slot />
+    </div>
   </div>
 </section>
 
 <style>
   .section-body {
     margin-top: 18px;
+  }
+
+  /* The layout strips padding from a full-bleed section, so the band's own
+     inner wrapper puts it back. */
+  .paper .ps-inner {
+    padding: var(--space-3) var(--space-1);
+  }
+
+  .paper h2 {
+    color: var(--paper-ink);
   }
 </style>

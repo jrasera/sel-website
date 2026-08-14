@@ -1,135 +1,87 @@
 ---
-import FutureFan from '../ui/FutureFan.astro';
+import EnsemblePlot from '../ui/EnsemblePlot.astro';
 ---
 
-<section class="hero" aria-labelledby="hero-h">
-  <div class="hero-backdrop">
-    <FutureFan />
-  </div>
-  <div class="hero-copy">
-    <span class="mono-label eyebrow">Imperial College London</span>
-    <h1 id="hero-h">Strategic Engineering Laboratory</h1>
-    <p class="standfirst">
-      How do we design future-generation engineering systems that are more sustainable and
-      resilient in the face of uncertainty and risk?
-    </p>
-    <p class="supporting">
-      At the Strategic Engineering Lab (SEL) we tackle the design, deployment, and operation of
-      next-generation systems — for defence, energy, resource extraction, transportation, and
-      space exploration — that run for decades and demand investments of £100 million or more.
-    </p>
-    <div class="cta-row">
-      <a href="/projects/" class="btn btn-primary">Explore our projects <span aria-hidden="true">→</span></a>
-      <a href="/people/" class="btn btn-secondary">Meet the team</a>
+<section class="hero full-bleed" aria-labelledby="hero-h">
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <span class="label eyebrow">Imperial College London</span>
+      <h1 id="hero-h">Strategic Engineering Laboratory</h1>
+      <p class="standfirst">
+        How do we design future-generation engineering systems that are more sustainable and
+        resilient in the face of uncertainty and risk?
+      </p>
+      <p class="supporting">
+        At the Strategic Engineering Lab (SEL) we tackle the design, deployment, and operation of
+        next-generation systems — for defence, energy, resource extraction, transportation, and
+        space exploration — that run for decades and demand investments of £100 million or more.
+      </p>
+      <div class="cta-row">
+        <a href="/projects/" class="btn">Explore our projects <span class="arw" aria-hidden="true">→</span></a>
+        <a href="/people/" class="btn-key">Meet the team</a>
+      </div>
+    </div>
+
+    <div class="hero-figure">
+      <EnsemblePlot />
     </div>
   </div>
 </section>
 
 <style>
-  .hero {
-    position: relative;
-    display: flex;
-    align-items: center;
-    min-height: min(720px, 88vh);
-    padding-top: var(--space-2);
-    overflow: hidden;
-  }
-
-  .hero-backdrop {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    /* The fan reads as full-bleed atmosphere, not a boxed illustration — but
-       it must never sit directly behind the text column, so it's masked out
-       there entirely (transparent, not just dim) and grows in past it. This
-       also reads thematically: the space of futures opens up as you move
-       away from the present moment the text occupies. Fixed px stops, not
-       percentages: .hero-copy has a fixed 640px max-width, so the mask must
-       track that in px too, not a proportion of the (much wider, and
-       differently-capped) hero section — a percentage-based mask drifts out
-       of sync with the text column and lets rays cross directly behind it
-       on wide viewports. */
-    mask-image: linear-gradient(to right, transparent 0, transparent 680px, black 900px);
-    -webkit-mask-image: linear-gradient(to right, transparent 0, transparent 680px, black 900px);
+  .hero-inner {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-1);
   }
 
   .hero-copy {
-    position: relative;
-    z-index: 1;
-    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 
   .eyebrow {
-    color: var(--accent);
+    color: var(--signal);
   }
 
   .hero h1 {
     font-size: var(--step-4);
-    margin: 18px 0 0;
-    font-weight: 600;
+    font-variation-settings: var(--vf-hero);
+    letter-spacing: -0.028em;
+    max-width: 13ch;
   }
 
   .standfirst {
-    font-family: var(--font-display);
     font-size: var(--step-1);
+    font-weight: 300;
+    line-height: 1.4;
     color: var(--text);
-    margin: 26px 0 0;
-    max-width: 38ch;
-    font-weight: 500;
+    margin: 0;
+    max-width: 34ch;
   }
 
   .supporting {
-    color: var(--muted);
-    margin: 22px 0 0;
-    max-width: 54ch;
+    color: var(--trace);
+    margin: 0;
+    max-width: 56ch;
   }
 
   .cta-row {
     display: flex;
-    gap: 14px;
+    gap: 26px;
     flex-wrap: wrap;
-    margin-top: 36px;
-  }
-
-  .btn {
-    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 15px 24px;
-    border-radius: 999px;
-    font-weight: 600;
-    text-decoration: none;
-    font-family: var(--font-body);
-    transition: filter 0.2s ease, border-color 0.2s ease;
+    margin-top: 6px;
   }
 
-  .btn-primary {
-    background: var(--accent);
-    color: var(--on-accent);
-  }
-
-  .btn-primary:hover {
-    filter: brightness(1.08);
-  }
-
-  .btn-secondary {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--line);
-  }
-
-  .btn-secondary:hover {
-    border-color: var(--accent);
-  }
-
-  @media (max-width: 860px) {
-    .hero {
-      min-height: min(640px, 80vh);
-    }
-
-    .hero-backdrop {
-      mask-image: linear-gradient(to bottom, transparent 0%, transparent 58%, black 88%);
-      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 58%, black 88%);
+  /* Below this width the figure sits under the copy at full width; above it the
+     two share the row, with the figure taking the larger share. */
+  @media (min-width: 68em) {
+    .hero-inner {
+      grid-template-columns: minmax(340px, 0.86fr) minmax(0, 1.14fr);
+      align-items: center;
+      gap: var(--space-3);
     }
   }
 </style>

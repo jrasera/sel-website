@@ -7,10 +7,19 @@ const { currentPath } = Astro.props;
 
 const isActive = (href: string) =>
   href === '/' ? currentPath === '/' : currentPath.startsWith(href);
+
+const links = [
+  { href: '/', label: 'Home' },
+  { href: '/method/', label: 'Method' },
+  { href: '/projects/', label: 'Projects' },
+  { href: '/people/', label: 'People' },
+  { href: '/publications/', label: 'Publications' },
+  { href: '/opportunities/', label: 'Opportunities' },
+];
 ---
 
 <header class="site-header">
-  <nav aria-label="Primary" class="nav">
+  <div class="bar">
     <div class="wordmark">
       <a href="https://www.imperial.ac.uk" class="imperial-link">
         <svg viewBox="0 0 1548 170" role="img" aria-label="Imperial College London" fill="currentColor" class="logo" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor"><polygon points="641.97,0 641.97,170 752.47,170 752.47,140.25 674.27,140.25 674.27,97.75 745.67,97.75 745.67,68.85 674.27,68.85 674.27,29.75 752.47,29.75 752.47,0"></polygon><path d="M507.7,27.45h-23.8v57.29h23.8c18.62,0,32.3-9.01,32.3-28.65C540,35.7,526.32,27.45,507.7,27.45 M509.4,112.2h-25.5V170h-32.3V0h57.8C545.65,0,574,16.42,574,56.1C574,95.2,545.44,112.2,509.4,112.2"></path><polygon points="1032.98,0 1032.98,29.75 1072.93,29.75 1072.93,140.25 1032.98,140.25 1032.98,170 1145.18,170 1145.18,140.25 1105.23,140.25 1105.23,29.75 1145.18,29.75 1145.18,0"></polygon><path d="M924.62,52.7c0,20.48-11.9,26.94-32.3,26.94h-27.2V27.46h27.2C914.46,27.46,924.62,35.7,924.62,52.7 M958.62,52.7c0-39.68-27.2-52.7-62.9-52.7h-62.9v170h32.3v-62.9h27.2c1.49,0,2.97-0.03,4.44-0.08L929.67,170h35.79l-36.51-69.72C946.71,92.39,958.62,77.23,958.62,52.7"></path><path d="M1286.9,30.16l23.24,74.98h-46.49L1286.9,30.16z M1265.65,0l-56.1,170h34l11.59-37.4h63.51l11.59,37.4h34l-56.1-170H1265.65z"></path><polygon points="1437.16,0 1437.16,170 1547.94,170 1547.94,140.25 1469.46,140.25 1469.46,0"></polygon><polygon points="323.53,0 282.73,99.96 241.93,0 196.03,0 196.03,170 226.63,170 226.63,42.9 265.73,132.6 267.43,132.6 298.03,132.6 299.73,132.6 338.83,42.9 338.83,170 369.43,170 369.43,0"></polygon><polygon points="0.06,0 0.06,29.75 40.01,29.75 40.01,140.25 0.06,140.25 0.06,170 112.26,170 112.26,140.25 72.31,140.25 72.31,29.75 112.26,29.75 112.26,0"></polygon></g></svg>
@@ -19,50 +28,45 @@ const isActive = (href: string) =>
       <a href="/" class="site-link">
         <span class="name-block">
           <span class="name">Strategic Engineering Laboratory</span>
-          <span class="mono-label">Dyson School of Design Engineering</span>
+          <span class="label dept">Dyson School of Design Engineering</span>
         </span>
       </a>
     </div>
 
-    <ul class="nav-list">
-      <li>
-        <a href="/" aria-current={isActive('/') && currentPath === '/' ? 'page' : undefined} class:list={{ active: currentPath === '/' }}>
-          Home
-        </a>
-      </li>
-      <li>
-        <a href="/method/" aria-current={isActive('/method') ? 'page' : undefined} class:list={{ active: isActive('/method') }}>
-          Method
-        </a>
-      </li>
-      <li class="dropdown">
-        <details>
-          <summary aria-current={isActive('/projects') ? 'page' : undefined} class:list={{ active: isActive('/projects') }}>
-            Projects
-          </summary>
-          <ul class="dropdown-menu" role="menu" aria-label="Projects">
-            <li role="none"><a role="menuitem" href="/projects/">All active projects</a></li>
-            <li role="none"><a role="menuitem" href="/projects/past/">Past projects</a></li>
-          </ul>
-        </details>
-      </li>
-      <li>
-        <a href="/people/" aria-current={isActive('/people') ? 'page' : undefined} class:list={{ active: isActive('/people') }}>
-          People
-        </a>
-      </li>
-      <li>
-        <a href="/publications/" aria-current={isActive('/publications') ? 'page' : undefined} class:list={{ active: isActive('/publications') }}>
-          Publications
-        </a>
-      </li>
-      <li>
-        <a href="/opportunities/" aria-current={isActive('/opportunities') ? 'page' : undefined} class:list={{ active: isActive('/opportunities') }}>
-          Opportunities
-        </a>
-      </li>
-    </ul>
-  </nav>
+    <!-- A <details> disclosure, not a scripted menu: the collapsed navigation
+         has to open with JavaScript disabled, and this does. Above 75em the
+         summary is hidden and the panel is laid out as an ordinary row — that
+         threshold is where all seven items measured as fitting on one line
+         beside the wordmark, so the header is a single row at every width. -->
+    <details class="nav-shell">
+      <summary class="nav-toggle" aria-label="Menu">
+        <span class="toggle-label">Menu</span>
+        <span class="toggle-mark" aria-hidden="true"></span>
+      </summary>
+      <nav aria-label="Primary" class="nav-panel">
+        <ul class="nav-list">
+          {
+            links.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
+                  class:list={{ active: isActive(link.href) }}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+          <li class="sub">
+            <a href="/projects/past/" class:list={{ active: isActive('/projects/past') }}>
+              Past projects
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </details>
+  </div>
 </header>
 
 <style>
@@ -71,18 +75,18 @@ const isActive = (href: string) =>
     top: 0;
     z-index: 100;
     backdrop-filter: blur(14px);
-    background: color-mix(in srgb, var(--bg) 80%, transparent);
-    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--field) 86%, transparent);
+    border-bottom: 1px solid var(--rule);
   }
 
-  .nav {
+  .bar {
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: 12px var(--space-1);
+    padding: 0 var(--space-1);
+    min-height: var(--header-h);
     display: flex;
     align-items: center;
     gap: 20px;
-    flex-wrap: wrap;
   }
 
   .wordmark {
@@ -90,6 +94,7 @@ const isActive = (href: string) =>
     align-items: center;
     gap: 16px;
     margin-right: auto;
+    min-width: 0;
   }
 
   .imperial-link,
@@ -98,117 +103,188 @@ const isActive = (href: string) =>
     align-items: center;
     text-decoration: none;
     color: var(--text);
-    border-radius: 4px;
+    min-width: 0;
   }
 
   .logo {
-    height: 19px;
+    height: 18px;
     width: auto;
     color: var(--text);
   }
 
   .divider {
     width: 1px;
-    height: 30px;
-    background: var(--line);
+    height: 28px;
+    background: var(--rule);
+    flex: none;
   }
 
   .name-block {
     display: flex;
     flex-direction: column;
+    gap: 1px;
     line-height: 1.15;
+    min-width: 0;
   }
 
   .name {
     font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 1rem;
+    font-variation-settings: 'wdth' 96, 'wght' 640;
+    font-size: 0.95rem;
+    letter-spacing: -0.005em;
+  }
+
+  .dept {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+  }
+
+  .nav-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 2px;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-display);
+    font-variation-settings: var(--vf-label);
+    font-size: var(--step-label);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .nav-toggle::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Two rules stacked — the same axis furniture the rest of the site is built
+     from, rather than a generic hamburger. */
+  .toggle-mark {
+    width: 20px;
+    height: 9px;
+    border-top: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+  }
+
+  .nav-shell[open] .toggle-mark {
+    border-top-color: var(--signal);
+    border-bottom-color: var(--signal);
+  }
+
+  .nav-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    background: var(--lift);
+    border-bottom: 1px solid var(--rule);
+    box-shadow: 0 26px 60px rgba(0, 0, 0, 0.5);
   }
 
   .nav-list {
     list-style: none;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin: 0;
-    padding: 0;
-    flex-wrap: wrap;
+    margin: 0 auto;
+    padding: 0 var(--space-1) 12px;
+    max-width: var(--max-width);
   }
 
-  .nav-list > li > a,
-  .nav-list summary {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    text-decoration: none;
-    color: var(--text);
-    font-weight: 500;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    list-style: none;
-  }
-
-  .nav-list summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .nav-list summary::after {
-    content: '▾';
-    font-size: 0.7rem;
-    opacity: 0.7;
-  }
-
-  .nav-list > li > a:hover,
-  .nav-list summary:hover {
-    background: var(--bg3);
-  }
-
-  .nav-list > li > a.active::after,
-  .nav-list summary.active::before {
-    content: '';
-    position: absolute;
-    left: 12px;
-    right: 12px;
-    bottom: 2px;
-    height: 2px;
-    background: var(--accent);
-    border-radius: 2px;
-  }
-
-  .dropdown {
-    position: relative;
-  }
-
-  .dropdown details[open] summary {
-    background: var(--bg3);
-  }
-
-  .dropdown-menu {
-    list-style: none;
-    margin: 8px 0 0;
-    padding: 8px;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    min-width: 220px;
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
-  }
-
-  .dropdown-menu a {
+  .nav-list a {
     display: block;
-    padding: 8px 12px;
-    border-radius: 8px;
+    padding: 14px 0;
     text-decoration: none;
     color: var(--text);
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-display);
+    font-variation-settings: 'wdth' 100, 'wght' 560;
+  }
+
+  .nav-list .sub a {
+    color: var(--trace);
+    padding-left: 18px;
     font-size: 0.95rem;
   }
 
-  .dropdown-menu a:hover {
-    background: var(--bg3);
+  .nav-list a.active {
+    color: var(--signal);
+  }
+
+  @media (min-width: 75em) {
+    .nav-toggle {
+      display: none;
+    }
+
+    /* The same panel that is a disclosure on mobile is simply a row here — no
+       duplicated markup, and no JavaScript in either state. Two rules are
+       needed because browsers hide a closed <details>'s content two different
+       ways: older engines apply display:none to the content (an author
+       `display` wins), and newer ones hide the ::details-content pseudo with
+       content-visibility (only this second rule reaches that). Dropping
+       either one leaves the navigation invisible on half the browsers in
+       use — which is exactly what happened when only the first was here. */
+    .nav-shell::details-content {
+      content-visibility: visible;
+      block-size: auto;
+    }
+
+    .nav-panel {
+      display: block;
+      position: static;
+      background: none;
+      border-bottom: 0;
+      box-shadow: none;
+    }
+
+    .nav-list {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0;
+    }
+
+    .nav-list a {
+      position: relative;
+      padding: 8px 12px;
+      border-bottom: 0;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      transition: background 0.18s ease;
+    }
+
+    .nav-list a:hover {
+      background: var(--lift-hi);
+    }
+
+    .nav-list a.active {
+      color: var(--text);
+    }
+
+    /* The active page is marked with a tick on the header's own rule. */
+    .nav-list a.active::after {
+      content: '';
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: -1px;
+      height: 2px;
+      background: var(--signal);
+    }
+
+    .nav-list .sub a {
+      color: var(--trace);
+      padding-left: 12px;
+      font-size: 0.95rem;
+    }
+
+    .dept {
+      font-size: 0.64rem;
+    }
+  }
+
+  @media (max-width: 30em) {
+    .dept,
+    .divider {
+      display: none;
+    }
   }
 </style>

@@ -28,7 +28,7 @@ const featured = allFeatured.sort((a, b) => (a.data.order ?? 99) - (b.data.order
         <>
           <AxisDivider label={project.data.sectors?.[0] ?? 'Active'} />
           <a href={`/projects/${project.id}/`} class="row">
-            <span class="row-n mono-label">{String(i + 1).padStart(2, '0')}</span>
+            <span class="row-n label">{String(i + 1).padStart(2, '0')}</span>
             <span class="row-body">
               <h3>{project.data.title}</h3>
               <p>{project.data.summary}</p>
@@ -57,7 +57,7 @@ const featured = allFeatured.sort((a, b) => (a.data.order ?? 99) - (b.data.order
   }
 
   .section-head p {
-    color: var(--muted);
+    color: var(--trace);
     margin: 12px 0 0;
     max-width: 60ch;
   }
@@ -65,7 +65,7 @@ const featured = allFeatured.sort((a, b) => (a.data.order ?? 99) - (b.data.order
   .all-link {
     white-space: nowrap;
     text-decoration: none;
-    color: var(--accent);
+    color: var(--signal);
     font-weight: 600;
     font-family: var(--font-body);
   }
@@ -81,7 +81,7 @@ const featured = allFeatured.sort((a, b) => (a.data.order ?? 99) - (b.data.order
   }
 
   .row-n {
-    color: var(--accent);
+    color: var(--signal);
     font-size: 0.9rem;
   }
 
@@ -90,7 +90,7 @@ const featured = allFeatured.sort((a, b) => (a.data.order ?? 99) - (b.data.order
   }
 
   .row-body p {
-    color: var(--muted);
+    color: var(--trace);
     margin: 8px 0 0;
     max-width: 60ch;
   }
@@ -99,7 +99,7 @@ const featured = allFeatured.sort((a, b) => (a.data.order ?? 99) - (b.data.order
     white-space: nowrap;
     font-family: var(--font-body);
     font-weight: 600;
-    color: var(--accent);
+    color: var(--signal);
     opacity: 0;
     transform: translateX(-6px);
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -112,7 +112,7 @@ const featured = allFeatured.sort((a, b) => (a.data.order ?? 99) - (b.data.order
   }
 
   .row:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--signal);
     outline-offset: 4px;
     border-radius: 4px;
   }

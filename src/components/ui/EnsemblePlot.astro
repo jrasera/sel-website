@@ -1,0 +1,378 @@
+---
+/**
+ * The signature element: an ensemble of cumulative-value paths leaving a single
+ * decision, branching at three staged decision gates, and resolving on the
+ * right into a marginal distribution of where they ended up.
+ *
+ * Two paths are lifted out of the mass because the argument depends on them —
+ * a fixed design that commits all its capital up front, and a flexible design
+ * that stages it and adds capability at each gate. The right-hand edge is the
+ * point of the figure rather than a crop: the traces terminate on an axis, and
+ * the histogram is what that termination actually looks like.
+ *
+ * Everything is computed at build time from a seeded PRNG and emitted as inline
+ * SVG, so the figure is byte-identical for every visitor, needs no JavaScript
+ * at all, and draws itself with CSS. The animation is written so its *base*
+ * state is the finished figure and the keyframes only supply the from-state:
+ * when animation is switched off (prefers-reduced-motion), the complete plot is
+ * what remains, rather than an empty frame.
+ */
+interface Props {
+  label?: string;
+}
+
+const {
+  label = 'Forty cumulative-value paths from one staged investment decision, branching at three decision gates and resolving into a distribution of terminal values on the right-hand axis.',
+} = Astro.props;
+
+function mulberry32(seed: number) {
+  let a = seed;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const K = 61; // half-years across a 30-year horizon
+const GATES = [5, 12, 22];
+const rand = mulberry32(7);
+
+function walk(capex: number, base: number, gates: number[], noise: number) {
+  const pts: [number, number][] = [];
+  let v = 0;
+  let rate = 0;
+  for (let k = 0; k < K; k++) {
+    const t = k * 0.5;
+    let dv: number;
+    if (t < 5) {
+      dv = -capex;
+    } else {
+      dv = base;
+      for (let g = 0; g < 3; g++) if (t >= GATES[g]) dv *= gates[g];
+    }
+    if (noise) dv += (rand() - 0.5) * noise;
+    // A smoothed rate, so traces curve rather than kink between gates.
+    rate = rate * 0.55 + dv * 0.45;
+    v += rate * 0.5;
+    pts.push([t, v]);
+  }
+  return pts;
+}
+
+const mass = Array.from({ length: 38 }, () =>
+  walk(2 + rand() * 0.35, 0.75 + rand() * 1.55, [0.66 + rand() * 0.7, 0.66 + rand() * 0.7, 0.66 + rand() * 0.7], 1.15)
+);
+
+// Fixed baseline: all capital committed up front, no adaptation.
+const fixed = walk(2.55, 1.55, [1, 1, 1], 0);
+
+// Flexible design: staged capital, capability added at each gate. The dips at
+// gates 2 and 3 are the cost of exercising each option.
+const flex: [number, number][] = [];
+{
+  let v = 0;
+  for (let k = 0; k < K; k++) {
+    const t = k * 0.5;
+    let dv: number;
+    if (t < 5) dv = -1.45;
+    else if (t < 12) dv = 1.15;
+    else if (t < 22) dv = 2.6;
+    else dv = 4.1;
+    if (t >= 12 && t < 12.6) dv -= 5.2;
+    if (t >= 22 && t < 22.6) dv -= 4.4;
+    v += dv * 0.5;
+    flex.push([t, v]);
+  }
+}
+
+const all = [...mass, fixed, flex];
+let vmin = Infinity;
+let vmax = -Infinity;
+for (const p of all)
+  for (const [, v] of p) {
+    if (v < vmin) vmin = v;
+    if (v > vmax) vmax = v;
+  }
+const padV = (vmax - vmin) * 0.06;
+vmin -= padV;
+vmax += padV;
+
+// --- projection into the viewBox ------------------------------------------
+const W = 1000;
+const H = 440;
+const padL = 62;
+const padR = 148;
+const padT = 46;
+const padB = 54;
+const px = (t: number) => padL + (t / 30) * (W - padL - padR);
+const py = (v: number) => padT + (1 - (v - vmin) / (vmax - vmin)) * (H - padT - padB);
+const round = (n: number) => Math.round(n * 10) / 10;
+const line = (p: [number, number][]) => p.map(([t, v]) => `${round(px(t))},${round(py(v))}`).join(' ');
+
+const massLines = mass.map(line);
+const fixedLine = line(fixed);
+const flexLine = line(flex);
+
+const gridValues: number[] = [];
+for (let v = Math.ceil(vmin / 20) * 20; v <= vmax; v += 20) gridValues.push(v);
+const xTicks = [0, 5, 10, 15, 20, 25, 30];
+
+// --- the margin: where those paths ended up --------------------------------
+const finals = all.map((p) => p[K - 1][1]);
+const fmin = Math.min(...finals);
+const fmax = Math.max(...finals);
+const BINS = 9;
+const bins = new Array(BINS).fill(0);
+for (const v of finals) bins[Math.min(BINS - 1, Math.floor(((v - fmin) / (fmax - fmin || 1)) * BINS))]++;
+const bmax = Math.max(...bins);
+const binW = (fmax - fmin) / BINS;
+const axisX = W - padR;
+const histBars = bins
+  .map((c, b) => {
+    if (!c) return null;
+    const y0 = py(fmin + b * binW);
+    const y1 = py(fmin + (b + 1) * binW);
+    return {
+      y: round(Math.min(y0, y1) + 1.5),
+      h: round(Math.abs(y1 - y0) - 3),
+      w: round((c / bmax) * (padR - 34)),
+    };
+  })
+  .filter((b): b is { y: number; h: number; w: number } => b !== null);
+---
+
+<figure class="ensemble">
+  <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label={label}>
+    <g class="grid">
+      {
+        gridValues.map((v) => (
+          <>
+            <line class:list={['gridline', { zero: v === 0 }]} x1={padL} y1={round(py(v))} x2={axisX} y2={round(py(v))} />
+            <text class="tick-label" x={padL - 10} y={round(py(v)) + 4} text-anchor="end">
+              {v}
+            </text>
+          </>
+        ))
+      }
+      {
+        GATES.map((g, i) => (
+          <>
+            <line class="gate" x1={round(px(g))} y1={padT} x2={round(px(g))} y2={H - padB} />
+            <text class="tick-label" x={round(px(g))} y={padT - 12} text-anchor="middle">
+              GATE {i + 1}
+            </text>
+          </>
+        ))
+      }
+      <line class="axis" x1={padL} y1={H - padB} x2={axisX} y2={H - padB} />
+      <line class="axis" x1={axisX} y1={padT} x2={axisX} y2={H - padB} />
+      {
+        xTicks.map((t) => (
+          <>
+            <line class="axis" x1={round(px(t))} y1={H - padB} x2={round(px(t))} y2={H - padB + 6} />
+            <text class="tick-label" x={round(px(t))} y={H - padB + 22} text-anchor="middle">
+              {t}
+            </text>
+          </>
+        ))
+      }
+      <text class="tick-label" x={padL} y={H - 8}>YEARS FROM DECISION</text>
+      <text class="tick-label" x="2" y={padT - 26}>CUMULATIVE VALUE</text>
+      <text class="tick-label" x={W} y={padT - 26} text-anchor="end">TERMINAL VALUE</text>
+    </g>
+
+    <g class="traces">
+      {massLines.map((pts, i) => <polyline class="ray" points={pts} pathLength="1" style={`--i:${i}`} />)}
+      <polyline class="ray ray-fixed" points={fixedLine} pathLength="1" />
+      <polyline class="ray ray-flex" points={flexLine} pathLength="1" />
+      <circle class="origin" cx={round(px(0))} cy={round(py(0))} r="5" />
+    </g>
+
+    <g class="margin" style={`--axis-x:${axisX}px`}>
+      {histBars.map((b) => <rect class="bar" x={axisX + 2} y={b.y} width={b.w} height={b.h} />)}
+      <rect class="marker marker-fixed" x={axisX + 2} y={round(py(fixed[K - 1][1])) - 2} width="26" height="4" />
+      <rect class="marker marker-flex" x={axisX + 2} y={round(py(flex[K - 1][1])) - 2} width="26" height="4" />
+    </g>
+  </svg>
+
+  <figcaption class="ensemble-key">
+    <span class="key k-flex"><i aria-hidden="true"></i>Flexible design</span>
+    <span class="key k-fixed"><i aria-hidden="true"></i>Fixed baseline</span>
+    <span class="key k-mass"><i aria-hidden="true"></i>38 other futures</span>
+    <span class="label illus">Illustrative</span>
+  </figcaption>
+</figure>
+
+<style>
+  .ensemble {
+    margin: 0;
+    width: 100%;
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+  }
+
+  /* Label size is in user units, so it has to grow as the figure shrinks —
+     otherwise the axis text is sub-6px on a phone. */
+  svg text {
+    font-family: var(--font-display);
+    font-variation-settings: var(--vf-label);
+    font-size: 13px;
+    letter-spacing: 1.4px;
+    fill: var(--trace);
+  }
+
+  @media (max-width: 68em) {
+    svg text {
+      font-size: 17px;
+    }
+  }
+
+  @media (max-width: 40em) {
+    svg text {
+      font-size: 24px;
+      letter-spacing: 1px;
+    }
+  }
+
+  .gridline,
+  .gate,
+  .axis {
+    stroke: var(--rule);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .gridline {
+    opacity: 0.35;
+  }
+
+  .gridline.zero {
+    opacity: 0.8;
+  }
+
+  .gate {
+    opacity: 0.45;
+    stroke-dasharray: 4 6;
+  }
+
+  .ray {
+    fill: none;
+    stroke: var(--trace);
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.28;
+    vector-effect: non-scaling-stroke;
+    /* Base state is the finished trace; the keyframe only supplies the
+       from-state, so with animations off the figure is simply complete. */
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    animation: ray-draw 1.15s ease-out backwards;
+    animation-delay: calc(var(--i, 0) * 12ms);
+  }
+
+  .ray-fixed,
+  .ray-flex {
+    opacity: 1;
+    stroke-width: 2;
+  }
+
+  .ray-fixed {
+    stroke: var(--series-2);
+    animation-delay: 0.14s;
+  }
+
+  .ray-flex {
+    stroke: var(--signal);
+    stroke-width: 2.4;
+    animation-delay: 0.2s;
+  }
+
+  @keyframes ray-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  .origin {
+    fill: var(--text);
+  }
+
+  .bar {
+    fill: var(--trace);
+    opacity: 0.5;
+  }
+
+  .marker-fixed {
+    fill: var(--series-2);
+  }
+
+  .marker-flex {
+    fill: var(--signal);
+  }
+
+  .bar,
+  .marker {
+    transform-box: fill-box;
+    transform-origin: left center;
+    animation: bar-grow 0.45s ease-out 1.05s backwards;
+  }
+
+  @keyframes bar-grow {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  .ensemble-key {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 10px 26px;
+    margin: 10px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .key {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-variation-settings: var(--vf-label);
+    font-size: var(--step-label);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .key i {
+    width: 15px;
+    height: 0;
+    border-top: 2px solid currentColor;
+    display: block;
+  }
+
+  .k-flex {
+    color: var(--signal);
+  }
+
+  .k-fixed {
+    color: var(--series-2);
+  }
+
+  .k-mass {
+    color: var(--trace);
+  }
+
+  .illus {
+    margin-left: auto;
+  }
+</style>

@@ -4,42 +4,49 @@ import SequenceSelector from '../ui/SequenceSelector.astro';
 const principles = [
   {
     n: '01',
+    figure: 'frame',
     heading: 'Frame the decision',
     description:
       "We begin by defining the decision itself: its objectives, the stakeholders it affects, and the criteria against which success will be judged, before any modelling work starts.",
   },
   {
     n: '02',
+    figure: 'uncertainty',
     heading: 'Model uncertainty explicitly',
     description:
       'Rather than relying on a single forecast, we represent the ranges and drivers that could plausibly shape long-horizon outcomes, and identify which uncertainties actually matter to the decision at hand.',
   },
   {
     n: '03',
+    figure: 'system',
     heading: 'Map the wider system',
     description:
       'Engineering decisions rarely stand alone. We connect technical architecture to operations, economics, and stakeholder interests, so a design choice is evaluated in its full context, not in isolation.',
   },
   {
     n: '04',
+    figure: 'staged',
     heading: 'Design for change over time',
     description:
       'We distinguish what should be fixed at the outset from what can be staged, deferred, or built with the capacity to adapt as conditions become clearer.',
   },
   {
     n: '05',
+    figure: 'explore',
     heading: 'Explore the space of possibilities',
     description:
       'Using simulation ensembles and structured scenario analysis, we compare credible alternatives across many futures rather than optimising for one assumed outcome.',
   },
   {
     n: '06',
+    figure: 'flexibility',
     heading: 'Quantify the value of flexibility',
     description:
       "Where a design can adapt, we use real options analysis to determine whether that adaptability is worth its cost — turning flexibility from an intuition into a number decision-makers can act on.",
   },
   {
     n: '07',
+    figure: 'tradeoff',
     heading: 'Balance risk and reward',
     description:
       "We bring stakeholders' differing priorities into a shared, transparent view of trade-offs, supporting recommendations and next steps that are defensible under scrutiny.",
@@ -63,7 +70,7 @@ const principles = [
   }
 
   .intro {
-    color: var(--muted);
+    color: var(--trace);
     margin: 14px 0 0;
     max-width: 60ch;
   }

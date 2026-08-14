@@ -1,8 +1,11 @@
 ---
+import StepSchematic from '../method/StepSchematic.astro';
+
 interface Item {
   n: string;
   heading: string;
   description: string;
+  figure: string;
 }
 
 interface Props {
@@ -12,206 +15,252 @@ interface Props {
 const { items } = Astro.props;
 ---
 
-<div class="sequence-selector" data-sequence-selector>
-  <div class="rail-panel">
-    <div class="rail">
-      {
-        items.map((item, i) => (
-          <button
-            type="button"
-            class="tick-btn"
-            data-index={i}
-            aria-label={`${item.n}. ${item.heading}`}
-          >
-            {item.n}
-          </button>
-        ))
-      }
-    </div>
-
-    <div class="detail-panel" aria-live="polite" hidden>
-      <span class="detail-n mono-label"></span>
-      <h3 class="detail-heading"></h3>
-      <p class="detail-description"></p>
-    </div>
-  </div>
-
-  <ol class="item-list">
+<div class="sequence" data-sequence>
+  <ol class="rail">
     {
       items.map((item, i) => (
-        <li data-index={i}>
-          <span class="item-n mono-label" aria-hidden="true">{item.n}</span>
-          <h3>{item.heading}</h3>
-          <p>{item.description}</p>
+        <li class="step" data-index={i}>
+          {/* Number and heading are both visible text at every width — the
+              pass-2 rail showed numbered dots only, so nothing could be read
+              without clicking. The button is only rendered as a control when
+              scripting is available; without it the plain heading stands. */}
+          <button type="button" class="step-btn" data-index={i}>
+            <span class="label step-n">{item.n}</span>
+            <span class="step-h">{item.heading}</span>
+          </button>
+          <h3 class="step-static">
+            <span class="label step-n">{item.n}</span>
+            <span class="step-h">{item.heading}</span>
+          </h3>
+          <div class="step-body">
+            <p>{item.description}</p>
+            <StepSchematic kind={item.figure} />
+          </div>
         </li>
       ))
     }
   </ol>
+
+  <div class="detail" aria-live="polite">
+    <span class="detail-n">01</span>
+    <h3 class="detail-h"></h3>
+    <div class="detail-body"></div>
+  </div>
 </div>
 
 <script>
-  function initSequenceSelector(root: Element) {
-    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('.tick-btn'));
-    const list = root.querySelector<HTMLElement>('.item-list');
-    const panel = root.querySelector<HTMLElement>('.detail-panel');
-    if (!buttons.length || !list || !panel) return;
-
-    const items = Array.from(list.querySelectorAll<HTMLElement>('li'));
-    const panelN = panel.querySelector('.detail-n');
-    const panelHeading = panel.querySelector('.detail-heading');
-    const panelDescription = panel.querySelector('.detail-description');
-    if (!panelN || !panelHeading || !panelDescription) return;
+  function initSequence(root: Element) {
+    const steps = Array.from(root.querySelectorAll<HTMLElement>('.step'));
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('.step-btn'));
+    const detail = root.querySelector<HTMLElement>('.detail');
+    const detailN = root.querySelector<HTMLElement>('.detail-n');
+    const detailH = root.querySelector<HTMLElement>('.detail-h');
+    const detailBody = root.querySelector<HTMLElement>('.detail-body');
+    if (!steps.length || !detail || !detailN || !detailH || !detailBody) return;
 
     function activate(index: number) {
-      const item = items[index];
-      if (!item) return;
-      panelN!.textContent = item.querySelector('.item-n')?.textContent ?? '';
-      panelHeading!.textContent = item.querySelector('h3')?.textContent ?? '';
-      panelDescription!.textContent = item.querySelector('p')?.textContent ?? '';
-      for (const btn of buttons) {
-        btn.classList.toggle('is-active', Number(btn.dataset.index) === index);
-      }
+      const step = steps[index];
+      if (!step) return;
+      detailN!.textContent = step.querySelector('.step-n')?.textContent ?? '';
+      detailH!.textContent = step.querySelector('.step-h')?.textContent ?? '';
+      const body = step.querySelector('.step-body');
+      if (body) detailBody!.replaceChildren(...Array.from(body.cloneNode(true).childNodes));
+      steps.forEach((s, i) => s.classList.toggle('is-active', i === index));
+      buttons.forEach((b, i) => {
+        if (i === index) b.setAttribute('aria-current', 'true');
+        else b.removeAttribute('aria-current');
+      });
     }
 
-    buttons.forEach((btn) => {
-      btn.addEventListener('click', () => activate(Number(btn.dataset.index)));
+    buttons.forEach((btn, i) => {
+      // The accessible name has to carry the number and the heading together.
+      btn.setAttribute('aria-label', `${steps[i].querySelector('.step-n')?.textContent}. ${steps[i].querySelector('.step-h')?.textContent}`);
+      btn.addEventListener('click', () => activate(i));
+      btn.addEventListener('keydown', (event) => {
+        const dir = event.key === 'ArrowDown' ? 1 : event.key === 'ArrowUp' ? -1 : 0;
+        if (!dir) return;
+        event.preventDefault();
+        const next = (i + dir + buttons.length) % buttons.length;
+        buttons[next].focus();
+        activate(next);
+      });
     });
 
-    panel.hidden = false;
-    // A CSS class, not the `hidden` attribute: whether this actually hides
-    // the list depends on a media query (see below), so the rail+panel
-    // view only replaces the list at widths where the rail is actually
-    // shown — including on live resize, with no JS resize listener needed.
-    list.classList.add('js-collapsed');
+    root.classList.add('is-enhanced');
     activate(0);
   }
 
-  document.querySelectorAll('[data-sequence-selector]').forEach(initSequenceSelector);
+  document.querySelectorAll('[data-sequence]').forEach(initSequence);
 </script>
 
 <style>
-  .rail-panel {
+  .sequence {
     display: grid;
-    grid-template-columns: auto 1fr;
     gap: var(--space-3);
-    align-items: start;
   }
 
   .rail {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 2px 0;
   }
 
+  /* A real axis with a tick per step, not a decorative line. */
   .rail::before {
     content: '';
     position: absolute;
-    left: 19px;
-    top: 20px;
-    bottom: 20px;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
     width: 1px;
-    background: var(--line);
+    background: var(--rule);
   }
 
-  .tick-btn {
+  .step {
     position: relative;
-    z-index: 1;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--bg2);
-    border: 1.5px solid var(--line);
-    color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    cursor: pointer;
-    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    padding-left: 24px;
   }
 
-  .tick-btn:hover {
-    border-color: var(--accent);
+  .step::before {
+    content: '';
+    position: absolute;
+    left: -3px;
+    top: 25px;
+    width: 7px;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .step-btn,
+  .step-static {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    width: 100%;
+    margin: 0;
+    padding: 13px 0;
+    text-align: left;
+    background: none;
+    border: 0;
+    color: inherit;
+    font: inherit;
+  }
+
+  .step-btn {
+    cursor: pointer;
+  }
+
+  .step-h {
+    font-family: var(--font-display);
+    font-variation-settings: 'wdth' 104, 'wght' 560;
+    font-size: 1.02rem;
+    line-height: 1.25;
+    color: var(--trace);
+    transition: color 0.18s ease;
+  }
+
+  .step-btn:hover .step-h {
     color: var(--text);
   }
 
-  .tick-btn:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+  .step-body {
+    padding: 0 0 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 
-  .tick-btn.is-active {
-    background: var(--accent-soft);
-    border-color: var(--accent);
-    color: var(--accent);
-    transform: scale(1.08);
-  }
-
-  .detail-panel {
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 28px 32px;
-    min-height: 168px;
-  }
-
-  .detail-n {
-    color: var(--accent);
-  }
-
-  .detail-heading {
-    font-size: 1.3rem;
-    margin: 12px 0 12px;
-  }
-
-  .detail-description {
-    color: var(--muted);
+  .step-body p {
+    color: var(--trace);
     margin: 0;
     max-width: 62ch;
   }
 
-  .item-list {
-    list-style: none;
-    margin: var(--space-2) 0 0;
-    padding: 0;
-    display: grid;
-    gap: 16px;
+  .detail {
+    display: none;
   }
 
-  @media (min-width: 48em) {
-    .item-list.js-collapsed {
+  .detail-n {
+    font-family: var(--font-display);
+    font-variation-settings: var(--vf-hero);
+    font-variant-numeric: tabular-nums;
+    font-size: 2.8rem;
+    line-height: 1;
+    color: var(--rule-text);
+  }
+
+  .detail-h {
+    font-size: 1.55rem;
+    font-variation-settings: var(--vf-sub);
+    margin: 12px 0 0;
+  }
+
+  .detail-body {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .detail-body p {
+    color: var(--trace);
+    margin: 0;
+    max-width: 60ch;
+  }
+
+  /* Without JavaScript the buttons are not controls, so they are never shown:
+     the static headings and the bodies stand on their own as a plain list. */
+  .sequence:not(.is-enhanced) .step-btn {
+    display: none;
+  }
+
+  /* Below the breakpoint the rail+detail split is off at every JS state, so
+     the buttons go and the full list stays — collapsing to headings-only here
+     would reproduce the regression this rebuild exists to fix. The two
+     thresholds are deliberately adjacent (55.9375em / 56em), never equal. */
+  @media (max-width: 55.9375em) {
+    .sequence .step-btn {
       display: none;
     }
   }
 
-  .item-list li {
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 20px 22px;
-  }
+  @media (min-width: 56em) {
+    .sequence.is-enhanced {
+      grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+      align-items: start;
+    }
 
-  .item-n {
-    color: var(--accent);
-  }
-
-  .item-list h3 {
-    font-size: 1.05rem;
-    margin: 8px 0 6px;
-  }
-
-  .item-list p {
-    color: var(--muted);
-    margin: 0;
-    font-size: 0.92rem;
-  }
-
-  /* Deliberately one step below the .item-list.js-collapsed breakpoint
-     (47.9375em vs 48em), not the same value — at the exact same breakpoint
-     both rules would match simultaneously and hide everything. */
-  @media (max-width: 47.9375em) {
-    .rail-panel {
+    .sequence.is-enhanced .step-static,
+    .sequence.is-enhanced .step-body {
       display: none;
+    }
+
+    /* Open on two sides — bounded by the rail's axis and a hairline above,
+       not enclosed in a panel. */
+    .sequence.is-enhanced .detail {
+      display: block;
+      border-top: 1px solid var(--rule);
+      padding-top: 16px;
+      position: sticky;
+      top: calc(var(--header-h) + 24px);
+    }
+
+    .sequence.is-enhanced .step.is-active::before {
+      left: -6px;
+      top: 22px;
+      width: 13px;
+      height: 7px;
+      background: var(--signal);
+    }
+
+    .sequence.is-enhanced .step.is-active .step-h {
+      color: var(--text);
+      box-shadow: inset 0 -1px 0 var(--signal);
+    }
+
+    .sequence.is-enhanced .step.is-active .step-n {
+      color: var(--signal);
     }
   }
 </style>

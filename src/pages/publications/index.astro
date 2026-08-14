@@ -27,7 +27,7 @@ const journals = [
   </a>
 
   <p class="evidence-framing">
-    <span class="mono-label">Evidence-based</span>
+    <span class="label">Evidence-based</span>
     These publications are the evidence base behind the method summarised on our{' '}
     <a href="/method/">Method page</a> — not just a bibliography. Across our published work, the
     finding is consistent: designs that preserve flexibility routinely outperform those optimised
@@ -53,30 +53,31 @@ const journals = [
   .full-list-btn {
     display: inline-flex;
     align-items: center;
-    gap: 9px;
+    gap: 10px;
     margin-top: 4px;
-    background: var(--accent);
-    color: var(--on-accent);
-    padding: 13px 22px;
-    border-radius: 999px;
-    font-weight: 600;
+    padding: 13px 20px;
+    border-radius: var(--radius);
+    background: var(--signal);
+    color: var(--on-signal);
     text-decoration: none;
     font-family: var(--font-display);
+    font-variation-settings: var(--vf-ui);
+    font-size: 0.95rem;
   }
 
   .evidence-framing {
-    color: var(--muted);
+    color: var(--trace);
     max-width: 60ch;
     margin-top: var(--space-2);
   }
 
-  .evidence-framing .mono-label {
+  .evidence-framing .label {
     display: block;
     margin-bottom: 8px;
   }
 
   .evidence-framing a {
-    color: var(--accent);
+    color: var(--signal);
   }
 
   .selected-work {
@@ -92,8 +93,7 @@ const journals = [
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    gap: 14px;
+    border-top: 1px solid var(--rule);
   }
 
   .journals {
@@ -109,13 +109,20 @@ const journals = [
     gap: 10px;
   }
 
-  .chips li {
-    background: var(--bg3);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 8px 15px;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    color: var(--muted);
+  .chips {
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    gap: 0;
   }
+
+  .chips li {
+    padding: 12px 20px;
+    border-left: 1px solid var(--rule);
+    font-family: var(--font-display);
+    font-variation-settings: 'wdth' 88, 'wght' 560;
+    font-size: 0.88rem;
+    color: var(--trace);
+  }
+
+
 </style>

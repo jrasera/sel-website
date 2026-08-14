@@ -22,18 +22,18 @@ const { title, description } = Astro.props;
     padding: var(--space-3) var(--space-1);
   }
 
-  .feature-page :global(section.surface-warm),
+  .feature-page :global(section.paper),
   .feature-page :global(section.full-bleed) {
     max-width: none;
     padding: 0;
   }
 
-  .feature-page :global(section.surface-warm) {
-    background: var(--surface-warm);
-    color: var(--surface-warm-text);
+  .feature-page :global(section.paper) {
+    background: var(--paper);
+    color: var(--paper-ink);
   }
 
-  .feature-page :global(section.surface-warm > *),
+  .feature-page :global(section.paper > *),
   .feature-page :global(section.full-bleed > *) {
     max-width: var(--max-width);
     margin: 0 auto;

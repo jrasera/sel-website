@@ -1,20 +1,29 @@
 ---
 interface Props {
   label?: string;
+  /** Marks the end of a run rather than the start of a section. */
+  terminal?: boolean;
 }
 
-const { label } = Astro.props;
+const { label, terminal = false } = Astro.props;
 const TICKS = 21;
 ---
 
 <div class="axis-divider">
-  {label && <span class="mono-label axis-label">{label}</span>}
+  {label && <span class="label axis-label">{label}</span>}
   <svg class="ticks" viewBox="0 0 400 12" preserveAspectRatio="none" aria-hidden="true">
     <line x1="0" y1="6" x2="400" y2="6" class="rule" />
     {
-      Array.from({ length: TICKS }, (_, i) => (i * 400) / (TICKS - 1)).map((x) => (
-        <line x1={x} y1="2" x2={x} y2="10" class="tick" />
-      ))
+      terminal ? (
+        <>
+          <line x1="0" y1="0" x2="0" y2="12" class="tick end" />
+          <line x1="400" y1="0" x2="400" y2="12" class="tick end" />
+        </>
+      ) : (
+        Array.from({ length: TICKS }, (_, i) => (i * 400) / (TICKS - 1)).map((x) => (
+          <line x1={x} y1="2" x2={x} y2="10" class="tick" />
+        ))
+      )
     }
   </svg>
 </div>
@@ -30,23 +39,30 @@ const TICKS = 21;
     white-space: nowrap;
   }
 
+  /* min-width: 0, or the SVG keeps its 400-unit intrinsic width in this flex
+     row and pushes the page wider than the viewport on narrow screens. */
   .ticks {
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
     height: 12px;
     display: block;
     overflow: visible;
   }
 
   .rule {
-    stroke: var(--line);
+    stroke: var(--rule);
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
   }
 
   .tick {
-    stroke: var(--line);
+    stroke: var(--rule);
     stroke-width: 1;
-    opacity: 0.55;
+    opacity: 0.6;
     vector-effect: non-scaling-stroke;
+  }
+
+  .tick.end {
+    opacity: 1;
   }
 </style>

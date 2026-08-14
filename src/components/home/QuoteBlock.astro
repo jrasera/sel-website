@@ -1,6 +1,11 @@
+---
+import AxisDivider from '../ui/AxisDivider.astro';
+---
+
 <section class="mission reveal" aria-label="Our approach">
+  <AxisDivider label="Approach" />
   <div class="mission-grid">
-    <div>
+    <div class="mission-copy">
       <h2>Designing for flexibility under deep uncertainty</h2>
       <p>
         With threats stemming from climate change, resource scarcity, and geopolitical
@@ -15,19 +20,20 @@
         decisions of policymakers and business leaders.
       </p>
     </div>
+
     <blockquote class="quote">
       <p>
-        "Our research develops and evaluates new data-driven methods, digital processes, and
+        Our research develops and evaluates new data-driven methods, digital processes, and
         computational algorithms to help designers create the systems of tomorrow, and to
         generate better value for society. Our goal is to develop the tools and techniques for
         future-generation engineers, so they are ready to tackle the challenges of designing
-        complex engineered systems."
+        complex engineered systems.
       </p>
       <footer>
         <span class="initials" aria-hidden="true">MC</span>
-        <span>
-          <strong>Dr Michel-Alexandre Cardin</strong><br />
-          <span class="muted">Director, SEL</span>
+        <span class="attribution">
+          <strong>Dr Michel-Alexandre Cardin</strong>
+          <span class="role">Director, SEL</span>
         </span>
       </footer>
     </blockquote>
@@ -37,18 +43,21 @@
 <style>
   .mission-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-2);
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
     align-items: start;
+    margin-top: var(--space-2);
   }
 
   .mission h2 {
     font-size: var(--step-2);
+    max-width: 18ch;
   }
 
-  .mission p {
-    color: var(--muted);
+  .mission-copy p {
+    color: var(--trace);
     margin-top: 18px;
+    max-width: 58ch;
   }
 
   .mission strong {
@@ -56,52 +65,64 @@
     font-weight: 600;
   }
 
-  .quote {
-    background: linear-gradient(135deg, var(--accent-soft), transparent 75%);
-    border: 1px solid var(--line);
-    border-left: 3px solid var(--accent);
-    border-radius: 16px;
-    padding: 30px;
-  }
-
+  /* No container: the quote is set as a pull-quote against an axis rule, with
+     the attribution hanging off it as a legend key. */
   .quote p {
-    font-family: var(--font-display);
-    font-size: 1.2rem;
-    line-height: 1.5;
+    font-size: var(--step-1);
+    font-weight: 300;
+    line-height: 1.38;
     color: var(--text);
     margin: 0;
+    max-width: 34ch;
+    quotes: '\201C' '\201D';
+  }
+
+  .quote p::before {
+    content: open-quote;
+  }
+
+  .quote p::after {
+    content: close-quote;
   }
 
   .quote footer {
-    margin-top: 20px;
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
     display: flex;
     align-items: center;
     gap: 12px;
   }
 
   .initials {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: var(--accent-soft);
-    border: 1px solid var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: var(--signal);
+    color: var(--on-signal);
     font-family: var(--font-display);
-    font-weight: 700;
-    color: var(--accent);
-    font-size: 0.9rem;
-    flex-shrink: 0;
+    font-variation-settings: var(--vf-label);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    padding: 4px 6px;
   }
 
-  .muted {
-    color: var(--muted);
+  .attribution {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    align-items: baseline;
+    font-size: 0.94rem;
   }
 
-  @media (max-width: 860px) {
+  .attribution strong {
+    font-weight: 600;
+  }
+
+  .role {
+    color: var(--trace);
+  }
+
+  @media (min-width: 54em) {
     .mission-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1.05fr 0.95fr;
     }
   }
 </style>

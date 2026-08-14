@@ -11,26 +11,24 @@ interface Props {
 }
 
 const { tool } = Astro.props;
+const statusNote =
+  tool.state === 'in-development'
+    ? (tool.note ?? 'An interactive tool is in development as part of this research.')
+    : tool.state === 'coming-soon'
+      ? (tool.note ?? 'An interactive tool is planned for this project.')
+      : '';
 ---
 
 {
-  tool.state === 'in-development' && (
+  (tool.state === 'in-development' || tool.state === 'coming-soon') && (
+    /* Status is carried by a marker and a rule, not by a dashed card. */
     <section aria-labelledby="tool-h" class="tool-slot">
       <h2 id="tool-h">Tool</h2>
-      <div class="status-card status-development">
-        <span class="mono-label">In development</span>
-        <p>{tool.note ?? 'An interactive tool is in development as part of this research.'}</p>
-      </div>
-    </section>
-  )
-}
-{
-  tool.state === 'coming-soon' && (
-    <section aria-labelledby="tool-h" class="tool-slot">
-      <h2 id="tool-h">Tool</h2>
-      <div class="status-card status-coming-soon">
-        <span class="mono-label">Coming soon</span>
-        <p>{tool.note ?? 'An interactive tool is planned for this project.'}</p>
+      <div class="status">
+        <span class="label status-label">
+          {tool.state === 'in-development' ? 'In development' : 'Coming soon'}
+        </span>
+        <p>{statusNote}</p>
       </div>
     </section>
   )
@@ -39,8 +37,8 @@ const { tool } = Astro.props;
   tool.state === 'link-out' && (
     <section aria-labelledby="tool-h" class="tool-slot">
       <h2 id="tool-h">Tool</h2>
-      <a href={tool.url} class="link-out-card">
-        {tool.label} <span aria-hidden="true">↗</span>
+      <a href={tool.url} class="btn">
+        {tool.label} <span class="arw" aria-hidden="true">↗</span>
       </a>
     </section>
   )
@@ -61,41 +59,29 @@ const { tool } = Astro.props;
     font-size: var(--step-2);
   }
 
-  .status-card {
+  .status {
     margin-top: 18px;
-    border-radius: 16px;
-    padding: 26px;
-    border: 1px dashed var(--line);
-    background: var(--bg2);
+    padding-left: 18px;
+    border-left: 2px solid var(--signal);
   }
 
-  .status-card p {
-    color: var(--muted);
-    margin: 10px 0 0;
+  .status-label {
+    color: var(--signal);
   }
 
-  .status-coming-soon .mono-label {
-    color: var(--accent);
+  .status p {
+    color: var(--trace);
+    margin: 8px 0 0;
+    max-width: 62ch;
   }
 
-  .link-out-card {
+  .tool-slot .btn {
     margin-top: 18px;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--accent);
-    color: var(--on-accent);
-    padding: 15px 24px;
-    border-radius: 999px;
-    font-weight: 600;
-    text-decoration: none;
-    font-family: var(--font-display);
   }
 
   .embed-frame {
     margin-top: 18px;
-    border: 1px solid var(--line);
-    border-radius: 16px;
+    border: 1px solid var(--rule);
     overflow: hidden;
     aspect-ratio: 16 / 10;
   }

@@ -18,7 +18,7 @@ const href = data.link.kind === 'download' ? data.link.file : data.link.url;
 ---
 
 <li class="entry">
-  <span class="mono-label type">{typeLabels[data.type]}</span>
+  <span class="label type">{typeLabels[data.type]}</span>
   <h3><a href={href}>{data.title}</a></h3>
   <p class="meta">
     {data.authors.join(', ')} · {data.venue ? `${data.venue} · ` : ''}{data.year}
@@ -26,20 +26,23 @@ const href = data.link.kind === 'download' ? data.link.file : data.link.url;
 </li>
 
 <style>
+  /* Hairline-ruled entry, in the same idiom as every other list on the site. */
   .entry {
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 22px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 22px 2px;
+    border-bottom: 1px solid var(--rule);
   }
 
   .type {
-    color: var(--accent);
+    color: var(--signal);
   }
 
   .entry h3 {
-    font-size: 1.05rem;
-    margin: 10px 0 6px;
+    font-size: 1.1rem;
+    font-variation-settings: var(--vf-sub);
+    margin: 0;
   }
 
   .entry h3 a {
@@ -48,12 +51,25 @@ const href = data.link.kind === 'download' ? data.link.file : data.link.url;
   }
 
   .entry h3 a:hover {
-    color: var(--accent);
+    color: var(--signal);
   }
 
   .meta {
-    color: var(--muted);
-    font-size: 0.85rem;
+    color: var(--trace);
+    font-size: 0.92rem;
     margin: 0;
+    max-width: 78ch;
+  }
+
+  @media (min-width: 52em) {
+    .entry {
+      grid-template-columns: 150px 1fr;
+      gap: 8px 24px;
+      align-items: baseline;
+    }
+
+    .type {
+      grid-row: span 2;
+    }
   }
 </style>

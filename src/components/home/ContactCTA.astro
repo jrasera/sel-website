@@ -1,54 +1,43 @@
-<section aria-label="Contact" class="reveal">
-  <div class="cta">
-    <div>
-      <h2>Interested in working with us?</h2>
-      <p>For academic details or collaboration enquiries, get in touch with the lab director.</p>
-    </div>
-    <a href="mailto:m.cardin@imperial.ac.uk" class="btn">
-      Contact the lab <span aria-hidden="true">→</span>
-    </a>
-  </div>
+---
+import AxisDivider from '../ui/AxisDivider.astro';
+---
+
+<section aria-labelledby="contact-h" class="contact reveal">
+  <h2 id="contact-h">Work with us</h2>
+  <AxisDivider terminal />
+  <p class="lede">
+    For academic details or collaboration enquiries, get in touch with the lab director.
+  </p>
+  <a href="mailto:m.cardin@imperial.ac.uk" class="btn-key">m.cardin@imperial.ac.uk</a>
 </section>
 
 <style>
-  .cta {
-    background: linear-gradient(135deg, var(--accent-soft), transparent 70%);
-    border: 1px solid var(--line);
-    border-radius: 20px;
-    padding: 40px;
+  /* The page opens on a decision point and closes on the terminal tick of the
+     same axis — no panel, no gradient. */
+  .contact {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 24px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
   }
 
-  .cta h2 {
-    font-size: var(--step-1);
+  .contact h2 {
+    font-size: var(--step-3);
+    font-variation-settings: var(--vf-hero);
+    letter-spacing: -0.024em;
   }
 
-  .cta p {
-    color: var(--muted);
-    margin: 10px 0 0;
+  .contact :global(.axis-divider) {
+    align-self: stretch;
+  }
+
+  .lede {
+    color: var(--trace);
+    margin: 0;
     max-width: 52ch;
   }
 
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--accent);
-    color: var(--on-accent);
-    padding: 15px 24px;
-    border-radius: 999px;
-    font-weight: 600;
-    text-decoration: none;
-    font-family: var(--font-body);
-    white-space: nowrap;
-    transition: filter 0.2s ease;
-  }
-
-  .btn:hover {
-    filter: brightness(1.08);
+  .contact .btn-key::before {
+    background: var(--signal);
   }
 </style>

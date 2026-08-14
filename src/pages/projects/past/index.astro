@@ -35,36 +35,37 @@ const past = await getCollection('projects', (e) => e.data.status === 'past');
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    gap: 18px;
+    border-top: 1px solid var(--rule);
   }
 
   .entry {
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 26px;
+    padding: 26px 2px;
+    border-bottom: 1px solid var(--rule);
   }
 
   .entry h2 {
-    font-size: 1.3rem;
+    font-size: 1.35rem;
   }
 
   .byline {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--accent);
-    margin: 8px 0 12px;
+    color: var(--signal);
+    font-family: var(--font-display);
+    font-variation-settings: var(--vf-label);
+    font-size: var(--step-label);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin: 10px 0 12px;
   }
 
   .entry p {
-    color: var(--muted);
+    color: var(--trace);
     margin: 0;
+    max-width: 68ch;
   }
 
   .collaborators {
     margin-top: 10px;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
 
   .back-link {
@@ -72,6 +73,6 @@ const past = await getCollection('projects', (e) => e.data.status === 'past');
   }
 
   .back-link a {
-    color: var(--accent);
+    color: var(--signal);
   }
 </style>

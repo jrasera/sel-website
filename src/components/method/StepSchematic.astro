@@ -1,0 +1,254 @@
+---
+/**
+ * One small line-art figure per method step, drawn in the same plot language
+ * as the rest of the site: hairline axes in --rule, the ensemble in --trace,
+ * and exactly one element in --signal carrying the point of the step.
+ *
+ * These exist to compose the detail region rather than pad it — the pass-3
+ * review flagged large empty areas beside the rail at 1440×900.
+ */
+interface Props {
+  kind: string;
+}
+
+const { kind } = Astro.props;
+
+const captions: Record<string, string> = {
+  frame: 'One decision, stated before any modelling starts',
+  uncertainty: 'A range with drivers, not a single forecast',
+  system: 'The decision in its wider context',
+  staged: 'What is committed, and what is held as an option',
+  explore: 'Many futures, compared',
+  flexibility: 'What adaptability is worth',
+  tradeoff: 'The frontier, and the trade-offs along it',
+};
+---
+
+<figure class="schematic">
+  <svg viewBox="0 0 340 150" role="img" aria-label={captions[kind] ?? ''}>
+    {
+      kind === 'frame' && (
+        <g>
+          <line x1="16" y1="112" x2="324" y2="112" class="rule" />
+          <line x1="16" y1="30" x2="16" y2="112" class="rule" />
+          <circle cx="96" cy="82" r="5" class="mass" />
+          <circle cx="168" cy="58" r="5" class="mass" />
+          <circle cx="248" cy="92" r="5" class="mass" />
+          <circle cx="168" cy="58" r="16" class="pick" />
+          <line x1="168" y1="30" x2="168" y2="42" class="pick" />
+          <line x1="168" y1="74" x2="168" y2="86" class="pick" />
+          <line x1="140" y1="58" x2="152" y2="58" class="pick" />
+          <line x1="184" y1="58" x2="196" y2="58" class="pick" />
+          <text x="192" y="34" class="tag sig">OBJECTIVE</text>
+          <text x="16" y="136" class="tag">CANDIDATE DECISIONS</text>
+        </g>
+      )
+    }
+    {
+      kind === 'uncertainty' && (
+        <g>
+          <line x1="16" y1="112" x2="324" y2="112" class="rule" />
+          <path
+            d="M16 112 C 96 112, 104 34, 170 34 C 236 34, 244 112, 324 112 Z"
+            class="band"
+          />
+          <path d="M16 112 C 96 112, 104 34, 170 34 C 236 34, 244 112, 324 112" class="mass" />
+          <line x1="170" y1="34" x2="170" y2="112" class="dash" />
+          <text x="176" y="52" class="tag">POINT FORECAST</text>
+          <line x1="96" y1="112" x2="96" y2="120" class="pick" />
+          <line x1="244" y1="112" x2="244" y2="120" class="pick" />
+          <line x1="96" y1="120" x2="244" y2="120" class="pick" />
+          <text x="96" y="138" class="tag sig">RANGE THAT MATTERS</text>
+        </g>
+      )
+    }
+    {
+      kind === 'system' && (
+        <g>
+          <g class="edge">
+            <line x1="170" y1="72" x2="72" y2="34" />
+            <line x1="170" y1="72" x2="72" y2="112" />
+            <line x1="170" y1="72" x2="268" y2="40" />
+            <line x1="170" y1="72" x2="268" y2="106" />
+            <line x1="72" y1="34" x2="268" y2="40" />
+            <line x1="72" y1="112" x2="268" y2="106" />
+          </g>
+          <circle cx="72" cy="34" r="6" class="mass-fill" />
+          <circle cx="72" cy="112" r="6" class="mass-fill" />
+          <circle cx="268" cy="40" r="6" class="mass-fill" />
+          <circle cx="268" cy="106" r="6" class="mass-fill" />
+          <circle cx="170" cy="72" r="8" class="pick-fill" />
+          <text x="170" y="102" class="tag sig" text-anchor="middle">DESIGN CHOICE</text>
+          <text x="16" y="138" class="tag">OPERATIONS · ECONOMICS · STAKEHOLDERS</text>
+        </g>
+      )
+    }
+    {
+      kind === 'staged' && (
+        <g>
+          <line x1="16" y1="112" x2="324" y2="112" class="rule" />
+          <g class="rule">
+            <line x1="16" y1="108" x2="16" y2="116" />
+            <line x1="93" y1="108" x2="93" y2="116" />
+            <line x1="170" y1="108" x2="170" y2="116" />
+            <line x1="247" y1="108" x2="247" y2="116" />
+            <line x1="324" y1="108" x2="324" y2="116" />
+          </g>
+          <g class="dash">
+            <line x1="93" y1="44" x2="93" y2="108" />
+            <line x1="170" y1="44" x2="170" y2="108" />
+            <line x1="247" y1="44" x2="247" y2="108" />
+          </g>
+          <rect x="16" y="76" width="77" height="14" class="pick-fill" />
+          <rect x="93" y="56" width="77" height="14" class="mass" />
+          <rect x="170" y="56" width="77" height="14" class="mass" />
+          <rect x="247" y="56" width="77" height="14" class="mass" />
+          <text x="93" y="38" class="tag" text-anchor="middle">GATE 1</text>
+          <text x="170" y="38" class="tag" text-anchor="middle">GATE 2</text>
+          <text x="247" y="38" class="tag" text-anchor="middle">GATE 3</text>
+          <text x="16" y="138" class="tag sig">COMMITTED</text>
+          <text x="324" y="138" class="tag" text-anchor="end">HELD AS OPTIONS</text>
+        </g>
+      )
+    }
+    {
+      kind === 'explore' && (
+        <g>
+          <line x1="16" y1="112" x2="324" y2="112" class="rule" />
+          <g class="mass">
+            <path d="M28 84 C 120 84, 200 66, 320 28" />
+            <path d="M28 84 C 120 88, 200 78, 320 52" />
+            <path d="M28 84 C 120 92, 200 92, 320 74" />
+            <path d="M28 84 C 120 96, 200 104, 320 96" />
+            <path d="M28 84 C 120 80, 200 56, 320 40" />
+          </g>
+          <path d="M28 84 C 120 86, 200 70, 320 34" class="pick" />
+          <circle cx="28" cy="84" r="4" class="text-fill" />
+          <text x="16" y="138" class="tag">ONE STARTING POINT · MANY FUTURES</text>
+        </g>
+      )
+    }
+    {
+      kind === 'flexibility' && (
+        <g>
+          <line x1="16" y1="112" x2="324" y2="112" class="rule" />
+          <rect x="60" y="70" width="56" height="42" class="mass" />
+          <rect x="180" y="40" width="56" height="72" class="pick-fill" />
+          <line x1="116" y1="40" x2="180" y2="40" class="dash" />
+          <line x1="140" y1="40" x2="140" y2="70" class="pick" />
+          <line x1="134" y1="46" x2="140" y2="40" class="pick" />
+          <line x1="146" y1="46" x2="140" y2="40" class="pick" />
+          <text x="152" y="60" class="tag sig">VALUE OF</text>
+          <text x="152" y="72" class="tag sig">FLEXIBILITY</text>
+          <text x="60" y="132" class="tag">FIXED</text>
+          <text x="180" y="132" class="tag">FLEXIBLE</text>
+        </g>
+      )
+    }
+    {
+      kind === 'tradeoff' && (
+        <g>
+          <line x1="16" y1="112" x2="324" y2="112" class="rule" />
+          <line x1="16" y1="24" x2="16" y2="112" class="rule" />
+          <g class="mass-fill">
+            <circle cx="88" cy="86" r="3.5" />
+            <circle cx="126" cy="94" r="3.5" />
+            <circle cx="150" cy="72" r="3.5" />
+            <circle cx="196" cy="88" r="3.5" />
+            <circle cx="214" cy="66" r="3.5" />
+            <circle cx="252" cy="80" r="3.5" />
+            <circle cx="286" cy="94" r="3.5" />
+          </g>
+          <path d="M60 100 C 130 86, 190 56, 300 40" class="pick" />
+          <g class="pick-fill">
+            <circle cx="76" cy="96" r="4.5" />
+            <circle cx="160" cy="70" r="4.5" />
+            <circle cx="248" cy="48" r="4.5" />
+          </g>
+          <text x="16" y="138" class="tag">RISK</text>
+          <text x="324" y="138" class="tag sig" text-anchor="end">FRONTIER</text>
+        </g>
+      )
+    }
+  </svg>
+  <figcaption class="label">{captions[kind] ?? ''}</figcaption>
+</figure>
+
+<style>
+  .schematic {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  svg {
+    width: 100%;
+    max-width: 520px;
+    height: auto;
+  }
+
+  .rule,
+  .dash,
+  .mass,
+  .pick,
+  .edge {
+    fill: none;
+  }
+
+  .rule,
+  .edge {
+    stroke: var(--rule);
+    stroke-width: 1;
+  }
+
+  .dash {
+    stroke: var(--rule);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+  }
+
+  .mass {
+    stroke: var(--trace);
+    stroke-width: 1;
+  }
+
+  .mass-fill {
+    fill: var(--trace);
+  }
+
+  .band {
+    fill: var(--trace);
+    opacity: 0.13;
+    stroke: none;
+  }
+
+  .pick {
+    stroke: var(--signal);
+    stroke-width: 1.6;
+  }
+
+  .pick-fill {
+    fill: var(--signal);
+  }
+
+  .text-fill {
+    fill: var(--text);
+  }
+
+  .tag {
+    fill: var(--trace);
+    font-family: var(--font-display);
+    font-variation-settings: var(--vf-label);
+    font-size: 9px;
+    letter-spacing: 1.3px;
+  }
+
+  .tag.sig {
+    fill: var(--signal);
+  }
+
+  figcaption {
+    color: var(--trace);
+  }
+</style>

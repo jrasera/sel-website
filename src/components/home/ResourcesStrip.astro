@@ -7,15 +7,15 @@ const resources = [
 ];
 ---
 
-<section aria-labelledby="resources-h" class="surface-warm reveal">
+<section aria-labelledby="resources-h" class="paper reveal">
   <div class="inner">
-    <span class="mono-label eyebrow">Find your way in</span>
+    <span class="label eyebrow">Find your way in</span>
     <h2 id="resources-h">Resources</h2>
     <div class="rows">
       {
         resources.map((r, i) => (
           <a href={r.href} class="row">
-            <span class="row-n mono-label">{String(i + 1).padStart(2, '0')}</span>
+            <span class="label row-n">{String(i + 1).padStart(2, '0')}</span>
             <span class="row-body">
               <h3>{r.title}</h3>
               <p>{r.description}</p>
@@ -29,23 +29,25 @@ const resources = [
 </section>
 
 <style>
+  /* Shares the paper band with the partner strip directly above it: the two
+     sections are one continuous light interruption, not two. */
   .inner {
-    padding: var(--space-4) var(--space-1);
+    padding: var(--space-2) var(--space-1) var(--space-4);
   }
 
   .eyebrow {
-    color: var(--surface-warm-muted);
+    color: var(--paper-trace);
   }
 
   h2 {
-    color: var(--surface-warm-text);
+    color: var(--paper-ink);
     font-size: var(--step-3);
     margin-top: 14px;
   }
 
   .rows {
-    margin-top: var(--space-3);
-    border-top: 1px solid rgba(23, 20, 15, 0.14);
+    margin-top: var(--space-2);
+    border-top: 1px solid var(--paper-rule);
   }
 
   .row {
@@ -55,7 +57,7 @@ const resources = [
     gap: var(--space-2);
     padding: 24px 4px;
     text-decoration: none;
-    border-bottom: 1px solid rgba(23, 20, 15, 0.14);
+    border-bottom: 1px solid var(--paper-rule);
     transition: gap 0.2s ease;
   }
 
@@ -64,28 +66,25 @@ const resources = [
     gap: calc(var(--space-2) + 6px);
   }
 
-  .row:focus-visible {
-    outline: 2px solid var(--surface-warm-text);
-    outline-offset: -2px;
-  }
-
   .row-n {
-    color: var(--surface-warm-muted);
+    color: var(--paper-trace);
   }
 
   .row-body h3 {
-    color: var(--surface-warm-text);
-    font-size: 1.2rem;
+    color: var(--paper-ink);
+    font-size: 1.25rem;
+    font-variation-settings: var(--vf-sub);
   }
 
   .row-body p {
-    color: var(--surface-warm-muted);
-    font-size: 0.92rem;
+    color: var(--paper-trace);
+    font-size: 0.95rem;
     margin: 6px 0 0;
+    max-width: 62ch;
   }
 
   .arrow {
-    color: var(--surface-warm-text);
+    color: var(--paper-ink);
     font-size: 1.1rem;
   }
 

@@ -11,50 +11,57 @@ interface Props {
 
 const { stages, outputs } = Astro.props;
 
+/* Drawn as plot furniture: the stages are divisions on one axis, and the
+   outputs are where that axis resolves — the same "paths terminating on a
+   right-hand margin" idea as the hero figure, at diagram scale. */
 const W = 900;
-const STAGE_Y = 96;
-const STAGE_R = 30;
-const startX = 64;
-const endX = 620;
-const stageX = stages.map((_, i) => startX + ((endX - startX) / (stages.length - 1)) * i);
+const H = 210;
+const AXIS_Y = 120;
+const startX = 40;
+const endX = 560;
+const stageX = stages.map((_, i) => startX + ((endX - startX) / Math.max(1, stages.length - 1)) * i);
+const branchX = 700;
 
-const outX = 820;
 const outputYs = outputs.map((_, i) => {
-  const span = 44 * (outputs.length - 1);
-  return STAGE_Y - span / 2 + i * 44;
+  const span = 40 * (outputs.length - 1);
+  return AXIS_Y - span / 2 + i * 40;
 });
 ---
 
 <figure class="value-chain" aria-hidden="true">
-  <svg viewBox={`0 0 ${W} 200`} preserveAspectRatio="xMidYMid meet">
-    {stageX.slice(0, -1).map((x, i) => (
-      <line class="stage-link" x1={x + STAGE_R} y1={STAGE_Y} x2={stageX[i + 1] - STAGE_R} y2={STAGE_Y} marker-end="url(#arrow)" />
-    ))}
+  <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+    <line class="axis" x1={startX} y1={AXIS_Y} x2={endX} y2={AXIS_Y} />
 
-    {outputYs.map((y) => (
-      <line class="branch-link" x1={stageX[stageX.length - 1] + STAGE_R} y1={STAGE_Y} x2={outX - 46} y2={y} marker-end="url(#arrow)" />
-    ))}
+    {
+      stageX.map((x, i) => (
+        <g>
+          <line class="tick" x1={x} y1={AXIS_Y - 7} x2={x} y2={AXIS_Y + 7} />
+          <text class="stage-n" x={x} y={AXIS_Y - 18}>
+            {stages[i].n}
+          </text>
+          <text class="stage-label" x={x} y={AXIS_Y + 30}>
+            {stages[i].label}
+          </text>
+        </g>
+      ))
+    }
 
-    {stageX.map((x, i) => (
-      <g>
-        <circle class="stage-node" cx={x} cy={STAGE_Y} r={STAGE_R} />
-        <text class="stage-n" x={x} y={STAGE_Y}>{stages[i].n}</text>
-        <text class="stage-label" x={x} y={STAGE_Y + STAGE_R + 22}>{stages[i].label}</text>
-      </g>
-    ))}
+    {
+      outputYs.map((y) => (
+        <path class="branch" d={`M ${endX} ${AXIS_Y} C ${endX + 70} ${AXIS_Y}, ${branchX - 70} ${y}, ${branchX} ${y}`} />
+      ))
+    }
 
-    {outputYs.map((y, i) => (
-      <g>
-        <rect class="output-pill" x={outX - 44} y={y - 16} width={W - (outX - 44) - 16} height="32" rx="16" />
-        <text class="output-label" x={outX - 44 + (W - (outX - 44) - 16) / 2} y={y}>{outputs[i]}</text>
-      </g>
-    ))}
-
-    <defs>
-      <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-        <path d="M0,0 L8,4 L0,8 Z" class="arrow-head" />
-      </marker>
-    </defs>
+    {
+      outputYs.map((y, i) => (
+        <g>
+          <rect class="out-marker" x={branchX} y={y - 4} width="8" height="8" />
+          <text class="out-label" x={branchX + 18} y={y}>
+            {outputs[i]}
+          </text>
+        </g>
+      ))
+    }
   </svg>
 </figure>
 
@@ -69,53 +76,45 @@ const outputYs = outputs.map((_, i) => {
     display: block;
   }
 
-  .stage-link,
-  .branch-link {
-    stroke: var(--line);
-    stroke-width: 2;
-  }
-
-  .branch-link {
-    stroke-dasharray: 3 4;
-  }
-
-  .arrow-head {
-    fill: var(--line);
-  }
-
-  .stage-node {
-    fill: var(--bg2);
-    stroke: var(--accent);
-    stroke-width: 2;
-  }
-
-  .stage-n {
-    fill: var(--accent);
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 20px;
-    text-anchor: middle;
-    dominant-baseline: central;
-  }
-
-  .stage-label {
-    fill: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    text-anchor: middle;
-  }
-
-  .output-pill {
-    fill: var(--accent-soft);
-    stroke: var(--accent);
+  .axis,
+  .tick {
+    stroke: var(--rule);
     stroke-width: 1.5;
   }
 
-  .output-label {
-    fill: var(--text);
-    font-family: var(--font-mono);
+  .branch {
+    fill: none;
+    stroke: var(--trace);
+    stroke-width: 1;
+    opacity: 0.55;
+  }
+
+  .out-marker {
+    fill: var(--signal);
+  }
+
+  .stage-n {
+    fill: var(--signal);
+    font-family: var(--font-display);
+    font-variation-settings: var(--vf-label);
     font-size: 12px;
+    letter-spacing: 1.4px;
     text-anchor: middle;
+  }
+
+  .stage-label {
+    fill: var(--trace);
+    font-family: var(--font-display);
+    font-variation-settings: 'wdth' 88, 'wght' 560;
+    font-size: 13px;
+    text-anchor: middle;
+  }
+
+  .out-label {
+    fill: var(--text);
+    font-family: var(--font-display);
+    font-variation-settings: 'wdth' 88, 'wght' 560;
+    font-size: 13px;
     dominant-baseline: central;
   }
 </style>

@@ -1,49 +1,83 @@
+/* Pass 3 design system. Every value here is derived from how the lab draws an
+   ensemble on screen, and was measured (OKLCH + WCAG contrast) against the
+   surfaces it sits on before being adopted — see sel-website-redesign-pass3-plan.md
+   for the per-value justification and the default-cluster rejection table.
+   Nothing is carried forward from the pre-pass-3 palette. */
 :root {
-  /* Carried forward from the draft's confirmed palette (mission-instrument dark navy). */
-  --bg: #05070d;
-  --bg2: #0b0e18;
-  --bg3: #121728;
-  --line: #232a3d;
-  --text: #e9edf7;
-  --muted: #9aa4bd;
-  --accent: #4cc4ff;
-  --accent-soft: rgba(76, 196, 255, 0.14);
-  --on-accent: #03121c;
+  /* --- the plot field ------------------------------------------------- */
+  /* Deep indigo ink rather than near-black: a trace at low alpha still has to
+     separate from it. L* 21.5, chroma 0.050. */
+  --field: #121730;
+  /* One lifted plane, +5 L*. The smallest step that reads as a surface change
+     without becoming a card. */
+  --lift: #1b2242;
+  /* Interactive hover surface, one step above the lift. */
+  --lift-hi: #242c56;
+  /* Axes, gridlines, ticks. 1.66:1 on the field — furniture never competes
+     with a trace. */
+  --rule: #333c66;
+  /* The same furniture tone raised until it is legible as text: used for the
+     large plot-annotation numerals, where --rule would sit at 1.66:1. 3.44:1
+     on the field, which clears AA for large text. */
+  --rule-text: #5d6ba3;
 
-  /* Second series colour: where a plot needs two distinguishable traces
-     (baseline vs. divergent scenario), this is the second one — the
-     "range" beyond a single accent on near-black. */
-  --accent-warm: #f2975a;
-  --accent-warm-soft: rgba(242, 151, 90, 0.14);
-  --on-accent-warm: #1c0f04;
+  /* --- ink -------------------------------------------------------------- */
+  --text: #eaedf8; /* 15.09:1 on field */
+  /* The ensemble mass, and secondary text. Field hue, so unemphasised futures
+     recede into the plot. 7.24:1 on field, 6.37:1 on lift. */
+  --trace: #9ba5c9;
 
-  /* Warm off-white secondary surface, for breaking up dark-on-dark on long pages. */
-  --surface-warm: #f4f1ea;
-  --surface-warm-text: #17140f;
-  --surface-warm-muted: #5c574c;
+  /* --- the two series --------------------------------------------------- */
+  /* The emphasised path: flexible design, active step, primary action.
+     5.43:1 on field, 4.77:1 on lift — the tightest pair in the system. */
+  --signal: #f1568e;
+  --signal-soft: rgba(241, 86, 142, 0.13);
+  --on-signal: #121730; /* 5.43:1 on signal */
+  /* The comparison case. 77° from signal in OKLCH, so the two read as
+     different series rather than two shades of emphasis. 9.49:1. */
+  --series-2: #efb44b;
+  --series-2-soft: rgba(239, 180, 75, 0.13);
 
-  /* Display: Fraunces, restrained (SOFT/WONK pinned off), variable
-     optical-size + weight — real character at large scale. */
-  --font-display: 'Fraunces', ui-serif, Georgia, serif;
-  /* Body: Public Sans, a humanist sans that holds up at long paragraph
-     lengths on a dark field. */
-  --font-body: 'Public Sans', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+  /* --- paper ------------------------------------------------------------ */
+  /* Cool plotting-paper white, 171° of hue from the cream default. Printed
+     figures come on white stock. */
+  --paper: #edeff2;
+  --paper-ink: #131727; /* 15.45:1 */
+  --paper-trace: #565e7a; /* 5.56:1 */
+  --paper-signal: #b3234f; /* 5.57:1 */
+  --paper-rule: rgba(19, 23, 39, 0.18);
 
-  /* Fluid type scale — genuine range: instrument-label small end,
-     editorial-headline large end, not a compressed middle band. */
-  --step-caption: clamp(0.7rem, 0.68rem + 0.1vw, 0.75rem);
-  --step-0: clamp(1rem, 0.95rem + 0.3vw, 1.15rem);
-  --step-1: clamp(1.3rem, 1.15rem + 0.7vw, 1.6rem);
-  --step-2: clamp(1.9rem, 1.6rem + 1.4vw, 2.6rem);
-  --step-3: clamp(2.75rem, 2.2rem + 2.6vw, 4rem);
-  --step-4: clamp(4rem, 2.8rem + 5.5vw, 7.5rem);
+  /* --- type ------------------------------------------------------------- */
+  /* One variable family works both ends of its width axis: expanded for
+     display (title-block lettering), condensed for labels and axis text
+     (drawing-dimension lettering). */
+  --font-display: 'Archivo', system-ui, sans-serif;
+  /* A low-contrast screen serif with stems sturdy enough to hold up reversed
+     out of a dark field, carrying the journal register in the place that
+     register belongs. */
+  --font-body: 'Newsreader', Georgia, serif;
 
-  --space-1: clamp(0.75rem, 0.7rem + 0.25vw, 1rem);
+  --vf-hero: 'wdth' 110, 'wght' 680;
+  --vf-display: 'wdth' 112, 'wght' 620;
+  --vf-sub: 'wdth' 106, 'wght' 600;
+  --vf-ui: 'wdth' 100, 'wght' 600;
+  --vf-label: 'wdth' 75, 'wght' 600;
+
+  --step-label: clamp(0.72rem, 0.7rem + 0.08vw, 0.78rem);
+  --step-0: clamp(1.04rem, 1rem + 0.18vw, 1.14rem);
+  --step-1: clamp(1.3rem, 1.05rem + 0.95vw, 1.78rem);
+  --step-2: clamp(1.95rem, 1.4rem + 1.9vw, 2.9rem);
+  --step-3: clamp(2.4rem, 1.8rem + 2.4vw, 3.9rem);
+  --step-4: clamp(2.8rem, 1.9rem + 3.6vw, 4.7rem);
+
+  --space-1: clamp(0.75rem, 0.7rem + 0.25vw, 1.25rem);
   --space-2: clamp(1.5rem, 1.3rem + 1vw, 2.25rem);
-  --space-3: clamp(3rem, 2.4rem + 3vw, 5rem);
-  --space-4: clamp(5rem, 3.8rem + 6vw, 9rem);
+  --space-3: clamp(2.75rem, 2.2rem + 2.6vw, 4.5rem);
+  --space-4: clamp(4.5rem, 3.4rem + 5vw, 7.5rem);
 
-  --radius: 12px;
+  /* Used only on interactive controls. Plot furniture is 0. */
+  --radius: 3px;
   --max-width: 1240px;
+  /* Measured from the rebuilt single-row header, not guessed. */
+  --header-h: 66px;
 }

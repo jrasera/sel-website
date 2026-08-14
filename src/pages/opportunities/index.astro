@@ -8,7 +8,7 @@ import ListLayout from '../../layouts/ListLayout.astro';
   heading="Opportunities"
   intro="SEL is looking for excellent candidates to pursue PhD studies focusing on the theme of Resilient and Sustainable Infrastructure Systems Design and Analysis at the Dyson School of Design Engineering."
 >
-  <section aria-labelledby="phd-h" class="card">
+  <section aria-labelledby="phd-h" class="block">
     <h2 id="phd-h">PhD study at SEL</h2>
     <p>
       We welcome enquiries from prospective PhD and MSc students interested in the design,
@@ -19,13 +19,13 @@ import ListLayout from '../../layouts/ListLayout.astro';
       For academic details, project ideas, or funding routes, get in touch with the lab director.
     </p>
     <a href="mailto:m.cardin@imperial.ac.uk" class="btn">
-      Contact the director <span aria-hidden="true">→</span>
+      Contact the director <span class="arw" aria-hidden="true">→</span>
     </a>
   </section>
 
-  <section aria-labelledby="current-h" class="card card-dashed">
+  <section aria-labelledby="current-h" class="block block-quiet">
     <h2 id="current-h">Current funded positions</h2>
-    <p class="mono-label placeholder-note">
+    <p class="placeholder-note">
       No funded positions are open at this time. Specific, time-bound postings will be listed
       here — with their own deadline and project detail — when available.
     </p>
@@ -33,49 +33,33 @@ import ListLayout from '../../layouts/ListLayout.astro';
 </ListLayout>
 
 <style>
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 34px;
-    margin-bottom: var(--space-2);
+  /* Sections divided by rules and a hanging marker, not stacked panels. */
+  .block {
     max-width: 66ch;
+    padding: var(--space-2) 0;
+    border-top: 1px solid var(--rule);
   }
 
-  .card h2 {
+  .block h2 {
     font-size: var(--step-1);
   }
 
-  .card p {
-    color: var(--muted);
+  .block p {
+    color: var(--trace);
     margin-top: 14px;
   }
 
-  .card p:first-of-type {
-    margin-top: 20px;
+  .block p:first-of-type {
+    margin-top: 18px;
   }
 
-  .btn {
+  .block .btn {
     margin-top: 24px;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--accent);
-    color: var(--on-accent);
-    padding: 14px 22px;
-    border-radius: 999px;
-    font-weight: 600;
-    text-decoration: none;
-    font-family: var(--font-display);
   }
 
-  .card-dashed {
-    border-style: dashed;
-    background: transparent;
-  }
-
-  .placeholder-note {
-    color: var(--muted);
-    margin-top: 14px !important;
+  .block-quiet .placeholder-note {
+    color: var(--trace);
+    padding-left: 18px;
+    border-left: 1px solid var(--rule);
   }
 </style>

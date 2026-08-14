@@ -13,54 +13,47 @@ const linkProps = data.url
   : {};
 ---
 
-<Tag class="partner-tile" {...linkProps}>
+<Tag class="partner-logo" {...linkProps}>
   {
     data.logo ? (
-      <img src={data.logo} alt={data.name} />
+      /* A definite size, and no lazy loading: an unsized lazy image in a flex
+         row can collapse to 0×0 and never get scheduled to load at all. */
+      <img src={data.logo} alt={data.name} width="150" height="46" />
     ) : (
-      <span class="mono-label placeholder-label">{data.name}</span>
+      <span class="label placeholder-label">{data.name}</span>
     )
   }
 </Tag>
 
 <style>
-  .partner-tile {
+  /* No tile. The logos sit directly on the paper band, separated by the
+     hairlines their container draws. */
+  .partner-logo {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 168px;
-    height: 88px;
-    padding: 18px 22px;
-    background: #ffffff;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
+    height: 46px;
     text-decoration: none;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
   }
 
-  .partner-tile:hover,
-  .partner-tile:focus-visible {
-    transform: translateY(-3px);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35), 0 0 20px var(--accent-soft);
-  }
-
-  .partner-tile img {
-    width: 100%;
+  .partner-logo img {
+    width: auto;
     height: 100%;
+    max-width: min(150px, 100%);
     object-fit: contain;
     filter: grayscale(1);
-    opacity: 0.75;
-    transition: filter 0.25s ease, opacity 0.25s ease;
+    opacity: 0.72;
+    transition: filter 0.2s ease, opacity 0.2s ease;
   }
 
-  .partner-tile:hover img,
-  .partner-tile:focus-visible img {
+  .partner-logo:hover img,
+  .partner-logo:focus-visible img {
     filter: none;
     opacity: 1;
   }
 
   .placeholder-label {
-    color: var(--surface-warm-muted);
+    color: var(--paper-trace);
     text-align: center;
   }
 </style>

@@ -6,30 +6,25 @@
 
 html {
   scroll-behavior: smooth;
-  /* Keeps content that scrolls to the top of the page (e.g. the home
-     methodology diagram, or a future in-page anchor) from landing underneath
-     the sticky header. Measured via headless browser across breakpoints: the
-     header wraps to 3 lines (~195px) below ~768px, 2 lines (~120px) from
-     768px up to roughly 1200px, and a single row (~70px) beyond that. Two
-     tiers, each with a small buffer, avoid an oversized gap on desktop
-     while still comfortably clearing the tallest mobile header. */
-  scroll-padding-top: 220px;
-}
-
-@media (min-width: 48em) {
-  html {
-    scroll-padding-top: 150px;
-  }
+  /* The header is a single row at every width in pass 3 (it collapses to a
+     disclosure below 64em rather than wrapping to three lines), so this is one
+     honest value measured from the rendered header plus a small buffer,
+     instead of the two guessed tiers the wrapping header needed. */
+  scroll-padding-top: calc(var(--header-h) + 24px);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--bg);
+  /* Full-bleed bands reach the viewport edge with a negative inline margin;
+     clip stops sub-pixel rounding on that from producing a sideways scroll. */
+  overflow-x: clip;
+  background: var(--field);
   color: var(--text);
   font-family: var(--font-body);
   font-size: var(--step-0);
-  line-height: 1.6;
+  font-weight: 440;
+  line-height: 1.62;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -45,12 +40,11 @@ h2,
 h3,
 h4 {
   font-family: var(--font-display);
-  font-optical-sizing: auto;
-  font-weight: 600;
-  line-height: 1.12;
+  font-variation-settings: var(--vf-display);
   margin: 0;
+  line-height: 1.06;
   text-wrap: balance;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.018em;
 }
 
 p {
@@ -65,19 +59,105 @@ blockquote {
   margin: 0;
 }
 
-.mono-label {
-  font-family: var(--font-mono);
-  font-size: var(--step-caption);
-  letter-spacing: 0.13em;
+/* Drawing-dimension lettering: narrow, uppercase, letterspaced. Carries axis
+   labels, eyebrows, captions, metadata and step numbers — the roles a
+   monospace was doing before pass 3. */
+.label {
+  font-family: var(--font-display);
+  font-variation-settings: var(--vf-label);
+  font-size: var(--step-label);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  color: var(--trace);
 }
 
-/* Real focus-visible states, replacing the draft's non-functional style-focus placeholder. */
+/* Primary action: a solid marker block, not a pill. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--signal);
+  color: var(--on-signal);
+  font-family: var(--font-display);
+  font-variation-settings: var(--vf-ui);
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn .arw {
+  transition: transform 0.18s ease;
+}
+
+.btn:hover .arw {
+  transform: translateX(3px);
+}
+
+/* Secondary action: a legend key — swatch, label, baseline rule. */
+.btn-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-variation-settings: var(--vf-ui);
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: border-color 0.18s ease;
+}
+
+.btn-key::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  flex: none;
+  background: var(--trace);
+  transition: background 0.18s ease;
+}
+
+.btn-key:hover {
+  border-bottom-color: var(--signal);
+}
+
+.btn-key:hover::before {
+  background: var(--signal);
+}
+
+/* Inline text link. */
+.link {
+  color: var(--signal);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.14em;
+}
+
 :focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Components are written for the dark field; inside a paper band they take
+   the light-surface ink automatically rather than each one restating it.
+   (Missing this put --trace label text at 2.12:1 on the partner band.) */
+.paper .label {
+  color: var(--paper-trace);
+}
+
+.paper .link {
+  color: var(--paper-signal);
+}
+
+/* On paper the dark outline is the legible one; on the signal block a white
+   ring is the only ring that survives. Both inherit the same 2px/3px shape. */
+.paper :focus-visible {
+  outline-color: var(--paper-ink);
 }
 
 .visually-hidden {
