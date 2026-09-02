@@ -14,6 +14,7 @@ const people = defineCollection({
       photoAlt: z.string().optional(),
       bio: z.string().optional(),
       email: z.email().optional(),
+      links: z.array(z.object({ label: z.string(), url: z.url() })).optional(),
       projectSlugs: z.array(z.string()).optional(),
       order: z.number().optional(),
     })
@@ -42,7 +43,23 @@ const toolSchema = z
     z.object({ state: z.literal('none') }),
     z.object({ state: z.literal('in-development'), note: z.string().optional() }),
     z.object({ state: z.literal('coming-soon'), note: z.string().optional() }),
-    z.object({ state: z.literal('embed'), embedUrl: z.url(), title: z.string() }),
+    // `embed` carries a list so a project can host more than one model.
+    z.object({
+      state: z.literal('embed'),
+      intro: z.string().optional(),
+      items: z
+        .array(
+          z.object({
+            title: z.string(),
+            // Site-relative path (models are hosted from /tools/) or absolute URL.
+            embedUrl: z.string(),
+            description: z.string().optional(),
+            // Canonical upstream copy, when the model is mirrored here.
+            sourceUrl: z.url().optional(),
+          })
+        )
+        .min(1),
+    }),
     z.object({ state: z.literal('link-out'), url: z.url(), label: z.string() }),
   ])
   .default({ state: 'none' });

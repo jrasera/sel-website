@@ -1,0 +1,1896 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>RECAP · Mozcon Power — Rounds 1 &amp; 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --panel:rgba(8,24,31,.87); --panel-2:rgba(11,31,40,.94); --line:rgba(190,230,215,.13);
+  --ink:#eaf6f0; --muted:#93aca4; --faint:#5f7a72;
+  --solar:#ffc65c; --wind:#8fd8ff; --profit:#47d98a; --loss:#ff6b5e; --warn:#ffb35c;
+  --shadow:0 18px 50px rgba(2,10,14,.55);
+  --disp:"Bricolage Grotesque",system-ui,sans-serif;
+  --body:"Instrument Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;font-family:var(--body);color:var(--ink);background:#0a1a22;overflow:hidden;font-size:14px}
+button{font:inherit;color:inherit;cursor:pointer}
+#scene{position:fixed;inset:0}
+#scene canvas{display:block}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0;transition:opacity .5s;
+  background:radial-gradient(ellipse at center,transparent 42%,rgba(160,20,10,.55) 100%)}
+#vignette.on{opacity:1}
+
+/* ---------- HUD ---------- */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:20;display:flex;flex-direction:column}
+#hud > *{pointer-events:none}
+.panel,#topbar,#bottomBar button,#toast,#banner,#weatherChip{pointer-events:auto}
+#topbar{display:flex;align-items:center;gap:14px;margin:14px 16px 0;padding:10px 16px;border-radius:16px;
+  background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(14px);box-shadow:var(--shadow)}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand b{font-family:var(--disp);font-weight:800;font-size:19px;letter-spacing:-.02em}
+.brand span{color:var(--muted);font-size:12px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;font-size:12.5px;
+  border:1px solid var(--line);background:rgba(255,255,255,.045);white-space:nowrap}
+.chip b{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
+.chip .dot{width:8px;height:8px;border-radius:50%}
+#roundChip{background:rgba(143,216,255,.09);border-color:rgba(143,216,255,.3)}
+.contract{margin-left:auto;display:flex;gap:8px}
+.contract .chip.sell b{color:var(--profit)} .contract .chip.pen b{color:var(--loss)}
+#resetBtn,#muteBtn{border:1px solid var(--line);background:rgba(255,255,255,.05);border-radius:10px;padding:7px 12px;color:var(--muted)}
+#resetBtn:hover,#muteBtn:hover{color:var(--ink)}
+
+#midRow{flex:1;display:flex;justify-content:space-between;align-items:flex-start;padding:14px 16px;gap:14px;min-height:0}
+.panel{width:262px;max-height:100%;overflow:auto;background:var(--panel);border:1px solid var(--line);
+  border-radius:18px;padding:15px;backdrop-filter:blur(14px);box-shadow:var(--shadow)}
+.panel h2{font-family:var(--disp);font-weight:700;font-size:13px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 11px}
+.panel .sep{height:1px;background:var(--line);margin:13px 0}
+
+.tech{width:100%;display:flex;gap:11px;align-items:center;text-align:left;padding:11px;margin-bottom:9px;
+  border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.035);transition:.15s}
+.tech:hover{background:rgba(255,255,255,.07)}
+.tech.sel{border-color:currentColor;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px currentColor}
+.tech.solar{color:var(--solar)} .tech.wind{color:var(--wind)}
+.tech .ic{width:38px;height:38px;flex:0 0 38px;border-radius:10px;display:grid;place-items:center;font-size:20px;
+  background:rgba(255,255,255,.07);border:1px solid var(--line)}
+.tech b{display:block;color:var(--ink);font-size:13.5px}
+.tech small{display:block;color:var(--muted);font-family:var(--mono);font-size:10.5px;margin-top:2px;line-height:1.45}
+.krow{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:12.5px}
+.krow span{color:var(--muted)} .krow b{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
+.good{color:var(--profit)} .bad{color:var(--loss)} .warnc{color:var(--warn)}
+.btn{width:100%;border:0;border-radius:12px;padding:11px 13px;font-weight:600;margin-top:9px;
+  background:rgba(255,255,255,.07);border:1px solid var(--line);transition:.15s}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn.primary{background:linear-gradient(180deg,#33b46f,#1d7a49);border-color:rgba(120,255,190,.35);
+  box-shadow:0 8px 22px rgba(35,150,90,.35);font-family:var(--disp);font-weight:700;font-size:15px}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.primary:disabled{background:#31473d;box-shadow:none;color:var(--faint);cursor:not-allowed;border-color:var(--line)}
+.btn.lab{background:rgba(143,216,255,.1);border-color:rgba(143,216,255,.35)}
+.btn.lab.locked{color:var(--faint)}
+#orderChip{display:none;margin-top:9px;padding:8px 10px;border-radius:10px;font-size:12px;
+  background:rgba(255,198,92,.1);border:1px solid rgba(255,198,92,.35)}
+.lesson{margin-top:11px;padding:10px 11px;border-radius:12px;background:rgba(255,255,255,.04);
+  border:1px dashed var(--line);color:var(--muted);font-size:12px;line-height:1.5}
+
+#chart{width:100%;height:148px;border-radius:12px;background:rgba(0,0,0,.22);border:1px solid var(--line)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:7px;font-size:10.5px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+#log{max-height:220px;overflow:auto;font-size:12px;line-height:1.5;color:var(--muted)}
+.log-e{padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--line);margin-bottom:8px}
+.log-e b{display:block;color:var(--ink);margin-bottom:2px;font-size:11.5px}
+.log-e.warn{border-color:rgba(255,107,94,.4)} .log-e.ok{border-color:rgba(71,217,138,.35)}
+
+#bottomBar{display:flex;justify-content:center;align-items:flex-end;gap:12px;padding:0 16px 18px}
+#hintChip{position:fixed;left:16px;bottom:18px;font-size:11.5px;color:var(--muted);background:var(--panel);
+  border:1px solid var(--line);border-radius:999px;padding:7px 13px;backdrop-filter:blur(10px)}
+#playBtn{min-width:300px;border:0;border-radius:16px;padding:15px 26px;font-family:var(--disp);font-weight:800;
+  font-size:17px;letter-spacing:.01em;background:linear-gradient(180deg,#38bd76,#1e7d4b);color:#fff;
+  box-shadow:0 14px 34px rgba(30,140,85,.45),inset 0 -3px 0 rgba(0,0,0,.25);transition:.15s}
+#playBtn:hover{transform:translateY(-1px);filter:brightness(1.06)}
+#playBtn:disabled{background:#2c4038;color:var(--faint);box-shadow:none;transform:none;cursor:not-allowed}
+#speedBtn{border:1px solid var(--line);background:rgba(255,255,255,.06);border-radius:12px;padding:12px 16px;
+  font-family:var(--mono);font-weight:600;color:var(--muted)}
+#speedBtn:hover{color:var(--ink)}
+#gridBar{height:8px;border-radius:99px;background:rgba(255,107,94,.3);overflow:hidden;margin:5px 0 3px}
+#gridFill{display:block;height:100%;width:100%;background:linear-gradient(90deg,#2e8f5b,#47d98a);border-radius:99px;transition:width .25s}
+#gridBar.bad #gridFill{background:linear-gradient(90deg,#c2452f,#ff6b5e)}
+#gridBar.bad{animation:gpulse 1s infinite}
+@keyframes gpulse{50%{box-shadow:0 0 0 3px rgba(255,107,94,.28)}}
+#banner{position:fixed;top:86px;left:50%;transform:translateX(-50%);font-family:var(--disp);font-weight:700;
+  font-size:15px;padding:10px 20px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);
+  box-shadow:var(--shadow);opacity:0;transition:opacity .3s;pointer-events:none!important;z-index:30}
+#banner.on{opacity:1}
+#weatherChip{position:fixed;top:134px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:13px;
+  padding:9px 16px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);opacity:0;
+  transition:opacity .3s;pointer-events:none!important;z-index:30}
+#weatherChip.on{opacity:1}
+#toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);background:var(--panel-2);
+  border:1px solid var(--line);border-radius:12px;padding:11px 17px;font-size:13px;opacity:0;transition:.3s;
+  z-index:45;box-shadow:var(--shadow);pointer-events:none!important;max-width:520px;text-align:center}
+#toast.on{opacity:1}
+
+/* ---------- Modals ---------- */
+.modal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:22px;
+  background:rgba(3,12,16,.72);backdrop-filter:blur(10px)}
+.modal[hidden]{display:none}
+.card{width:min(880px,96vw);max-height:92vh;overflow:auto;background:linear-gradient(180deg,#0d232d,#0a1c24);
+  border:1px solid rgba(190,230,215,.16);border-radius:22px;padding:28px 30px;box-shadow:0 40px 110px rgba(0,0,0,.6)}
+.card.wide{width:min(1160px,97vw)}
+.kicker{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--wind);border:1px solid rgba(143,216,255,.35);background:rgba(143,216,255,.08);
+  padding:5px 10px;border-radius:999px;margin-bottom:14px}
+.card h1{font-family:var(--disp);font-weight:800;font-size:clamp(26px,4vw,38px);letter-spacing:-.03em;margin:0 0 10px;line-height:1.05}
+.card .sub{color:var(--muted);line-height:1.6;max-width:70ch;margin:0 0 6px}
+.rulegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:18px 0}
+.rule{border:1px solid var(--line);border-radius:14px;padding:13px;background:rgba(255,255,255,.035)}
+.rule b{font-family:var(--mono);font-size:16px;display:block;margin-bottom:5px}
+.rule span{color:var(--muted);font-size:12.5px;line-height:1.5;display:block}
+.cardgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:18px 0}
+.stat{border:1px solid var(--line);border-radius:14px;padding:13px;background:rgba(255,255,255,.035)}
+.stat.hi{border-color:rgba(255,179,92,.5);background:rgba(255,179,92,.08)}
+.stat span{display:block;color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.stat b{display:block;font-family:var(--mono);font-size:21px;margin:6px 0 3px;font-variant-numeric:tabular-nums}
+.stat small{color:var(--faint);font-size:11px}
+.histWrap{border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.22);padding:16px 16px 8px;margin:14px 0}
+.hist{position:relative;height:170px;display:flex;align-items:flex-end;gap:5px}
+.hbar{flex:1;border-radius:5px 5px 2px 2px;position:relative;min-height:3px}
+.hbar.s1{background:linear-gradient(180deg,#ffb35c,#b46a1f)}
+.hbar.s2{background:linear-gradient(180deg,#4fd98d,#1d7a49)}
+.hmark{position:absolute;top:0;bottom:18px;width:0;border-left:2px dashed;opacity:.95}
+.hmark i{position:absolute;top:-4px;left:4px;font-style:normal;font-family:var(--mono);font-size:10px;white-space:nowrap;
+  background:var(--panel-2);padding:2px 6px;border-radius:6px;border:1px solid var(--line)}
+.haxis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:6px}
+.tableWrap{border:1px solid var(--line);border-radius:14px;overflow:auto;max-height:300px;background:rgba(0,0,0,.18)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:8px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{position:sticky;top:0;background:#0e2530;font-family:var(--mono);font-weight:600;font-size:10.5px;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--muted);z-index:2}
+td{font-variant-numeric:tabular-nums}
+td.mono{font-family:var(--mono);white-space:nowrap}
+.v-rob{color:var(--profit)} .v-exp{color:var(--warn)} .v-fra{color:var(--loss)}
+.actions{display:flex;gap:11px;justify-content:flex-end;margin-top:20px}
+.actions .btn{width:auto;min-width:170px;margin:0}
+.qlist{margin:12px 0 4px;padding:0 0 0 20px;color:var(--muted);line-height:1.7}
+.qlist li{margin-bottom:7px}
+input[type=number]{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:12px;
+  color:var(--ink);font-family:var(--mono);font-size:22px;padding:12px 14px;outline:none}
+input[type=number]:focus{border-color:var(--wind)}
+.predRow{display:flex;gap:14px;align-items:flex-end;margin-top:16px}
+.predRow .fld{flex:1}
+.fld label{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}
+#resGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+#predSummary,#labState{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.steppers{display:flex;align-items:center;gap:6px}
+.steppers button{width:26px;height:26px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.06);font-weight:700}
+.steppers b{font-family:var(--mono);min-width:20px;text-align:center}
+.mini{display:flex;align-items:flex-end;gap:2px;height:30px;width:96px}
+.mini i{flex:1;background:#3f9c6c;border-radius:2px 2px 0 0;min-height:2px}
+.adopt{border:1px solid rgba(143,216,255,.4);background:rgba(143,216,255,.1);border-radius:9px;padding:6px 11px;font-size:12px}
+.adopt:disabled{opacity:.35;cursor:not-allowed}
+tr.mrow{background:rgba(255,198,92,.06)}
+.foot{margin-top:14px;color:var(--faint);font-size:11.5px;font-family:var(--mono)}
+
+/* consultant */
+#consult{margin-top:9px;padding:11px 12px;border-radius:12px;background:rgba(255,198,92,.07);border:1px solid rgba(255,198,92,.3)}
+#consult .c-head{display:flex;gap:7px;align-items:center;font-size:12px}
+#consult .c-tag{margin-left:auto;font-family:var(--mono);font-size:9.5px;color:var(--warn);border:1px solid rgba(255,198,92,.4);padding:1px 7px;border-radius:99px}
+#consultSay{font-size:12px;color:var(--muted);font-style:italic;line-height:1.55;margin:8px 0}
+#consult .c-btns{display:flex;gap:7px}
+#consult .c-btns .btn{margin-top:0;padding:7px;font-size:12px}
+/* swan futures */
+#swanRow{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:4px 0 2px}
+.swan{border:1px solid rgba(190,140,255,.42);border-radius:14px;padding:13px;background:linear-gradient(180deg,rgba(30,20,48,.9),rgba(13,10,26,.92))}
+.swan .sk{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:#c9a6ff;text-transform:uppercase}
+.swan b.nm{display:block;font-family:var(--disp);font-size:15px;margin:6px 0 3px}
+.swan p{margin:0 0 9px;color:var(--muted);font-size:12px;line-height:1.5}
+.swan .sstats{display:flex;gap:7px;flex-wrap:wrap}
+.swan .sstats span{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid var(--line)}
+tr.swanrow{background:rgba(150,100,255,.09)}
+tr.swanrow td:first-child::before{content:'\25C6  ';color:#c9a6ff}
+.lead{border-bottom:2px solid var(--profit);padding-bottom:1px}
+.hbar.sneg{box-shadow:inset 0 0 0 100px rgba(130,20,45,.45)}
+@media (prefers-reduced-motion:reduce){ *{transition-duration:.01ms!important} }
+@media (max-width:1120px){ .panel{width:228px} #lockBtn{min-width:220px} .cardgrid,.rulegrid{grid-template-columns:1fr 1fr} }
+:focus-visible{outline:2px solid var(--wind);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<div id="vignette"></div>
+
+<div id="hud">
+  <header id="topbar">
+    <div class="brand"><b>MOZCON&nbsp;POWER</b><span>RECAP field console</span></div>
+    <span class="chip" id="roundChip"><b id="roundLabel">Round 1 · The Average Trap</b></span>
+    <span class="chip">Year <b id="yearNow">1</b>/5 · <b id="monthNow">Plan</b></span>
+    <span class="chip"><span class="dot" style="background:var(--profit)"></span>Budget <b id="budgetVal">£180m</b></span>
+    <span class="chip"><span class="dot" style="background:var(--solar)"></span><b id="fleetVal">0 solar · 0 wind</b></span>
+    <span class="chip">Cash <b id="cashVal">£0.0m</b></span>
+    <div class="contract">
+      <span class="chip sell">Sell <b>£220/MWh</b></span>
+      <span class="chip pen">Short <b>£660/MWh + lost sale</b></span>
+    </div>
+    <button id="muteBtn" title="Sound on/off">🔊</button>
+    <button id="resetBtn" title="Restart the whole session">Restart</button>
+  </header>
+
+  <div id="midRow">
+    <aside class="panel" id="leftPanel">
+      <h2>Build console</h2>
+      <button class="tech solar sel" id="techSolar">
+        <span class="ic">☀</span>
+        <span><b>Solar PV park</b><small>25 MW · £35m · 43,800 MWh/y avg</small></span>
+      </button>
+      <button class="tech wind" id="techWind">
+        <span class="ic">⌁</span>
+        <span><b>Wind farm</b><small>30 MW · £55m · 65,700 MWh/y avg</small></span>
+      </button>
+      <div class="sep"></div>
+      <div class="krow"><span>Committed this year</span><b id="addsNow">—</b></div>
+      <div class="krow"><span>Capex this year</span><b id="capexNow">£0m</b></div>
+      <div class="krow"><span>Queued · next year</span><b id="queueNow">—</b></div>
+      <div class="krow"><span>Budget left</span><b id="budgetLeft">£180m</b></div>
+      <button class="btn" id="undoBtn">Undo last build</button>
+      <button class="btn lab locked" id="labBtn">🔒 Scenario Lab</button>
+      <div id="orderChip"></div>
+      <div id="consult" style="display:none">
+        <div class="c-head"><span>📊</span><b>The Brochure Desk</b><span class="c-tag">advisory</span></div>
+        <p id="consultSay"></p>
+        <div class="c-btns"><button class="btn" id="consultTake">Take the advice</button><button class="btn" id="consultNo">Dismiss</button></div>
+      </div>
+      <div class="lesson" id="lessonBox">The regional authority’s forecast is on your chart. Building nothing is also a decision — deferral is an option.</div>
+    </aside>
+
+    <aside class="panel" id="rightPanel">
+      <h2>Grid dashboard</h2>
+      <div class="krow"><span>Forecast (this yr)</span><b id="dashForecast">175,200 MWh</b></div>
+      <div class="krow"><span>Plan @ averages</span><b id="dashPlan">0 MWh</b></div>
+      <div class="sep"></div>
+      <div class="krow"><span>Load · this month</span><b id="liveLoad">—</b></div>
+      <div class="krow"><span>Supply · this month</span><b id="liveSupply">—</b></div>
+      <div id="gridBar"><i id="gridFill"></i></div>
+      <div class="sep"></div>
+      <canvas id="chart"></canvas>
+      <div class="legend" id="chartLegend"></div>
+      <div class="sep"></div>
+      <h2>Telemetry</h2>
+      <div id="log"></div>
+    </aside>
+  </div>
+
+  <div id="bottomBar"><button id="playBtn" class="primary">▶ Start Year 1</button><button id="speedBtn">1×</button></div>
+  <div id="hintChip">Drag to orbit · scroll to zoom · green tiles: build while planning · queue while the year runs</div>
+  <div id="banner"></div>
+  <div id="weatherChip"></div>
+  <div id="toast"></div>
+</div>
+
+<!-- Intro -->
+<div class="modal" id="introModal">
+  <div class="card">
+    <span class="kicker">RECAP · Round 1 — The Average Trap</span>
+    <h1>Five years. One contract.<br>Keep the lights on — profitably.</h1>
+    <p class="sub">You are the project developer for <b>Mozcon Power</b>, awarded a five-year contract to supply a fast-growing island that is decarbonising while it courts new industry. The regional authority has issued its official demand forecast. Your investors expect a profitable plan.</p>
+    <div class="rulegrid">
+      <div class="rule"><b style="color:var(--profit)">+£220 / MWh</b><span>for every MWh delivered — delivery is min(supply, demand).</span></div>
+      <div class="rule"><b style="color:var(--loss)">−£660 / MWh</b><span>penalty for every MWh of unmet demand — on top of the sale you didn’t make.</span></div>
+      <div class="rule"><b style="color:var(--wind)">£0</b><span>for surplus. It’s curtailed — earns nothing, and the capital is already spent.</span></div>
+    </div>
+    <p class="sub"><b>Budget:</b> £180m in Year 1, then £60m a year; unspent budget carries forward. At the end of Year 5, assets return their unused life as residual value. Score = cash + residual.</p>
+    <p class="sub"><b>The loop:</b> plan while the clock is paused, press ▶, and live the year month by month — weather, demand, cash, blackouts. Capacity placed while the year runs breaks ground as scaffolding and commissions at New Year. Once a year starts, its capital is committed. No takebacks.</p>
+    <div class="actions"><button class="btn primary" id="introGo">Take the contract</button></div>
+  </div>
+</div>
+
+<!-- Year result -->
+<div class="modal" id="resultModal" hidden>
+  <div class="card" style="width:min(640px,95vw)">
+    <span class="kicker" id="resKick">Year 1 · revealed</span>
+    <h1 id="resTitle">Year 1</h1>
+    <p class="sub" id="resEvent"></p>
+    <div id="resGrid"></div>
+    <div class="actions"><button class="btn primary" id="resGo">Continue</button></div>
+  </div>
+</div>
+
+<!-- Futures stress test (end of R1) -->
+<div class="modal" id="futuresModal" hidden>
+  <div class="card wide">
+    <span class="kicker">Round 1 debrief · stress test</span>
+    <h1>Your plan met one future.<br>There were twenty.</h1>
+    <p class="sub" id="futSub">Your build schedule, unchanged, replayed across 20 equally likely futures. The set is unbiased by construction: on average, demand equals the forecast and the weather equals its long-run mean.</p>
+    <div class="cardgrid">
+      <div class="stat"><span>Promise at averages</span><b id="cardPromise">—</b><small>what the brochure said</small></div>
+      <div class="stat"><span>Realised (your path)</span><b id="cardRealised">—</b><small>the future you lived</small></div>
+      <div class="stat"><span>Expected across 20</span><b id="cardExpected">—</b><small>mean over the futures</small></div>
+      <div class="stat hi"><span>Flaw-of-Averages gap</span><b id="cardGap">—</b><small>promise − expectation</small></div>
+    </div>
+    <div id="swanRow"></div>
+    <p class="foot">◆ Swan futures are the tail draws from this known set of twenty. A true black swan sits outside any list of futures — the defence is the same: plans that keep options open.</p>
+    <div class="histWrap"><div class="hist" id="futHist"></div><div class="haxis" id="futAxis"></div></div>
+    <p class="sub" id="futSevere"></p>
+    <div class="tableWrap"><table><thead><tr>
+      <th>Future</th><th>Final profit</th><th>Shortage</th><th>Curtailed</th><th>Story</th><th>Verdict</th>
+    </tr></thead><tbody id="futTableBody"></tbody></table></div>
+    <div class="actions"><button class="btn primary" id="futGo">So what went wrong? →</button></div>
+  </div>
+</div>
+
+<!-- Debrief / R2 intro -->
+<div class="modal" id="debriefModal" hidden>
+  <div class="card">
+    <span class="kicker">The lesson · Savage’s Flaw of Averages</span>
+    <h1>The forecast was right<br>on average. You still lost.</h1>
+    <p class="sub">The five forecast errors sum to <b>exactly zero</b>, and the weather averaged exactly its long-run mean. Nothing was wrong with the forecast — what failed was using its average as if it were the future. A short MWh costs the £660 penalty <i>plus</i> the £220 sale you didn’t make; a surplus MWh earns nothing. When payoffs are asymmetric like that, <b>the profit of the average future is not the average of profits</b>. Your gap: <b id="dbGap">£—</b>.</p>
+    <p class="sub">Before Round 2, worth a minute:</p>
+    <ol class="qlist">
+      <li>Which year hurt most — and did the damage come from being short, or from paying for idle surplus?</li>
+      <li>The forecast was unbiased. So what exactly failed: the forecast, or the way it was used?</li>
+      <li>Extra capacity loses a little in average years. What is it buying you in the bad ones?</li>
+    </ol>
+    <p class="sub"><b>Round 2 — Managing the Flaw of Averages.</b> Same island. Same five years. One new instrument: the <b style="color:var(--wind)">Scenario Lab</b>. Before you commit each year, test candidate moves against all twenty futures — and choose by the distribution, not the average. Your Round 1 score of <b id="dbBench">£—</b> is the benchmark to beat.</p>
+    <div class="actions"><button class="btn primary" id="dbGo">Start Round 2</button></div>
+  </div>
+</div>
+
+<!-- Scenario Lab -->
+<div class="modal" id="labModal" hidden>
+  <div class="card wide">
+    <span class="kicker" id="labKick">Scenario Lab · Year 1 decision</span>
+    <h1>Test the move before you make it</h1>
+    <p class="sub">Each candidate is only what you add <b>this year</b>. For later years, every candidate assumes the same brochure rule — build just enough solar to tile the official forecast, wind held flat — so you are comparing this year’s move in isolation. You’ll re-decide each later year for real. Green underlines mark the best affordable value in each column.</p>
+    <div id="labState"></div>
+    <div class="tableWrap" style="max-height:340px;margin-top:14px"><table><thead><tr>
+      <th></th><th>+Solar</th><th>+Wind</th><th>Capex</th><th>Promise @avg</th><th>Expected</th><th>P10</th><th>Worst</th><th>Severe futures</th><th>Distribution</th><th></th>
+    </tr></thead><tbody id="labRows"></tbody></table></div>
+    <p class="foot">Look at the whole distribution, not the average case. The candidate that looks best at averages is usually not the one with the best downside.</p>
+    <div class="actions"><button class="btn" id="labClose">Back to the map</button></div>
+  </div>
+</div>
+
+<!-- Final comparison -->
+<div class="modal" id="finalModal" hidden>
+  <div class="card wide">
+    <span class="kicker">Final debrief · Round 1 vs Round 2</span>
+    <h1>What did flexibility buy you?</h1>
+    <p class="sub">Both of your plans, replayed across the same twenty unbiased futures. The winning strategy isn’t the one that looks best under the average forecast — it’s the one that protects profit when the future changes.</p>
+    <div class="cardgrid" id="finGrid"></div>
+    <div class="histWrap"><div class="hist" id="finHist"></div><div class="haxis" id="finAxis"></div>
+      <div class="legend" style="margin-top:8px"><span><i style="background:#ffb35c"></i>Round 1 plan</span><span><i style="background:#4fd98d"></i>Round 2 plan</span></div>
+    </div>
+    <p class="sub" id="finMsg"></p>
+    <div class="actions">
+      <button class="btn" id="exportBtn">Export session data (JSON)</button>
+      <button class="btn primary" id="againBtn">Play again</button>
+    </div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ===== RECAP v8-calibrated data — decision-equivalent with mozcon_full_test.xlsx =====
+const CONFIG = {
+  years: 5, year1Budget: 180, annualBudget: 60,
+  price: 220, penalty: 660, assetLife: 25, severeFrac: 0.05,
+  forecast: [175200, 219000, 262800, 306600, 350400],
+  tech: {
+    solar: { key:'solar', label:'Solar PV park', blockMW:25, capex:35, avgAvail:0.20, avgOutput:43800,
+             note:'One block covers exactly one year of forecast demand growth.' },
+    wind:  { key:'wind', label:'Wind farm', blockMW:30, capex:55, avgAvail:0.25, avgOutput:65700,
+             note:'Bigger, pricier blocks; does not tile the forecast neatly.' }
+  }
+};
+
+// The played path (Facilitator sheet). Unbiased by construction:
+// forecast errors sum to 0; mean solar = .20, mean wind = .25.
+const ACTUAL = {
+  demand: [166440, 245280, 262800, 271560, 367920],
+  solar:  [0.22, 0.17, 0.20, 0.24, 0.17],
+  wind:   [0.27, 0.21, 0.25, 0.30, 0.22],
+  eventsR1: [
+    'Mild year — a big industrial client ramps up slower than planned.',
+    'Data centre connects two years early; cloudy, calm winter.',
+    'A textbook year — demand and weather land exactly on forecast.',
+    'Flagship industrial project delayed; sunny, windy year.',
+    'Island boom plus heatwave with weak trade winds.'
+  ],
+  eventsR2: [
+    'Year 1 is quiet — the anchor industrial client is slow to ramp.',
+    'A data centre connects early; demand jumps well above forecast.',
+    'Demand and weather land close to the official forecast.',
+    'A flagship project slips a year; demand eases and the weather is kind.',
+    'The island booms and a heatwave bites while the trade winds drop.'
+  ]
+};
+
+// 20 equally likely futures — EXACT transcription of the Stress Test sheet.
+// Unbiased by construction: per-year mean demand = forecast; mean solar = .20; mean wind = .25.
+// Path 1 is the path the player actually lives through.
+const FUTURES = [
+  {name:'F01 · The path you played', story:'The five years you just lived — one draw among twenty.',
+   demand:[166440,245280,262800,271560,367920], solar:[0.22,0.17,0.20,0.24,0.17], wind:[0.27,0.21,0.25,0.30,0.22]},
+  {name:'F02 · Quiet growth', story:'Industry ramps slowly and the weather stays kind.',
+   demand:[160874,188589,211035,267895,277535], solar:[0.215,0.164,0.208,0.209,0.220], wind:[0.278,0.189,0.264,0.231,0.264]},
+  {name:'F03 · Steady island', story:'Loads run a touch under plan; skies stay ordinary.',
+   demand:[168726,206297,255406,279502,296969], solar:[0.212,0.201,0.235,0.200,0.185], wind:[0.241,0.246,0.251,0.257,0.265]},
+  {name:'F04 · Late surge', story:'Boom years arrive just as the weather tires.',
+   demand:[182992,231559,275958,323726,419636], solar:[0.203,0.217,0.213,0.164,0.181], wind:[0.275,0.258,0.281,0.193,0.267]},
+  {name:'F05 · Hazy boom', story:'Growth lands early under dim, still skies.',
+   demand:[181231,236847,274524,339743,397501], solar:[0.167,0.211,0.193,0.184,0.200], wind:[0.214,0.260,0.249,0.236,0.236]},
+  {name:'F06 · Choppy decade', story:'Demand climbs while output stutters mid-contract.',
+   demand:[165928,222055,274783,320019,347012], solar:[0.202,0.171,0.215,0.167,0.179], wind:[0.254,0.217,0.260,0.205,0.198]},
+  {name:'F07 · Fast start', story:'The port fills before the fleet does; late years ease.',
+   demand:[199961,251024,251150,259683,295072], solar:[0.185,0.169,0.218,0.190,0.228], wind:[0.254,0.217,0.277,0.220,0.256]},
+  {name:'F08 · Storm-lit', story:'Big loads — and late gales that ride to the rescue.',
+   demand:[185927,233527,264282,295284,358407], solar:[0.181,0.240,0.176,0.191,0.236], wind:[0.249,0.249,0.202,0.244,0.324]},
+  {name:'F09 · Slow burn', story:'Modest loads under mostly ordinary skies.',
+   demand:[161118,197991,235291,273720,337657], solar:[0.174,0.176,0.214,0.166,0.195], wind:[0.267,0.224,0.256,0.238,0.233]},
+  {name:'F10 · Gentle decade', story:'Light loads meet generous weather.',
+   demand:[171803,192616,232630,244624,271123], solar:[0.210,0.232,0.182,0.172,0.229], wind:[0.205,0.282,0.253,0.238,0.305]},
+  {name:'F11 · Supercycle', story:'Green industry stampedes in; demand explodes.',
+   demand:[175329,244722,348117,450573,487887], solar:[0.218,0.213,0.193,0.176,0.212], wind:[0.309,0.236,0.206,0.218,0.269]},
+  {name:'F12 · The grind', story:'Relentless growth with becalmed, cloudy years.',
+   demand:[198173,259545,311676,346009,434508], solar:[0.206,0.148,0.191,0.196,0.208], wind:[0.272,0.167,0.196,0.269,0.255]},
+  {name:'F13 · Cliff edge', story:'A boom, then the calmest year on record.',
+   demand:[183046,231975,279503,354814,422774], solar:[0.196,0.241,0.156,0.196,0.141], wind:[0.220,0.292,0.212,0.243,0.183]},
+  {name:'F14 · Efficiency wins', story:'Demand goes flat while the turbines feast.',
+   demand:[181035,187659,187627,217518,248254], solar:[0.154,0.228,0.248,0.232,0.206], wind:[0.194,0.348,0.337,0.312,0.238]},
+  {name:'F15 · Second wind', story:'Expansion lands in years four and five.',
+   demand:[175326,234658,282794,387622,409259], solar:[0.197,0.213,0.185,0.222,0.202], wind:[0.231,0.271,0.256,0.253,0.239]},
+  {name:'F16 · Plateau', story:'The island pauses for breath.',
+   demand:[149247,183999,221839,217518,248254], solar:[0.221,0.183,0.185,0.227,0.179], wind:[0.272,0.220,0.243,0.292,0.270]},
+  {name:'F17 · Overbuilt skies', story:'Everyone else’s good year: low loads, bright, breezy.',
+   demand:[146469,166297,227388,261135,279654], solar:[0.245,0.195,0.224,0.248,0.216], wind:[0.291,0.276,0.274,0.290,0.232]},
+  {name:'F18 · Textbook-plus', story:'Roughly the brochure future — and friendly weather.',
+   demand:[171574,216674,258133,278858,332555], solar:[0.231,0.214,0.194,0.187,0.203], wind:[0.287,0.300,0.229,0.202,0.249]},
+  {name:'F19 · Whiplash', story:'Feast and famine alternate without warning.',
+   demand:[193943,188292,265741,334348,388035], solar:[0.153,0.225,0.169,0.205,0.191], wind:[0.194,0.308,0.222,0.236,0.258]},
+  {name:'F20 · High tide', story:'Demand and gales rise together into year five.',
+   demand:[184858,260394,335323,407849,387988], solar:[0.210,0.189,0.201,0.228,0.219], wind:[0.223,0.230,0.282,0.323,0.239]}
+];
+// 18 cols x 14 rows. w water, b beach, g buildable valley, f forest, m mountain,
+// r road, c city, h suburbs, i industry, s substation, p port, a farmland
+const MAP_ROWS = [
+  'wwwwwwwwwwwwwwwwww',
+  'wwwwwbbbbbbbwwwwww',
+  'wwwbbggggfffbbwwww',
+  'wwbbgggggffmmmbwww',
+  'wwbggaagggfmmmgbww',
+  'wbbgaaagggffmmgbww',
+  'wbpprrrrrrrchhgbww',
+  'wbpggggggarrcchbww',
+  'wwbggggggarriisbww',
+  'wwbgggggggargggbww',
+  'wwbbggagggggggbwww',
+  'wwwbbggggggggbbwww',
+  'wwwwbbbggggbbwwwww',
+  'wwwwwwbbbbbwwwwwww'
+];
+// ===== Pure economics engine (no DOM) — mirrors the v8 workbook formulas =====
+function yearOutcome(S, W, capex, demand, sa, wa){
+  const supply = S*CONFIG.tech.solar.avgOutput*(sa/CONFIG.tech.solar.avgAvail)
+               + W*CONFIG.tech.wind.avgOutput*(wa/CONFIG.tech.wind.avgAvail);
+  const delivered = Math.min(supply, demand);
+  const shortage  = Math.max(0, demand - supply);
+  const curtailed = Math.max(0, supply - demand);
+  const revenue = delivered*CONFIG.price/1e6;
+  const penalty = shortage*CONFIG.penalty/1e6;
+  return { supply, delivered, shortage, curtailed, revenue, penalty, capex, demand,
+           cash: revenue - penalty - capex, severe: shortage > demand*CONFIG.severeFrac };
+}
+function schedCapex(sch, y){ return sch[y].s*CONFIG.tech.solar.capex + sch[y].w*CONFIG.tech.wind.capex; }
+function residualOf(sch){
+  let r = 0;
+  for(let y=0; y<CONFIG.years; y++){
+    const yearsUsed = CONFIG.years - y;
+    r += schedCapex(sch, y) * (CONFIG.assetLife - yearsUsed) / CONFIG.assetLife;
+  }
+  return r;
+}
+function runPath(sch, path){
+  let S=0, W=0, cash=0, shortT=0, curtT=0, severeYears=0;
+  const years=[];
+  for(let y=0; y<CONFIG.years; y++){
+    S += sch[y].s; W += sch[y].w;
+    const o = yearOutcome(S, W, schedCapex(sch,y), path.demand[y], path.solar[y], path.wind[y]);
+    years.push(o); cash += o.cash; shortT += o.shortage; curtT += o.curtailed;
+    if(o.severe) severeYears++;
+  }
+  const residual = residualOf(sch);
+  return { years, cash, residual, final: cash+residual, severeYears,
+           totalShortage: shortT, totalCurtailed: curtT };
+}
+const AVG_PATH = { demand: CONFIG.forecast.slice(), solar:[0.2,0.2,0.2,0.2,0.2], wind:[0.25,0.25,0.25,0.25,0.25] };
+function stressTest(sch){ return FUTURES.map(f => ({ f, r: runPath(sch, f) })); }
+function pctile(sortedAsc, p){
+  const idx = (sortedAsc.length-1)*p, lo = Math.floor(idx), hi = Math.ceil(idx), t = idx-lo;
+  return sortedAsc[lo]*(1-t) + sortedAsc[hi]*t;
+}
+function budgetStartOfYear(builds, year){ // year 1-based; builds = committed schedule so far
+  let b = CONFIG.year1Budget;
+  for(let y=0; y<year-1; y++) b += CONFIG.annualBudget - schedCapex(builds, y);
+  return b;
+}
+// Scenario Lab candidate — mirrors the R2-Scenarios sheet exactly:
+// past years = actual cumulative; candidate year = entering fleet + this year's add;
+// LATER years follow the brochure rule: cumulative solar = MAX(prev, CEILING(forecast/solarOutput)),
+// wind held flat. So every candidate shares the same continuation and you compare this year's move only.
+function trackTarget(y){ // 0-based year index -> cumulative solar the brochure rule demands
+  return Math.ceil(CONFIG.forecast[y]/CONFIG.tech.solar.avgOutput - 1e-9);
+}
+function candidateEval(builds, currentYear, lockedCash, dS, dW){
+  const cumS=[], cumW=[];
+  let S=0, W=0;
+  for(let y=0; y<CONFIG.years; y++){
+    const yr = y+1;
+    if(yr < currentYear){ S += builds[y].s; W += builds[y].w; cumS.push(S); cumW.push(W); }
+    else if(yr === currentYear){ cumS.push(S + dS); cumW.push(W + dW); }
+    else { cumS.push(Math.max(cumS[y-1], trackTarget(y))); cumW.push(cumW[y-1]); }
+  }
+  const adds = cumS.map((v,y)=>({ s: v - (y ? cumS[y-1] : 0), w: cumW[y] - (y ? cumW[y-1] : 0) }));
+  const evalPath = (path)=>{
+    let cash = lockedCash, sev = false;
+    for(let y=currentYear-1; y<CONFIG.years; y++){
+      const o = yearOutcome(cumS[y], cumW[y], schedCapex(adds,y), path.demand[y], path.solar[y], path.wind[y]);
+      cash += o.cash; if(o.severe) sev = true;
+    }
+    return { final: cash + residualOf(adds), sev };
+  };
+  const runs = FUTURES.map(evalPath);
+  const byFuture = runs.map(x=>x.final);
+  const vals = byFuture.slice().sort((a,b)=>a-b);
+  return {
+    dS, dW, capex: dS*CONFIG.tech.solar.capex + dW*CONFIG.tech.wind.capex,
+    promise: evalPath(AVG_PATH).final,
+    expected: vals.reduce((a,b)=>a+b,0)/vals.length,
+    p10: pctile(vals,0.1), p90: pctile(vals,0.9),
+    worst: vals[0], best: vals[vals.length-1],
+    severeShare: runs.filter(x=>x.sev).length/runs.length,
+    vals, byFuture
+  };
+}
+// =====================================================================
+// PART A — world: renderer, island, assets, weather, camera, effects
+// =====================================================================
+const $ = id => document.getElementById(id);
+const clamp = (v,a,b)=>Math.min(b,Math.max(a,v));
+const lerp = (a,b,t)=>a+(b-a)*t;
+const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DUR = m => REDUCED ? m*0.2 : m;
+function fmtM(v,dp=1){ const s = v<0?'−':''; return s+'£'+Math.abs(v).toFixed(dp)+'m'; }
+function fmtMWh(v){ return Math.round(v).toLocaleString('en-GB')+' MWh'; }
+function seeded(n){ let x = Math.sin(n*127.1+311.7)*43758.5453; return x-Math.floor(x); }
+
+// ---- tween system ----
+const tweens = [];
+function tween(dur, onU){ return new Promise(res=>{ tweens.push({t0:performance.now(), dur:Math.max(1,dur), onU, res}); }); }
+const sleep = ms => new Promise(r=>setTimeout(r, ms));
+const easeIO = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+const easeOutBack = t => { const c=1.70158; return 1+ (c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2); };
+
+// ---- three setup ----
+const ROWS = MAP_ROWS.length, COLS = MAP_ROWS[0].length;
+const scene = new THREE.Scene();
+const SKY_DAY = new THREE.Color(0x9fd2ec), SKY_DAWN = new THREE.Color(0xffd2a0), SKY_DUSK = new THREE.Color(0xff9e78);
+scene.background = SKY_DAY.clone();
+scene.fog = new THREE.Fog(scene.background, 30, 64);
+const camera = new THREE.PerspectiveCamera(46, innerWidth/innerHeight, 0.1, 200);
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+$('scene').appendChild(renderer.domElement);
+
+const hemi = new THREE.HemisphereLight(0xcfe8ff, 0x64784f, 0.75);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff2d8, 1.05);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -14; sun.shadow.camera.right = 14;
+sun.shadow.camera.top = 14; sun.shadow.camera.bottom = -14;
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 70;
+scene.add(sun); scene.add(sun.target);
+function setSunAngle(a){ // 0 dawn(E) .. 1 dusk(W)
+  const t = a*Math.PI;
+  sun.position.set(Math.cos(t)*22, 5+Math.sin(t)*17, 9);
+}
+setSunAngle(0.42);
+function setSky(c){ scene.background.copy(c); scene.fog.color.copy(c); }
+
+// ---- water ----
+const waterGeo = new THREE.PlaneGeometry(70, 60, 46, 40);
+const waterMat = new THREE.MeshPhongMaterial({ color:0x2f86c8, transparent:true, opacity:0.93,
+  shininess:90, specular:0x9fd6ff, flatShading:true });
+const water = new THREE.Mesh(waterGeo, waterMat);
+water.rotation.x = -Math.PI/2; water.position.y = 0.3;
+scene.add(water);
+const deep = new THREE.Mesh(new THREE.PlaneGeometry(70,60), new THREE.MeshBasicMaterial({color:0x0e3f63}));
+deep.rotation.x = -Math.PI/2; deep.position.y = 0.05; scene.add(deep);
+const waterBase = waterGeo.attributes.position.array.slice();
+
+// ---- island ----
+const world = new THREE.Group(); scene.add(world);
+const tileMeshes = [];
+const windowMats = [];   // city window materials (blackout flicker)
+const smokes = [];
+let subTop = null;       // substation connection point
+let boat = null;
+const TOP = { b:0.4, g:0.5, f:0.52, m:0.55, r:0.5, c:0.5, h:0.5, i:0.5, s:0.5, p:0.44, a:0.5 };
+const TILE_COL = { b:0xe8d29a, g:0x74c163, f:0x5aa04f, m:0x8d9296, r:0x424a52, c:0x9aa3ab, h:0x8fb877, i:0xa5988b, s:0x9aa3ab, p:0xd9c489, a:0x9fbe62 };
+const pos = (r,c)=>({ x: c-(COLS-1)/2, z: r-(ROWS-1)/2 });
+function lam(color){ return new THREE.MeshLambertMaterial({ color }); }
+
+function makeWindowTex(seed){
+  const cv = document.createElement('canvas'); cv.width = 64; cv.height = 96;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#232f38'; g.fillRect(0,0,64,96);
+  for(let y=0;y<8;y++) for(let x=0;x<4;x++){
+    g.fillStyle = seeded(seed+x*13+y*7) > 0.32 ? '#ffd98c' : '#2c3a44';
+    g.fillRect(6+x*14, 6+y*11, 9, 7);
+  }
+  const tx = new THREE.CanvasTexture(cv); tx.magFilter = THREE.NearestFilter;
+  return tx;
+}
+function addTree(x,z,topY,seed){
+  const t = new THREE.Group();
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.028,0.045,0.16,5), lam(0x7a5636));
+  trunk.position.y = 0.08;
+  const fol = new THREE.Mesh(new THREE.ConeGeometry(0.15+seeded(seed)*0.06, 0.36+seeded(seed+1)*0.18, 6), lam(0x3f8f45));
+  fol.position.y = 0.34;
+  trunk.castShadow = fol.castShadow = true;
+  t.add(trunk, fol); t.position.set(x,topY,z); world.add(t);
+}
+function buildIsland(){
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    const t = MAP_ROWS[r][c];
+    if(t==='w') continue;
+    const p = pos(r,c), h = TOP[t];
+    const col = new THREE.Color(TILE_COL[t]);
+    col.multiplyScalar(0.96 + seeded(r*31+c*17)*0.08);
+    const tile = new THREE.Mesh(new THREE.BoxGeometry(0.99, h, 0.99), lam(col));
+    tile.position.set(p.x, h/2, p.z);
+    tile.receiveShadow = true;
+    tile.userData = { r, c, t };
+    world.add(tile); tileMeshes.push(tile);
+    const sd = r*57+c*23;
+
+    if(t==='f'){ addTree(p.x-0.2+seeded(sd)*0.2, p.z-0.2+seeded(sd+2)*0.2, h, sd); addTree(p.x+0.05+seeded(sd+3)*0.2, p.z+0.08+seeded(sd+4)*0.2, h, sd+5); }
+    if(t==='m'){
+      const mk = new THREE.Mesh(new THREE.ConeGeometry(0.52, 1.2+seeded(sd)*0.7, 5), lam(0x848a90));
+      mk.position.set(p.x, h, p.z); mk.castShadow = true; world.add(mk);
+      const cap = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.34, 5), lam(0xf2f6f8));
+      cap.position.set(p.x, h + (1.2+seeded(sd)*0.7)*0.72, p.z); world.add(cap);
+    }
+    if(t==='a' && !(r===8 && c===9)){   // (8,9) reserved: the data-centre pad
+      for(let i=0;i<3;i++){
+        const strip = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.03, 0.14), lam(0x8a6b3d));
+        strip.position.set(p.x, h+0.02, p.z-0.26+i*0.26); world.add(strip);
+      }
+    }
+    if(t==='r'){
+      const nb = d => { const [rr,cc]=d; const ch = (MAP_ROWS[rr]||'')[cc]||'w'; return 'rcisp'.includes(ch); };
+      const horiz = nb([r,c-1])||nb([r,c+1]), vert = nb([r-1,c])||nb([r+1,c]);
+      const top = new THREE.Mesh(new THREE.BoxGeometry(0.99,0.03,0.99), lam(0x363d45));
+      top.position.set(p.x,h+0.015,p.z); world.add(top);
+      const dash = (dx,dz,rot)=>{ const m = new THREE.Mesh(new THREE.BoxGeometry(0.16,0.012,0.045), lam(0xf5df8a));
+        m.rotation.y = rot; m.position.set(p.x+dx,h+0.034,p.z+dz); world.add(m); };
+      if(horiz){ dash(-0.24,0,0); dash(0.24,0,0); }
+      if(vert){ dash(0,-0.24,Math.PI/2); dash(0,0.24,Math.PI/2); }
+    }
+    if(t==='c'){
+      for(let i=0;i<2;i++){
+        const bh = 1.15+seeded(sd+i)*1.05;
+        const mat = new THREE.MeshPhongMaterial({ color:0xb9c2ca, emissive:0xffffff,
+          emissiveMap:makeWindowTex(sd+i*9), map:makeWindowTex(sd+i*9), emissiveIntensity:0.85 });
+        const b = new THREE.Mesh(new THREE.BoxGeometry(0.32, bh, 0.32), mat);
+        b.position.set(p.x-0.18+i*0.36, h+bh/2, p.z+(seeded(sd+i+4)-0.5)*0.3);
+        b.castShadow = true; world.add(b); windowMats.push(mat);
+      }
+    }
+    if(t==='h'){
+      for(let i=0;i<2;i++){
+        const hx = p.x-0.2+i*0.4, hz = p.z+(seeded(sd+i)-0.5)*0.4;
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.26,0.2,0.24), lam(0xe7dcc4));
+        body.position.set(hx,h+0.1,hz); body.castShadow = true; world.add(body);
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(0.21,0.17,4), lam(0xc25b47));
+        roof.rotation.y = Math.PI/4; roof.position.set(hx,h+0.28,hz); roof.castShadow=true; world.add(roof);
+      }
+    }
+    if(t==='i'){
+      const shed = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.34,0.5), lam(0xb5a793));
+      shed.position.set(p.x,h+0.17,p.z); shed.castShadow=true; world.add(shed);
+      const chim = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.06,0.5,7), lam(0x8b7f72));
+      chim.position.set(p.x+0.2,h+0.55,p.z-0.12); chim.castShadow=true; world.add(chim);
+      for(let i=0;i<3;i++){
+        const s = new THREE.Mesh(new THREE.SphereGeometry(0.06,6,5),
+          new THREE.MeshLambertMaterial({color:0xe9edef, transparent:true, opacity:0.55}));
+        s.position.set(p.x+0.2, h+0.85, p.z-0.12);
+        smokes.push({ m:s, ph:i/3, x:p.x+0.2, y:h+0.82, z:p.z-0.12 }); world.add(s);
+      }
+    }
+    if(t==='s'){
+      const base = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.1,0.5), lam(0x6f7880));
+      base.position.set(p.x,h+0.05,p.z); world.add(base);
+      for(let i=0;i<2;i++){
+        const py = new THREE.Mesh(new THREE.BoxGeometry(0.05,0.66,0.05), lam(0x4c565e));
+        py.position.set(p.x-0.13+i*0.26,h+0.43,p.z); py.castShadow=true; world.add(py);
+      }
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(0.44,0.045,0.045), lam(0x4c565e));
+      bar.position.set(p.x,h+0.72,p.z); world.add(bar);
+      for(let i=0;i<3;i++){
+        const ins = new THREE.Mesh(new THREE.SphereGeometry(0.035,6,5), lam(0xf4f8fa));
+        ins.position.set(p.x-0.15+i*0.15,h+0.76,p.z); world.add(ins);
+      }
+      subTop = new THREE.Vector3(p.x, h+0.76, p.z);
+    }
+    if(t==='p'){
+      if(MAP_ROWS[r][c+1]!=='p' && seeded(sd)>0.4){
+        const col1 = new THREE.Mesh(new THREE.BoxGeometry(0.07,0.7,0.07), lam(0xd2603e));
+        col1.position.set(p.x-0.1,h+0.35,p.z); col1.castShadow=true; world.add(col1);
+        const jib = new THREE.Mesh(new THREE.BoxGeometry(0.62,0.05,0.06), lam(0xd2603e));
+        jib.position.set(p.x-0.28,h+0.68,p.z); jib.castShadow=true; world.add(jib);
+      }
+    }
+  }
+  // city label sprite
+  const cv = document.createElement('canvas'); cv.width=256; cv.height=64;
+  const g = cv.getContext('2d'); g.font='700 30px "Bricolage Grotesque", sans-serif';
+  g.fillStyle='rgba(10,26,34,.85)'; g.strokeStyle='rgba(255,255,255,.25)';
+  g.beginPath(); g.roundRect ? g.roundRect(4,8,248,48,14) : g.rect(4,8,248,48); g.fill(); g.stroke();
+  g.fillStyle='#eaf6f0'; g.textAlign='center'; g.fillText('MOZCON CITY',128,42);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:new THREE.CanvasTexture(cv), transparent:true, depthTest:false }));
+  sp.scale.set(2.4,0.6,1); const cp = pos(6,12); sp.position.set(cp.x, 3.1, cp.z);
+  scene.add(sp);
+  // boat
+  boat = new THREE.Group();
+  const hull = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.12,0.2), lam(0xc9573b));
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(0.16,0.12,0.14), lam(0xf1e9d4));
+  cab.position.set(-0.06,0.12,0);
+  boat.add(hull,cab); const pp = pos(6,2); boat.position.set(pp.x-1.7,0.36,pp.z+0.4);
+  hull.castShadow = true; scene.add(boat);
+}
+buildIsland();
+
+// ---- clouds ----
+const clouds = [];
+for(let i=0;i<5;i++){
+  const gr = new THREE.Group();
+  const cm = new THREE.MeshLambertMaterial({ color:0xffffff, transparent:true, opacity:0.9 });
+  for(let j=0;j<3;j++){
+    const s = new THREE.Mesh(new THREE.SphereGeometry(0.55+seeded(i*9+j)*0.4, 7, 6), cm);
+    s.scale.set(1.7,0.55,1); s.position.set(j*0.8-0.8, seeded(i+j)*0.2, seeded(i*3+j)*0.5);
+    s.castShadow = true; gr.add(s);
+  }
+  gr.position.set(-16+seeded(i*4)*30, 6.4+seeded(i*5)*1.8, -5+seeded(i*7)*10);
+  gr.userData = { sp: 0.24+seeded(i)*0.2, mat: cm };
+  clouds.push(gr); scene.add(gr);
+}
+
+// ---- wind streaks ----
+const streaks = [];
+{
+  const smat = new THREE.MeshBasicMaterial({ color:0xffffff, transparent:true, opacity:0.0 });
+  for(let i=0;i<14;i++){
+    const s = new THREE.Mesh(new THREE.BoxGeometry(0.9,0.014,0.014), smat.clone());
+    s.position.set(-12+seeded(i*3)*24, 1.1+seeded(i*5)*2.4, -6+seeded(i*7)*12);
+    s.userData = { sp: 5+seeded(i)*4 };
+    streaks.push(s); scene.add(s);
+  }
+}
+
+// ---- environment factors (weather) ----
+const env = { wind:1, solar:1 };   // realised availability / long-run average
+
+// ---- buildable assets ----
+function makeTurbine(){
+  const g = new THREE.Group();
+  const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.078,0.95,7), lam(0xf2f5f7));
+  tower.position.y = 0.475; tower.castShadow = true;
+  const nac = new THREE.Mesh(new THREE.BoxGeometry(0.12,0.09,0.2), lam(0xdfe5e9));
+  nac.position.set(0,0.95,0.02); nac.castShadow = true;
+  const rotor = new THREE.Group(); rotor.position.set(0,0.95,0.13);
+  const hub = new THREE.Mesh(new THREE.SphereGeometry(0.045,7,6), lam(0xcfd6da));
+  rotor.add(hub);
+  for(let i=0;i<3;i++){
+    const piv = new THREE.Group(); piv.rotation.z = i*Math.PI*2/3;
+    const bl = new THREE.Mesh(new THREE.BoxGeometry(0.05,0.44,0.02), lam(0xf7fafb));
+    bl.position.y = 0.24; bl.castShadow = true;
+    piv.add(bl); rotor.add(piv);
+  }
+  g.add(tower,nac,rotor);
+  g.rotation.y = 2.4;
+  g.userData.rotor = rotor;
+  rotor.rotation.z = Math.random()*Math.PI*2;
+  return g;
+}
+function makeSolar(){
+  const g = new THREE.Group();
+  const pmat = new THREE.MeshPhongMaterial({ color:0x1c3a6e, shininess:95, specular:0x9fc3ff,
+    emissive:0x2a67c9, emissiveIntensity:0.25 });
+  for(let i=0;i<2;i++) for(let j=0;j<3;j++){
+    const p = new THREE.Mesh(new THREE.BoxGeometry(0.27,0.02,0.19), pmat);
+    p.rotation.x = -0.42;
+    p.position.set(-0.29+j*0.29, 0.12, -0.2+i*0.36);
+    p.castShadow = true; g.add(p);
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.02,0.1,0.02), lam(0x93989c));
+    leg.position.set(-0.29+j*0.29, 0.05, -0.14+i*0.36); g.add(leg);
+  }
+  const inv = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.12,0.08), lam(0xc9cfd3));
+  inv.position.set(0.36,0.06,0.28); g.add(inv);
+  g.userData.panelMat = pmat;
+  return g;
+}
+
+// ---- ghost + highlight ----
+const ghostMatS = new THREE.MeshBasicMaterial({ transparent:true, opacity:0.5, depthWrite:false, color:0x58e08a });
+const ghostMatW = new THREE.MeshBasicMaterial({ transparent:true, opacity:0.5, depthWrite:false, color:0x58e08a });
+const ghostS = new THREE.Mesh(new THREE.BoxGeometry(0.78,0.1,0.62), ghostMatS);
+const ghostW = new THREE.Group();
+{
+  const t = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.08,0.95,7), ghostMatW); t.position.y = 0.475;
+  const d = new THREE.Mesh(new THREE.SphereGeometry(0.3,8,6), ghostMatW); d.position.y = 0.95; d.scale.z = 0.15;
+  ghostW.add(t,d);
+}
+ghostS.visible = ghostW.visible = false; scene.add(ghostS, ghostW);
+const hiMat = new THREE.MeshBasicMaterial({ transparent:true, opacity:0.25, color:0x58e08a, depthWrite:false });
+const hiPlane = new THREE.Mesh(new THREE.PlaneGeometry(0.99,0.99), hiMat);
+hiPlane.rotation.x = -Math.PI/2; hiPlane.visible = false; scene.add(hiPlane);
+
+// ---- dust burst ----
+const bursts = [];
+function dustBurst(x,y,z){
+  for(let i=0;i<9;i++){
+    const m = new THREE.Mesh(new THREE.SphereGeometry(0.035,5,4),
+      new THREE.MeshBasicMaterial({ color:0xd8c79b, transparent:true, opacity:0.85 }));
+    m.position.set(x,y+0.05,z);
+    const a = i/9*Math.PI*2;
+    bursts.push({ m, vx:Math.cos(a)*1.4, vz:Math.sin(a)*1.4, vy:1.6+Math.random(), life:0.55 });
+    scene.add(m);
+  }
+}
+
+// ---- demand-shock beacon over the city ----
+const beacon = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.42, 0.42, 4.6, 12, 1, true),
+  new THREE.MeshBasicMaterial({ color:0xff5d4d, transparent:true, opacity:0, side:THREE.DoubleSide, depthWrite:false }));
+{ const cp = pos(6,12); beacon.position.set(cp.x, 2.5, cp.z); }
+scene.add(beacon);
+function pulseBeacon(hex){
+  beacon.material.color.setHex(hex);
+  return tween(DUR(1500), k=>{
+    beacon.material.opacity = Math.sin(Math.min(1,k)*Math.PI)*0.32*(0.72+0.28*Math.sin(k*14));
+  }).then(()=>{ beacon.material.opacity = 0; });
+}
+
+// ---- the Year-2 data centre (a demand shock made physical) ----
+let dataCentre = null;
+function spawnDataCentre(){
+  if(dataCentre) return;
+  const g = new THREE.Group();
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(0.78,0.4,0.56), lam(0x1c2733));
+  slab.position.y = 0.2; slab.castShadow = true; g.add(slab);
+  const glow = new THREE.MeshBasicMaterial({ color:0x39e0ff });
+  for(let i=0;i<3;i++){
+    const s = new THREE.Mesh(new THREE.BoxGeometry(0.66,0.022,0.02), glow);
+    s.position.set(0, 0.1+i*0.11, 0.29); g.add(s);
+  }
+  for(let i=0;i<2;i++){
+    const ac = new THREE.Mesh(new THREE.BoxGeometry(0.14,0.08,0.14), lam(0x9aa6ad));
+    ac.position.set(-0.18+i*0.36, 0.44, 0); ac.castShadow = true; g.add(ac);
+  }
+  const dish = new THREE.Mesh(new THREE.SphereGeometry(0.09,8,6,0,Math.PI), lam(0xe8eef1));
+  dish.rotation.x = -1.1; dish.position.set(0.26,0.5,-0.16); g.add(dish);
+  const p = pos(8,9);
+  g.position.set(p.x, 0.5, p.z); g.scale.setScalar(0.01);
+  scene.add(g); dataCentre = g;
+  tween(DUR(520), k=>g.scale.setScalar(Math.max(0.01, easeOutBack(k))));
+  dustBurst(p.x, 0.5, p.z);
+}
+function removeDataCentre(){ if(dataCentre){ scene.remove(dataCentre); dataCentre = null; } }
+
+// ---- construction scaffold (queued for next year) ----
+function makeScaffold(tech){
+  const g = new THREE.Group();
+  const amber = new THREE.MeshLambertMaterial({ color:0xffc65c });
+  for(const [dx,dz] of [[-0.36,-0.36],[0.36,-0.36],[-0.36,0.36],[0.36,0.36]]){
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.035,0.5,0.035), amber);
+    post.position.set(dx,0.25,dz); g.add(post);
+  }
+  const frame = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(0.78,0.5,0.78)),
+    new THREE.LineBasicMaterial({ color:0xffc65c }));
+  frame.position.y = 0.25; g.add(frame);
+  const hintMat = new THREE.MeshBasicMaterial({ color:0xffc65c, transparent:true, opacity:0.3, depthWrite:false });
+  if(tech==='wind'){
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.08,0.8,7), hintMat);
+    pole.position.y = 0.4; g.add(pole);
+  } else {
+    const slab = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.06,0.44), hintMat);
+    slab.position.y = 0.12; g.add(slab);
+  }
+  return g;
+}
+
+// ---- growth tower: the city rises with demand ----
+const towerBase = pos(6,11);
+const towerFloors = [];
+let crane = null;
+function setTowerFloors(n){
+  n = clamp(n, 1, 9);
+  while(towerFloors.length > n){ scene.remove(towerFloors.pop()); }
+  while(towerFloors.length < n){
+    const i = towerFloors.length;
+    const mat = new THREE.MeshPhongMaterial({ color:0xb2bcc4, emissive:0xffffff,
+      emissiveMap:makeWindowTex(400+i*17), map:makeWindowTex(400+i*17), emissiveIntensity:0.85 });
+    const fl = new THREE.Mesh(new THREE.BoxGeometry(0.27,0.22,0.27), mat);
+    fl.position.set(towerBase.x+0.31, 0.5+0.11+i*0.22, towerBase.z+0.31);
+    fl.castShadow = true; fl.scale.setScalar(0.01);
+    scene.add(fl); towerFloors.push(fl); windowMats.push(mat);
+    tween(DUR(420), k=>fl.scale.setScalar(Math.max(0.01, easeOutBack(k))));
+  }
+  if(!crane){
+    crane = new THREE.Group();
+    const mast = new THREE.Mesh(new THREE.BoxGeometry(0.05,0.6,0.05), lam(0xd2603e));
+    mast.position.y = 0.3;
+    const jib = new THREE.Mesh(new THREE.BoxGeometry(0.7,0.045,0.05), lam(0xd2603e));
+    jib.position.set(0.18,0.6,0);
+    const wt = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.09,0.09), lam(0x8b8f94));
+    wt.position.set(-0.22,0.6,0);
+    crane.add(mast,jib,wt); scene.add(crane);
+  }
+  crane.position.set(towerBase.x+0.31, 0.5+n*0.22, towerBase.z+0.31);
+}
+
+// ---- road traffic ----
+const carPath = [[6,4],[6,5],[6,6],[6,7],[6,8],[6,9],[6,10],[7,10],[8,10],[9,10]]
+  .map(([r,c])=>{ const p = pos(r,c); return new THREE.Vector3(p.x, 0.56, p.z); });
+const cars = [];
+for(let i=0;i<2;i++){
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.17,0.07,0.1), lam(i? 0xe4574a : 0x4aa3e4));
+  body.position.y = 0.035;
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(0.08,0.05,0.08), lam(0xe8f0f4));
+  cab.position.set(-0.02,0.09,0);
+  body.castShadow = true;
+  g.add(body,cab); scene.add(g);
+  cars.push({ g, t: i*0.5, dir: 1, sp: 0.55+i*0.2 });
+}
+function updateCars(dt){
+  const segs = carPath.length-1;
+  cars.forEach(c=>{
+    c.t += c.dir*c.sp*dt/segs*3;
+    if(c.t>1){ c.t=1; c.dir=-1; } if(c.t<0){ c.t=0; c.dir=1; }
+    const f = c.t*segs, i = Math.min(segs-1, Math.floor(f)), k = f-i;
+    c.g.position.lerpVectors(carPath[i], carPath[i+1], k);
+    const d = carPath[i+1].clone().sub(carPath[i]);
+    c.g.rotation.y = Math.atan2(d.x, d.z) + Math.PI/2;
+    c.g.position.x += 0.14*c.dir* (Math.abs(d.x)>0.5?0:1);
+    c.g.position.z += 0.14*c.dir* (Math.abs(d.x)>0.5?1:0);
+  });
+}
+
+// ---- camera controls ----
+const cam = { theta:-2.15, phi:1.02, r:16.5, tgt:new THREE.Vector3(0,0.3,0) };
+function applyCam(){
+  camera.position.set(
+    cam.tgt.x + cam.r*Math.sin(cam.phi)*Math.cos(cam.theta),
+    cam.tgt.y + cam.r*Math.cos(cam.phi),
+    cam.tgt.z + cam.r*Math.sin(cam.phi)*Math.sin(cam.theta));
+  camera.lookAt(cam.tgt);
+}
+applyCam();
+let dragging = false, moved = 0, px = 0, py = 0;
+const dom = renderer.domElement;
+dom.addEventListener('pointerdown', e=>{ dragging = true; moved = 0; px = e.clientX; py = e.clientY; });
+addEventListener('pointerup', e=>{
+  if(dragging && moved < 6) onClickAt(e.clientX, e.clientY);
+  dragging = false;
+});
+addEventListener('pointermove', e=>{
+  updatePointer(e.clientX, e.clientY);
+  if(!dragging) return;
+  if(window.G && G.cinecam) return;
+  const dx = e.clientX-px, dy = e.clientY-py;
+  moved += Math.abs(dx)+Math.abs(dy);
+  px = e.clientX; py = e.clientY;
+  cam.theta -= dx*0.005;
+  cam.phi = clamp(cam.phi + dy*0.004, 0.5, 1.32);
+  applyCam();
+});
+dom.addEventListener('wheel', e=>{
+  e.preventDefault();
+  if(window.G && G.cinecam) return;
+  cam.r = clamp(cam.r * (1 + e.deltaY*0.0011), 9, 27);
+  applyCam();
+}, { passive:false });
+
+// ---- raycast hover ----
+const ray = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+let hoverTile = null, pointerDirty = false;
+function updatePointer(x,y){
+  ndc.x = (x/innerWidth)*2-1; ndc.y = -(y/innerHeight)*2+1; pointerDirty = true;
+}
+function refreshHover(){
+  pointerDirty = false;
+  hoverTile = null;
+  if(!window.canBuildNow || !canBuildNow()){ ghostS.visible = ghostW.visible = hiPlane.visible = false; return; }
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(tileMeshes, false)[0];
+  if(!hit){ ghostS.visible = ghostW.visible = hiPlane.visible = false; return; }
+  const u = hit.object.userData;
+  hoverTile = u;
+  const ok = tileFree(u) && affordSelected();
+  const col = ok ? 0x58e08a : 0xff6b5e;
+  ghostMatS.color.setHex(col); ghostMatW.color.setHex(col); hiMat.color.setHex(col);
+  const p = pos(u.r,u.c), topY = TOP[u.t]||0.5;
+  const g = (G.selectedTech==='solar') ? ghostS : ghostW;
+  ghostS.visible = ghostW.visible = false;
+  if(u.t==='g'){ g.visible = true; g.position.set(p.x, topY + (g===ghostS?0.06:0), p.z); }
+  hiPlane.visible = (u.t==='g');
+  hiPlane.position.set(p.x, topY+0.015, p.z);
+}
+
+// ---- main loop ----
+let lastT = performance.now();
+function animate(){
+  requestAnimationFrame(animate);
+  const now = performance.now(), rawDt = (now-lastT)/1000, dt = Math.min(0.05, rawDt); lastT = now;
+  // tweens
+  for(let i=tweens.length-1;i>=0;i--){
+    const tw = tweens[i], k = Math.min(1,(now-tw.t0)/tw.dur);
+    tw.onU(k);
+    if(k>=1){ tweens.splice(i,1); tw.res(); }
+  }
+  // water
+  const wp = waterGeo.attributes.position;
+  const t = now*0.001;
+  for(let i=0;i<wp.count;i++){
+    const x = waterBase[i*3], y = waterBase[i*3+1];
+    wp.array[i*3+2] = Math.sin(x*0.55+t*1.3)*0.05 + Math.cos(y*0.5+t*0.9)*0.05;
+  }
+  wp.needsUpdate = true;
+  // clouds — cover follows solar factor
+  const cover = clamp(1.12 - env.solar, 0.18, 0.95);
+  clouds.forEach(cl=>{
+    cl.position.x += cl.userData.sp*dt*(window.G && G.busy?4:1);
+    if(cl.position.x > 17) cl.position.x = -17;
+    cl.userData.mat.opacity = lerp(cl.userData.mat.opacity, 0.35+cover*0.6, 0.04);
+    const sc = 0.8+cover*0.5;
+    cl.scale.set(lerp(cl.scale.x,sc,0.04), lerp(cl.scale.y,sc,0.04), lerp(cl.scale.z,sc,0.04));
+  });
+  // streaks — wind factor
+  const sAlpha = clamp((env.wind-0.75)*0.55, 0, 0.5) + 0.05;
+  streaks.forEach(s=>{
+    s.position.x += s.userData.sp*dt*(0.4+env.wind*0.8);
+    if(s.position.x > 13) s.position.x = -13;
+    s.material.opacity = sAlpha;
+  });
+  // placed assets
+  if(window.G){
+    G.placements.forEach(pl=>{
+      if(pl.rotor) pl.rotor.rotation.z += dt*(0.6+env.wind*2.0);
+      if(pl.panelMat) pl.panelMat.emissiveIntensity = lerp(pl.panelMat.emissiveIntensity, 0.08+clamp(env.solar,0,1.4)*0.32, 0.05);
+    });
+  }
+  // sun follows solar factor a bit
+  sun.intensity = lerp(sun.intensity, 0.7 + clamp(env.solar,0,1.4)*0.4, 0.03);
+  hemi.intensity = lerp(hemi.intensity, 0.55 + clamp(env.solar,0,1.3)*0.25, 0.03);
+  // smoke
+  smokes.forEach(s=>{
+    const k = (t*0.35 + s.ph) % 1;
+    s.m.position.set(s.x + Math.sin(k*9)*0.05, s.y + k*0.8, s.z);
+    s.m.material.opacity = 0.5*(1-k);
+    s.m.scale.setScalar(0.6+k*1.4);
+  });
+  if(boat){ boat.position.y = 0.36 + Math.sin(t*1.4)*0.035; boat.rotation.z = Math.sin(t*1.1)*0.05; }
+  // dust bursts
+  for(let i=bursts.length-1;i>=0;i--){
+    const b = bursts[i]; b.life -= dt;
+    if(b.life<=0){ scene.remove(b.m); bursts.splice(i,1); continue; }
+    b.vy -= 6*dt;
+    b.m.position.x += b.vx*dt; b.m.position.y += b.vy*dt; b.m.position.z += b.vz*dt;
+    b.m.material.opacity = b.life*1.5;
+  }
+  if(window.tickGame) tickGame(Math.min(0.25, rawDt)); // sim clock keeps pace on slow machines
+  updateCars(dt);
+  if(crane) crane.rotation.y = Math.sin(t*0.35)*0.6;
+  if(pointerDirty) refreshHover();
+  renderer.render(scene, camera);
+}
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+// =====================================================================
+// PART B — dynamic (SimCity-style) game core.
+// The clock runs; months tick; the annual v8 engine remains the single
+// source of truth. Monthly series are an exact allocation of canonical
+// annual outcomes, so workbook parity is untouched.
+// =====================================================================
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function freshBuilds(){ return Array.from({length:CONFIG.years},()=>({s:0,w:0})); }
+const G = {
+  round:1, year:1, phase:'planning', selectedTech:'solar', busy:false,
+  builds:freshBuilds(), placements:[], queue:[], results:[], cash:0,
+  buildOrder:null, orderSrc:null, labCands:[{s:1,w:0},{s:0,w:1},{s:2,w:1},{s:0,w:0}],
+  consult:{shown:0,taken:0,records:[]}, _advice:null, sawDrop:false, cinecam:false,
+  muted:false, heatT:0, advised:{}, blackoutBusy:false,
+  r1:null, r2:null, startedAt:new Date().toISOString()
+};
+window.G = G;
+const T = { running:false, speed:1, month:0, mprog:0, msPerMonth:1800 };
+window.T = T;
+let M = null;               // monthly cache for the running year
+const envTgt = { solar:1, wind:1 };
+
+const show = el => el.hidden = false;
+const hide = el => el.hidden = true;
+let toastT = null;
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('on'), 2900); }
+function banner(msg){ const b=$('banner');
+  if(msg){ b.textContent=msg; b.classList.add('on'); } else b.classList.remove('on'); }
+function weatherChip(msg){ const w=$('weatherChip');
+  if(msg){ w.textContent=msg; w.classList.add('on'); setTimeout(()=>w.classList.remove('on'), 3400); }
+  else w.classList.remove('on'); }
+function logAdd(title, body, cls=''){
+  const e=document.createElement('div'); e.className='log-e '+cls;
+  e.innerHTML=`<b>${title}</b>${body}`;
+  $('log').prepend(e);
+}
+
+// ---- audio (journey: warning tone / blackout alarm / year chime) ----
+let AC = null;
+function audioInit(){
+  if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+  if(AC && AC.state==='suspended') AC.resume();
+}
+function tone(freq, dur, type='sine', vol=0.04, when=0){
+  if(!AC || G.muted) return;
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, AC.currentTime+when);
+  g.gain.setTargetAtTime(0.0001, AC.currentTime+when+dur*0.55, dur*0.25);
+  o.connect(g); g.connect(AC.destination);
+  o.start(AC.currentTime+when); o.stop(AC.currentTime+when+dur+0.1);
+}
+const sndWarn  = ()=>{ tone(392,0.13,'square',0.028); tone(311,0.17,'square',0.028,0.15); };
+const sndAlarm = ()=>{ tone(196,0.5,'sawtooth',0.05); tone(147,0.75,'sawtooth',0.05,0.42); };
+const sndChime = ()=>{ tone(523,0.22); tone(659,0.26,'sine',0.035,0.16); tone(784,0.34,'sine',0.03,0.3); };
+
+// ---- state helpers ----
+const techCapex = t => CONFIG.tech[t].capex;
+function cumFleet(throughYi){
+  let S=0,W=0; for(let y=0;y<=throughYi;y++){ S+=G.builds[y].s; W+=G.builds[y].w; } return {S,W};
+}
+function budgetRemaining(){
+  return budgetStartOfYear(G.builds, G.year) - schedCapex(G.builds, G.year-1);
+}
+function queueCapex(){ return G.queue.reduce((a,q)=>a+techCapex(q.tech),0); }
+function projNextRemaining(){ return budgetRemaining() + CONFIG.annualBudget - queueCapex(); }
+function canBuildNow(){ return (G.phase==='planning' || G.phase==='running') && !G.busy; }
+function tileFree(u){
+  if(u.t!=='g') return false;
+  const key = u.r+'_'+u.c;
+  return !G.placements.some(p=>p.key===key) && !G.queue.some(q=>q.key===key);
+}
+function affordSelected(){
+  return G.phase==='planning'
+    ? techCapex(G.selectedTech) <= budgetRemaining()
+    : techCapex(G.selectedTech) <= projNextRemaining();
+}
+
+// ---- placement: build in planning, queue while the year runs ----
+function powerLine(target){
+  if(!subTop) return null;
+  const mid = subTop.clone().lerp(target, 0.5); mid.y = Math.min(subTop.y, target.y) - 0.25;
+  const curve = new THREE.QuadraticBezierCurve3(subTop, mid, target);
+  const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(22)),
+    new THREE.LineBasicMaterial({ color:0x2c3b45, transparent:true, opacity:0.9 }));
+  scene.add(line); return line;
+}
+function buildReal(u, tech, year, placedDuring){
+  const p = pos(u.r,u.c), topY = TOP[u.t];
+  const grp = tech==='solar' ? makeSolar() : makeTurbine();
+  grp.position.set(p.x, topY, p.z); grp.scale.setScalar(0.01);
+  scene.add(grp);
+  tween(DUR(380), k=>grp.scale.setScalar(Math.max(0.01, easeOutBack(k))));
+  dustBurst(p.x, topY, p.z);
+  const lineTgt = new THREE.Vector3(p.x, topY + (tech==='wind'?0.95:0.22), p.z);
+  G.placements.push({ key:u.r+'_'+u.c, tech, year, round:G.round, committed:false, placedDuring,
+    group:grp, line:powerLine(lineTgt), rotor:grp.userData.rotor||null, panelMat:grp.userData.panelMat||null });
+}
+function placeAt(u){
+  if(!canBuildNow()) return;
+  if(!tileFree(u)){ if(u.t==='g') toast('That plot is taken.'); return; }
+  const tech = G.selectedTech, cpx = techCapex(tech);
+  if(G.phase==='planning'){
+    if(cpx > budgetRemaining()){ toast(`Not enough budget — ${CONFIG.tech[tech].label} costs ${fmtM(cpx,0)}.`); return; }
+    buildReal(u, tech, G.year, 'planning');
+    G.builds[G.year-1][tech==='solar'?'s':'w']++;
+  } else { // running: queue for next year
+    if(G.year >= CONFIG.years){ toast('No further commissioning windows in this contract.'); return; }
+    if(cpx > projNextRemaining()){ toast(`Next year’s projected budget can’t cover that (${fmtM(cpx,0)}).`); return; }
+    const p = pos(u.r,u.c);
+    const sc = makeScaffold(tech);
+    sc.position.set(p.x, TOP[u.t], p.z); sc.scale.setScalar(0.01);
+    tween(DUR(300), k=>sc.scale.setScalar(Math.max(0.01,k)));
+    scene.add(sc);
+    G.queue.push({ key:u.r+'_'+u.c, tech, mesh:sc, u:{...u}, monthQueued:T.month });
+    toast(`${CONFIG.tech[tech].label} breaks ground — commissions in Year ${G.year+1}. Cancellable until New Year.`);
+  }
+  renderAll();
+}
+function onClickAt(x,y){
+  updatePointer(x,y); refreshHover();
+  if(hoverTile) placeAt(hoverTile);
+}
+function undo(){
+  if(!canBuildNow()) return;
+  if(G.phase==='running'){
+    const q = G.queue.pop();
+    if(!q){ toast('Nothing queued to cancel.'); return; }
+    scene.remove(q.mesh); renderAll(); return;
+  }
+  for(let i=G.placements.length-1;i>=0;i--){
+    const p = G.placements[i];
+    if(p.round===G.round && p.year===G.year && !p.committed){
+      scene.remove(p.group); if(p.line) scene.remove(p.line);
+      G.placements.splice(i,1);
+      G.builds[G.year-1][p.tech==='solar'?'s':'w']--;
+      renderAll(); return;
+    }
+  }
+  toast('This year’s builds are committed — nothing left to undo.');
+}
+function clearAllPlacements(){
+  G.placements.forEach(p=>{ scene.remove(p.group); if(p.line) scene.remove(p.line); });
+  G.placements = [];
+  G.queue.forEach(q=>scene.remove(q.mesh));
+  G.queue = [];
+}
+
+// ---- monthly allocation of the canonical annual outcome ----
+function computeMonthly(yi){
+  const f = cumFleet(yi);
+  const o = yearOutcome(f.S, f.W, schedCapex(G.builds,yi),
+                        ACTUAL.demand[yi], ACTUAL.solar[yi], ACTUAL.wind[yi]);
+  const dW=[], sS=[], wS=[];
+  for(let m=0;m<12;m++){
+    dW.push(1 + 0.09*Math.cos((m-0.5)/12*2*Math.PI) + (seeded(yi*37+m*7)-0.5)*0.08 + (yi===4 && m>=5 && m<=8 ? 0.05 : 0));
+    sS.push(Math.max(0.22, 1 + 0.58*Math.cos((m-6.5)/12*2*Math.PI) + (seeded(yi*11+m*13)-0.5)*0.18));
+    wS.push(Math.max(0.30, 1 - 0.38*Math.cos((m-6.5)/12*2*Math.PI) + (seeded(yi*23+m*5)-0.5)*0.30));
+  }
+  const norm = a=>{ const s=a.reduce((x,y)=>x+y,0); return a.map(v=>v*12/s); };
+  const dw = norm(dW), ss = norm(sS), ws = norm(wS);
+  const demM = dw.map(w=>ACTUAL.demand[yi]*w/12);
+  const soY = f.S*CONFIG.tech.solar.avgOutput*(ACTUAL.solar[yi]/CONFIG.tech.solar.avgAvail);
+  const woY = f.W*CONFIG.tech.wind.avgOutput*(ACTUAL.wind[yi]/CONFIG.tech.wind.avgAvail);
+  const supM = ss.map((v,m)=>(soY*v + woY*ws[m])/12);
+  const rawS = demM.map((d,m)=>Math.max(0, d-supM[m]));
+  const sSum = rawS.reduce((a,b)=>a+b,0);
+  const shortM = rawS.map(v=> o.shortage>0 && sSum>0 ? v*o.shortage/sSum : 0);
+  if(o.shortage>0 && sSum===0) shortM[demM.indexOf(Math.max(...demM))] = o.shortage;
+  const delM = demM.map((d,m)=>Math.max(0, d-shortM[m]));
+  const dSum = delM.reduce((a,b)=>a+b,0);
+  const revM = delM.map(v=> dSum>0 ? v*o.revenue/dSum : o.revenue/12);
+  const cashM = revM.map((r,m)=> r - shortM[m]*CONFIG.penalty/1e6 - (m===0 ? o.capex : 0));
+  return { o, demM, supM, shortM, cashM, ss, ws,
+           solarF: ss.map(v=>v*ACTUAL.solar[yi]/CONFIG.tech.solar.avgAvail),
+           windF:  ws.map(v=>v*ACTUAL.wind[yi]/CONFIG.tech.wind.avgAvail),
+           peakMonth: shortM.indexOf(Math.max(...shortM)) };
+}
+
+// ---- crisis FX ----
+async function cameraDrop(){
+  const saved = { theta:cam.theta, phi:cam.phi, r:cam.r, tx:cam.tgt.x, ty:cam.tgt.y, tz:cam.tgt.z };
+  const cp = pos(6,12);
+  G.cinecam = true;
+  await tween(DUR(950), k=>{
+    const e = easeIO(k);
+    cam.theta = lerp(saved.theta, -2.5, e);
+    cam.phi   = lerp(saved.phi, 1.31, e);
+    cam.r     = lerp(saved.r, 5.4, e);
+    cam.tgt.set(lerp(saved.tx,cp.x,e), lerp(saved.ty,1.15,e), lerp(saved.tz,cp.z,e));
+    applyCam();
+  });
+  return async ()=>{
+    await tween(DUR(850), k=>{
+      const e = easeIO(k);
+      cam.theta = lerp(-2.5, saved.theta, e);
+      cam.phi   = lerp(1.31, saved.phi, e);
+      cam.r     = lerp(5.4, saved.r, e);
+      cam.tgt.set(lerp(cp.x,saved.tx,e), lerp(1.15,saved.ty,e), lerp(cp.z,saved.tz,e));
+      applyCam();
+    });
+    G.cinecam = false;
+  };
+}
+async function blackoutFX(){
+  if(G.blackoutBusy) return;
+  G.blackoutBusy = true;
+  sndAlarm();
+  $('vignette').classList.add('on');
+  let camBack = null;
+  if(!G.sawDrop && !REDUCED){ G.sawDrop = true; camBack = await cameraDrop(); }
+  await tween(DUR(850), k=>{ windowMats.forEach(m=> m.emissiveIntensity = Math.random()<k*0.9 ? 0.05 : 0.85); });
+  windowMats.forEach(m=>m.emissiveIntensity=0.04);
+  await sleep(DUR(950));
+  windowMats.forEach(m=>m.emissiveIntensity=0.85);
+  $('vignette').classList.remove('on');
+  if(camBack) await camBack();
+  G.blackoutBusy = false;
+}
+async function brownoutFX(){
+  if(G.blackoutBusy) return;
+  sndWarn();
+  await tween(DUR(220), k=>{ windowMats.forEach(m=> m.emissiveIntensity = lerp(0.85, 0.28, k)); });
+  await tween(DUR(320), k=>{ windowMats.forEach(m=> m.emissiveIntensity = lerp(0.28, 0.85, k)); });
+}
+function advisorOnce(key, msg){
+  if(G.advised[key]) return;
+  G.advised[key] = true;
+  toast('🛰 Grid Advisor: ' + msg);
+}
+
+// ---- the clock ----
+function tickGame(dt){
+  // smooth weather toward monthly targets
+  env.solar += (envTgt.solar - env.solar)*Math.min(1, dt*2.5);
+  env.wind  += (envTgt.wind  - env.wind )*Math.min(1, dt*2.5);
+  // heat tint easing
+  const heatGoal = (G.phase==='running' && G.year===5 && T.month>=5 && T.month<=8) ? 0.8 : 0;
+  G.heatT += (heatGoal - G.heatT)*Math.min(1, dt*1.5);
+  if(G.phase!=='running') return;
+  if(!T.running) return;
+  T.mprog += dt*1000*T.speed / T.msPerMonth;
+  while(T.mprog >= 1 && T.month < 12){
+    T.mprog -= 1; T.month++;
+    if(T.month >= 12){ yearEnd(); return; }
+    monthTick(T.month);
+  }
+  // year-as-a-day: the sun crosses the sky once per year
+  const yp = Math.min(1, (T.month + Math.min(1,T.mprog))/12);
+  setSunAngle(0.12 + 0.76*yp);
+  const c = new THREE.Color();
+  if(yp<0.5) c.lerpColors(SKY_DAWN, SKY_DAY, yp*2); else c.lerpColors(SKY_DAY, SKY_DUSK, (yp-0.5)*2);
+  if(G.heatT>0.02) c.lerp(new THREE.Color(0xf6c493), G.heatT*0.8);
+  setSky(c);
+  liveHUD();
+}
+window.tickGame = tickGame;
+function monthTick(m){
+  const yi = G.year-1;
+  envTgt.solar = M.solarF[m]; envTgt.wind = M.windF[m];
+  $('monthNow').textContent = MONTHS[m];
+  if(m===4){
+    const dev = (ACTUAL.demand[yi] - CONFIG.forecast[yi]) / CONFIG.forecast[yi];
+    const evs = G.round===1 ? ACTUAL.eventsR1 : ACTUAL.eventsR2;
+    toast('📰 ' + evs[yi]);
+    if(Math.abs(dev) > 0.08){
+      weatherChip(`⚠ demand ${dev>0?'+':'−'}${Math.round(Math.abs(dev)*100)}% vs plan`);
+      pulseBeacon(dev>0 ? 0xff5d4d : 0x5db9ff);
+    }
+    if(yi===1) spawnDataCentre();
+    if(yi===4) weatherChip('🌡 heatwave — trade winds drop, the island sweats');
+  }
+  if(M.shortM[m] > 0.5){
+    if(M.o.severe && m===M.peakMonth){
+      advisorOnce('blackout', 'unserved demand — the grid is shedding load.');
+      blackoutFX();
+    } else {
+      advisorOnce('reserve', 'reserve margin critically low this month.');
+      brownoutFX();
+    }
+  }
+}
+function liveHUD(){
+  if(!M || T.month>=12) return;
+  const m = T.month;
+  const ytd = G.cash + M.cashM.slice(0,m).reduce((a,b)=>a+b,0) + M.cashM[m]*Math.min(1,T.mprog);
+  $('cashVal').textContent = fmtM(ytd);
+  const dem = M.demM[m], sup = M.supM[m];
+  $('liveLoad').textContent = (dem/1000).toFixed(1)+' GWh';
+  $('liveSupply').textContent = (sup/1000).toFixed(1)+' GWh';
+  const cover = Math.min(1, sup/Math.max(1,dem));
+  $('gridFill').style.width = (cover*100).toFixed(0)+'%';
+  $('gridBar').classList.toggle('bad', cover < 0.999);
+}
+
+// ---- year lifecycle ----
+function startYear(){
+  if(G.phase!=='planning' || G.busy) return;
+  audioInit();
+  hideConsultant(null);
+  G.placements.forEach(p=>{ if(p.round===G.round && p.year===G.year) p.committed = true; });
+  M = computeMonthly(G.year-1);
+  G.advised = {};
+  G.phase = 'running'; T.running = true; T.month = 0; T.mprog = 0;
+  monthTick(0);   // January fires like any other month (peak-shortage can land here)
+  setTowerFloors(1 + Math.round((ACTUAL.demand[G.year-1]/ACTUAL.demand[0] - 1)*6));
+  banner(`Year ${G.year} begins`);
+  setTimeout(()=>banner(null), 1600);
+  $('monthNow').textContent = MONTHS[0];
+  renderAll();
+}
+function yearEnd(){
+  T.running = false; G.phase = 'between';
+  const o = M.o;
+  G.results.push(o); G.cash += o.cash;
+  envTgt.solar = ACTUAL.solar[G.year-1]/CONFIG.tech.solar.avgAvail;
+  envTgt.wind  = ACTUAL.wind[G.year-1]/CONFIG.tech.wind.avgAvail;
+  sndChime();
+  const evs = G.round===1 ? ACTUAL.eventsR1 : ACTUAL.eventsR2;
+  const cls = o.severe ? 'warn' : (o.cash>=0?'ok':'');
+  logAdd(`R${G.round} · Year ${G.year} — cash ${fmtM(o.cash)}`,
+    `${evs[G.year-1]}<br>Demand ${fmtMWh(o.demand)} · supplied ${fmtMWh(o.supply)}` +
+    (o.shortage>0.5?` · <span class="bad">short ${fmtMWh(o.shortage)}</span>`:'') +
+    (o.curtailed>0.5?` · <span style="color:var(--wind)">curtailed ${fmtMWh(o.curtailed)}</span>`:''), cls);
+  showSummary(o, evs[G.year-1]);
+}
+function showSummary(o, evt){
+  $('resKick').textContent = `Round ${G.round} · Year ${G.year} — year in review`;
+  $('resTitle').textContent = o.severe ? `Year ${G.year}: the lights went out` : `Year ${G.year} closes`;
+  const reliab = 12 - M.shortM.filter(v=>v>0.5).length;
+  const qNote = G.queue.length
+    ? `<br><span class="warnc">Breaking ground for Year ${G.year+1}: ${G.queue.filter(q=>q.tech==='solar').length} solar · ${G.queue.filter(q=>q.tech==='wind').length} wind — commissions at New Year.</span>`
+    : '';
+  $('resEvent').innerHTML = evt + `<br><span style="color:var(--faint)">Reliable months: ${reliab}/12.</span>` + qNote;
+  const stat = (l,v,c='')=>`<div class="stat"><span>${l}</span><b class="${c}">${v}</b></div>`;
+  $('resGrid').innerHTML =
+    stat('Demand', fmtMWh(o.demand)) +
+    stat('Supplied', fmtMWh(o.supply)) +
+    stat('Delivered', fmtMWh(o.delivered)) +
+    stat('Shortage', fmtMWh(o.shortage), o.shortage>0.5?'bad':'') +
+    stat('Curtailed', fmtMWh(o.curtailed), o.curtailed>0.5?'warnc':'') +
+    stat('Cash profit', fmtM(o.cash), o.cash>=0?'good':'bad');
+  show($('resultModal'));
+}
+function afterSummary(){
+  hide($('resultModal'));
+  $('vignette').classList.remove('on');
+  const finished = G.year;
+  if(finished < CONFIG.years){
+    G.year++;
+    // queued scaffolds commission now, as this year's (still cancellable) builds
+    G.queue.forEach(q=>{
+      scene.remove(q.mesh);
+      buildReal(q.u, q.tech, G.year, 'run-queue');
+      G.builds[G.year-1][q.tech==='solar'?'s':'w']++;
+    });
+    G.queue = [];
+    G.phase = 'planning'; T.month = 0; T.mprog = 0;
+    G.buildOrder = null; G.orderSrc = null;
+    $('monthNow').textContent = 'Plan';
+    setSunAngle(0.12); setSky(SKY_DAWN.clone().lerp(SKY_DAY, 0.5));
+    showConsultant();
+    renderAll();
+  } else endRound();
+}
+
+// ---- HUD ----
+function renderHUD(){
+  $('roundLabel').textContent = G.round===1 ? 'Round 1 · The Average Trap' : 'Round 2 · Managing the Flaw of Averages';
+  $('yearNow').textContent = G.year;
+  $('budgetVal').textContent = fmtM(budgetRemaining(),0);
+  const f = cumFleet(G.year-1);
+  $('fleetVal').textContent = `${f.S} solar · ${f.W} wind`;
+  if(G.phase!=='running') $('cashVal').textContent = fmtM(G.cash);
+  const b = G.builds[G.year-1];
+  $('addsNow').textContent = (b.s||b.w) ? `${b.s} solar · ${b.w} wind` : '—';
+  $('capexNow').textContent = fmtM(schedCapex(G.builds,G.year-1),0);
+  const qs = G.queue.filter(q=>q.tech==='solar').length, qw = G.queue.filter(q=>q.tech==='wind').length;
+  $('queueNow').textContent = G.queue.length ? `${qs} solar · ${qw} wind (${fmtM(queueCapex(),0)})` : '—';
+  const rem = budgetRemaining();
+  const bl = $('budgetLeft'); bl.textContent = fmtM(rem,0);
+  bl.className = rem < Math.min(CONFIG.tech.solar.capex,CONFIG.tech.wind.capex) ? 'warnc' : '';
+  const pb = $('playBtn');
+  if(G.phase==='planning'){ pb.disabled = false; pb.textContent = `▶ Start Year ${G.year}`; }
+  else if(G.phase==='running'){ pb.disabled = false;
+    pb.textContent = T.running ? `⏸ ${MONTHS[Math.min(11,T.month)]} · Year ${G.year}` : `▶ Resume — ${MONTHS[Math.min(11,T.month)]}`; }
+  else { pb.disabled = true; pb.textContent = '…'; }
+  $('speedBtn').textContent = T.speed + '×';
+  $('undoBtn').textContent = G.phase==='running' ? 'Cancel last queued' : 'Undo last build';
+  $('dashForecast').textContent = fmtMWh(CONFIG.forecast[G.year-1]);
+  $('dashPlan').textContent = fmtMWh(f.S*CONFIG.tech.solar.avgOutput + f.W*CONFIG.tech.wind.avgOutput);
+  if(G.phase!=='running'){
+    $('liveLoad').textContent = '—'; $('liveSupply').textContent = '—';
+    $('gridFill').style.width = '100%'; $('gridBar').classList.remove('bad');
+  }
+  const lab = $('labBtn');
+  if(G.round===1){ lab.classList.add('locked'); lab.textContent='🔒 Scenario Lab'; }
+  else { lab.classList.remove('locked'); lab.textContent='Scenario Lab — test this year’s move'; }
+  const oc = $('orderChip');
+  if(G.buildOrder){
+    oc.style.display='block';
+    const src = G.orderSrc==='consultant' ? 'Consultant’s guide' : 'Lab guide';
+    oc.innerHTML = `${src} (advisory): place <b>${G.buildOrder.s} solar · ${G.buildOrder.w} wind</b> — placed so far: ${b.s} · ${b.w}`;
+  } else oc.style.display='none';
+  $('lessonBox').textContent = G.phase==='running'
+    ? 'The year is live. Anything you place now breaks ground and commissions at New Year — the grid you have is the grid you chose.'
+    : (G.round===1
+      ? 'Plan while the clock is paused. The forecast is on your chart; building nothing is also a decision.'
+      : 'Plan while the clock is paused. Check the Scenario Lab before you press ▶ — choose by the distribution, not the average.');
+}
+function chartLegend(){
+  $('chartLegend').innerHTML = G.round===1
+    ? `<span><i style="background:rgba(255,255,255,.75)"></i>Forecast</span>
+       <span><i style="background:#47d98a"></i>Your supply @avg</span>
+       <span><i style="background:#ffc65c"></i>Actual demand</span>`
+    : `<span><i style="background:rgba(143,216,255,.5)"></i>20-futures demand fan (P10–P90)</span>
+       <span><i style="background:rgba(201,166,255,.6)"></i>◆ tail futures — beyond the fan</span>
+       <span><i style="background:rgba(255,255,255,.75)"></i>Forecast</span>
+       <span><i style="background:#47d98a"></i>Your supply @avg</span>
+       <span><i style="background:#ffc65c"></i>Actual demand</span>`;
+}
+function drawChart(){
+  const cv=$('chart'), dpr=Math.min(devicePixelRatio||1,2);
+  const W=cv.clientWidth||240, H=cv.clientHeight||148;
+  cv.width=W*dpr; cv.height=H*dpr;
+  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
+  const m={l:10,r:10,t:12,b:18}, ymax=520000;
+  const X=i=>m.l+(W-m.l-m.r)*i/4, Y=v=>H-m.b-(H-m.t-m.b)*v/ymax;
+  g.strokeStyle='rgba(255,255,255,.08)'; g.lineWidth=1;
+  for(const v of [100000,200000,300000,400000,500000]){ g.beginPath(); g.moveTo(m.l,Y(v)); g.lineTo(W-m.r,Y(v)); g.stroke(); }
+  if(G.round===2){
+    const p10=[],p90=[];
+    for(let y=0;y<5;y++){ const ds=FUTURES.map(f=>f.demand[y]).sort((a,b)=>a-b); p10.push(pctile(ds,0.1)); p90.push(pctile(ds,0.9)); }
+    g.fillStyle='rgba(143,216,255,.14)'; g.beginPath(); g.moveTo(X(0),Y(p90[0]));
+    for(let i=1;i<5;i++) g.lineTo(X(i),Y(p90[i]));
+    for(let i=4;i>=0;i--) g.lineTo(X(i),Y(p10[i]));
+    g.closePath(); g.fill();
+    const mn=[], mx=[];
+    for(let y=0;y<5;y++){ const ds=FUTURES.map(f=>f.demand[y]); mn.push(Math.min(...ds)); mx.push(Math.max(...ds)); }
+    g.setLineDash([2,3]); g.strokeStyle='rgba(201,166,255,.6)'; g.lineWidth=1.2;
+    g.beginPath(); mx.forEach((v,i)=> i?g.lineTo(X(i),Y(v)):g.moveTo(X(0),Y(v))); g.stroke();
+    g.beginPath(); mn.forEach((v,i)=> i?g.lineTo(X(i),Y(v)):g.moveTo(X(0),Y(v))); g.stroke();
+    g.setLineDash([]);
+  }
+  g.setLineDash([5,4]); g.strokeStyle='rgba(255,255,255,.75)'; g.lineWidth=1.5;
+  g.beginPath(); CONFIG.forecast.forEach((v,i)=> i?g.lineTo(X(i),Y(v)):g.moveTo(X(0),Y(v))); g.stroke(); g.setLineDash([]);
+  g.strokeStyle='#47d98a'; g.lineWidth=2; g.beginPath();
+  let S=0,Wd=0;
+  for(let y=0;y<5;y++){
+    S+=G.builds[y].s; Wd+=G.builds[y].w;
+    const v=S*CONFIG.tech.solar.avgOutput+Wd*CONFIG.tech.wind.avgOutput;
+    y?g.lineTo(X(y),Y(v)):g.moveTo(X(0),Y(v));
+  }
+  g.stroke();
+  g.fillStyle='#ffc65c';
+  for(let y=0;y<G.results.length;y++){ g.beginPath(); g.arc(X(y),Y(ACTUAL.demand[y]),3.4,0,7); g.fill(); }
+  g.fillStyle='rgba(255,255,255,.4)'; g.font='9px "IBM Plex Mono",monospace'; g.textAlign='center';
+  for(let y=0;y<5;y++) g.fillText('Y'+(y+1), X(y), H-5);
+}
+function renderAll(){ renderHUD(); chartLegend(); drawChart(); }
+
+// ---- consultant (planning phase only) ----
+function consultantAdvice(){
+  const prev = G.year>1 ? cumFleet(G.year-2) : {S:0,W:0};
+  const target = Math.max(prev.S, Math.ceil(CONFIG.forecast[G.year-1]/CONFIG.tech.solar.avgOutput - 1e-9));
+  const need = target - prev.S;
+  const placed = G.builds[G.year-1];
+  let say;
+  if(need > 0){
+    const togo = Math.max(0, need - placed.s);
+    say = `${fmtMWh(CONFIG.forecast[G.year-1])} to serve. My rule is simple: solar tiles the forecast — ${target} block${target>1?'s':''} in total, so add ${need}`;
+    if(placed.s) say += ` (you’ve placed ${placed.s}; ${togo} to go)`;
+    say += `. I don’t count wind — you can’t set a clock by it. Not one block more.`;
+  } else {
+    say = `You hold ${prev.S} solar — the forecast (${fmtMWh(CONFIG.forecast[G.year-1])}) is already tiled. Build nothing, keep the cash.`;
+    if(placed.s + placed.w > 0) say += ` Those ${placed.s+placed.w} new placement${placed.s+placed.w>1?'s':''}? Cancel them, if you ask me.`;
+  }
+  return { need, say };
+}
+function showConsultant(){
+  if(G.phase!=='planning') return;
+  const a = consultantAdvice(); G._advice = a;
+  $('consultSay').textContent = '“'+a.say+'”';
+  $('consult').style.display = 'block';
+  G.consult.shown++;
+}
+function hideConsultant(took){
+  if($('consult').style.display==='none') return;
+  G.consult.records.push({ round:G.round, year:G.year, advisedSolar:G._advice.need, took });
+  if(took===true) G.consult.taken++;
+  $('consult').style.display = 'none';
+}
+
+// ---- round end (unchanged canonical pipeline) ----
+function endRound(){
+  G.phase = 'between';
+  renderHUD();
+  const sch = G.builds.map(b=>({s:b.s,w:b.w}));
+  const run = runPath(sch, ACTUAL);
+  const st = stressTest(sch);
+  const vals = st.map(x=>x.r.final);
+  const sorted = vals.slice().sort((a,b)=>a-b);
+  const summ = {
+    schedule: sch,
+    final: run.final, cash: run.cash, residual: run.residual,
+    promise: runPath(sch, AVG_PATH).final,
+    expected: vals.reduce((a,b)=>a+b,0)/vals.length,
+    worst: sorted[0], best: sorted[sorted.length-1], p10: pctile(sorted,0.1),
+    severeFuts: st.filter(x=>x.r.severeYears>0).length,
+    swans: st.slice().sort((x,y)=>x.r.final-y.r.final).slice(0,2).map(x=>x.f.name),
+    consult: { shown:G.consult.shown, taken:G.consult.taken, records:G.consult.records.slice() },
+    buildTiming: G.placements.filter(p=>p.round===G.round).map(p=>({year:p.year, tech:p.tech, placedDuring:p.placedDuring})),
+    stressVals: vals, stress: st
+  };
+  if(G.round===1){ G.r1 = summ; showFutures(summ); }
+  else { G.r2 = summ; showFinal(); }
+}
+function verdict(r){
+  if(r.totalShortage>160000 || r.final<0) return ['Fragile','v-fra'];
+  if(r.totalShortage>50000 || r.final<40) return ['Exposed','v-exp'];
+  return ['Robust','v-rob'];
+}
+function renderHist(el, axisEl, series, markers){
+  const all = series.flatMap(s=>s.vals).concat(markers.map(m=>m.v));
+  let lo = Math.min(...all), hi = Math.max(...all);
+  if(hi-lo < 1e-6) hi = lo+1;
+  const pad = (hi-lo)*0.05; lo -= pad; hi += pad;
+  const B = 12;
+  const counts = series.map(()=>Array(B).fill(0));
+  series.forEach((s,si)=> s.vals.forEach(v=>{
+    counts[si][clamp(Math.floor((v-lo)/(hi-lo)*B),0,B-1)]++; }));
+  const mx = Math.max(1, ...counts.flat());
+  el.innerHTML = '';
+  for(let b=0;b<B;b++){
+    const cell = document.createElement('div');
+    cell.style.cssText = 'flex:1;display:flex;align-items:flex-end;gap:2px;height:100%';
+    series.forEach((s,si)=>{
+      const bar = document.createElement('div');
+      bar.className = 'hbar ' + (si===0 && series.length>1 ? 's1' : 's2');
+      if(series.length===1) bar.className = 'hbar s2';
+      bar.style.height = (counts[si][b]/mx*92)+'%';
+      if(lo+(hi-lo)*(b+1)/B <= 0) bar.classList.add('sneg');
+      bar.style.flex = '1';
+      bar.title = `${s.label}: ${counts[si][b]} futures`;
+      cell.appendChild(bar);
+    });
+    el.appendChild(cell);
+  }
+  markers.forEach((m,i)=>{
+    const d = document.createElement('div'); d.className = 'hmark';
+    d.style.left = clamp((m.v-lo)/(hi-lo)*100,0,100)+'%';
+    d.style.borderColor = m.color;
+    d.innerHTML = `<i style="color:${m.color};top:${i*17-4}px">${m.label} ${fmtM(m.v,0)}</i>`;
+    el.appendChild(d);
+  });
+  axisEl.innerHTML = `<span>${fmtM(lo,0)}</span><span>final profit across the 20 futures</span><span>${fmtM(hi,0)}</span>`;
+}
+function showFutures(s){
+  $('cardPromise').textContent = fmtM(s.promise);
+  $('cardRealised').textContent = fmtM(s.final);
+  $('cardExpected').textContent = fmtM(s.expected);
+  $('cardGap').textContent = fmtM(s.promise - s.expected);
+  const ranked = s.stress.slice().sort((x,y)=>x.r.final-y.r.final);
+  const swans = ranked.slice(0,2);
+  const swanIds = new Set(swans.map(x=>x.f.name));
+  $('swanRow').innerHTML = swans.map(x=>{
+    const peak = Math.max(...x.r.years.map(y=>y.shortage));
+    return `<div class="swan"><span class="sk">◆ swan future — worst decile of 20</span><b class="nm">${x.f.name}</b>
+      <p>${x.f.story}</p>
+      <div class="sstats"><span>final ${fmtM(x.r.final)}</span><span>${x.r.severeYears} severe year${x.r.severeYears===1?'':'s'}</span><span>peak shortage ${fmtMWh(peak)}</span></div></div>`;
+  }).join('');
+  renderHist($('futHist'), $('futAxis'),
+    [{label:'Your plan', vals:s.stressVals}],
+    [{label:'Promise', v:s.promise, color:'#ffc65c'},
+     {label:'Realised', v:s.final, color:'#eaf6f0'},
+     {label:'Expected', v:s.expected, color:'#47d98a'}]);
+  $('futSevere').innerHTML = `<b>${s.severeFuts} of 20 futures</b> include at least one severe shortage year (unserved demand above 5%). That exposure is exactly what the average hides.`;
+  $('futTableBody').innerHTML = s.stress.map((x,i)=>{
+    const [v,c] = verdict(x.r);
+    return `<tr class="${swanIds.has(x.f.name)?'swanrow':''}"><td class="mono">${x.f.name}</td><td class="mono ${x.r.final<0?'bad':''}">${fmtM(x.r.final)}</td>
+      <td class="mono">${fmtMWh(x.r.totalShortage)}</td><td class="mono">${fmtMWh(x.r.totalCurtailed)}</td>
+      <td>${x.f.story}</td><td class="mono ${c}">${v}</td></tr>`;
+  }).join('');
+  show($('futuresModal'));
+}
+function showDebrief(){
+  $('dbGap').textContent = fmtM(G.r1.promise - G.r1.expected);
+  $('dbBench').textContent = fmtM(G.r1.final);
+  show($('debriefModal'));
+}
+
+// ---- Scenario Lab (planning only in Round 2) ----
+function openLab(){
+  if(G.round===1){ toast('The Scenario Lab unlocks in Round 2 — first, feel the trap.'); return; }
+  if(G.phase!=='planning'){ toast('The Lab opens during planning — at the year boundary, clock paused.'); return; }
+  $('labKick').textContent = `Scenario Lab · Year ${G.year} decision`;
+  const f = G.year>1 ? cumFleet(G.year-2) : {S:0,W:0};
+  const chip = (l,v)=>`<span class="chip">${l} <b>${v}</b></span>`;
+  $('labState').innerHTML =
+    chip('Fleet entering this year', `${f.S} solar · ${f.W} wind`) +
+    chip('Budget available', fmtM(budgetStartOfYear(G.builds,G.year),0)) +
+    chip('Cash locked so far', fmtM(G.cash)) +
+    (G.r1 ? chip('Round 1 benchmark', fmtM(G.r1.final)) : '');
+  renderLabRows();
+  show($('labModal'));
+}
+function renderLabRows(){
+  const budget = budgetStartOfYear(G.builds, G.year);
+  const cur = G.builds[G.year-1];
+  const rows = G.labCands.map((c,i)=>({ label:'ABCD'[i], ci:i, s:c.s, w:c.w, mine:false }));
+  rows.push({ label:'M', ci:-1, s:cur.s, w:cur.w, mine:true });
+  const evs = rows.map(r=> candidateEval(G.builds, G.year, G.cash, r.s, r.w));
+  const allVals = evs.flatMap(e=>e.vals);
+  let lo = Math.min(...allVals), hi = Math.max(...allVals);
+  if(hi-lo<1e-6) hi = lo+1;
+  const mini = vals=>{
+    const B=12, cnt=Array(B).fill(0);
+    vals.forEach(v=>cnt[clamp(Math.floor((v-lo)/(hi-lo)*B),0,B-1)]++);
+    const mx=Math.max(...cnt,1);
+    return `<div class="mini">${cnt.map(c=>`<i style="height:${Math.max(6,c/mx*100)}%"></i>`).join('')}</div>`;
+  };
+  const afford = evs.map(e=>e.capex <= budget + 1e-9);
+  const leadOf = (get, dir)=>{ // best value among affordable rows
+    let best = null;
+    evs.forEach((e,i)=>{ if(!afford[i]) return; const v=get(e);
+      if(best===null || (dir==='hi' ? v>best : v<best)) best = v; });
+    return best;
+  };
+  const leads = { expected: leadOf(e=>e.expected,'hi'), p10: leadOf(e=>e.p10,'hi'),
+                  worst: leadOf(e=>e.worst,'hi'), severe: leadOf(e=>e.severeShare,'lo') };
+  const mark = (v, key, txt)=> (leads[key]!==null && Math.abs(v-leads[key])<1e-6) ? `<span class="lead">${txt}</span>` : txt;
+  $('labRows').innerHTML = rows.map((r,ri)=>{
+    const e = evs[ri], over = e.capex > budget + 1e-9;
+    const step = f => r.mine ? `<b class="mono">${f==='s'?r.s:r.w}</b>` :
+      `<span class="steppers"><button data-ci="${r.ci}" data-f="${f}" data-d="-1">−</button><b>${f==='s'?r.s:r.w}</b><button data-ci="${r.ci}" data-f="${f}" data-d="1">+</button></span>`;
+    return `<tr class="${r.mine?'mrow':''}">
+      <td class="mono">${r.mine?'M · your placement':'Candidate '+r.label}${r.s===0&&r.w===0?'<br><small style="color:var(--faint)">defer</small>':''}</td>
+      <td>${step('s')}</td><td>${step('w')}</td>
+      <td class="mono ${over?'bad':''}">${fmtM(e.capex,0)}${over?'<br><small>over budget</small>':''}</td>
+      <td class="mono">${fmtM(e.promise)}</td>
+      <td class="mono"><b>${over?fmtM(e.expected):mark(e.expected,'expected',fmtM(e.expected))}</b></td>
+      <td class="mono">${over?fmtM(e.p10):mark(e.p10,'p10',fmtM(e.p10))}</td>
+      <td class="mono ${e.worst<0?'bad':''}">${over?fmtM(e.worst):mark(e.worst,'worst',fmtM(e.worst))}</td>
+      <td class="mono ${e.severeShare>0.4?'warnc':''}">${over?'':''}${over?Math.round(e.severeShare*100)+'%':mark(e.severeShare,'severe',Math.round(e.severeShare*100)+'%')}</td>
+      <td>${mini(e.vals)}</td>
+      <td>${r.mine?'':`<button class="adopt" data-adopt="${r.ci}" ${over?'disabled':''}>Adopt</button>`}</td>
+    </tr>`;
+  }).join('');
+}
+$('labRows').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.adopt !== undefined){
+    const c = G.labCands[+b.dataset.adopt];
+    G.buildOrder = { s:c.s, w:c.w }; G.orderSrc = 'lab';
+    hide($('labModal'));
+    toast(`Guide set: place ${c.s} solar · ${c.w} wind this year. The map is still the commitment.`);
+    renderAll(); return;
+  }
+  if(b.dataset.ci !== undefined){
+    const c = G.labCands[+b.dataset.ci];
+    c[b.dataset.f] = clamp(c[b.dataset.f] + (+b.dataset.d), 0, 8);
+    renderLabRows();
+  }
+});
+
+// ---- final comparison ----
+function showFinal(){
+  const A = G.r1, B = G.r2;
+  const pair = (l, dispA, dispB, improved, small='')=>
+    `<div class="stat"><span>${l}</span><b>${dispA} → <span class="${improved?'good':'bad'}">${dispB}</span></b><small>${small}</small></div>`;
+  $('finGrid').innerHTML =
+    pair('Final profit (played path)', fmtM(A.final), fmtM(B.final), B.final>=A.final, 'round 1 → round 2') +
+    pair('Expected across 20 futures', fmtM(A.expected), fmtM(B.expected), B.expected>=A.expected, 'the robustness score') +
+    pair('Worst future', fmtM(A.worst), fmtM(B.worst), B.worst>=A.worst, 'the downside') +
+    pair('P10 (bad-decile) profit', fmtM(A.p10), fmtM(B.p10), B.p10>=A.p10, 'the plan on a bad draw') +
+    pair('Severe-shortage futures', A.severeFuts+' / 20', B.severeFuts+' / 20', B.severeFuts<=A.severeFuts, 'blackout exposure') +
+    pair('Flaw-of-Averages gap', fmtM(A.promise-A.expected), fmtM(B.promise-B.expected), (B.promise-B.expected)<=(A.promise-A.expected), 'promise − expectation') +
+    pair('Brochure advice taken', `${A.consult.taken}/${A.consult.shown}`, `${B.consult.taken}/${B.consult.shown}`, B.consult.taken<=A.consult.taken, 'did you challenge the average?');
+  renderHist($('finHist'), $('finAxis'),
+    [{label:'Round 1', vals:A.stressVals},{label:'Round 2', vals:B.stressVals}],
+    [{label:'E[R1]', v:A.expected, color:'#ffb35c'},{label:'E[R2]', v:B.expected, color:'#4fd98d'}]);
+  const tailAvg = v=>{ const s2=v.slice().sort((a,b)=>a-b); return (s2[0]+s2[1])/2; };
+  const dExp = B.expected - A.expected, dWorst = B.worst - A.worst;
+  $('finMsg').innerHTML = (dExp > 0.5
+    ? `Across the same twenty futures, your Round 2 plan is worth <b class="good">${fmtM(dExp)}</b> more in expectation and moves the worst case by <b>${fmtM(dWorst)}</b>. That difference is the value of deciding from the distribution — flexibility you chose on purpose, not luck.`
+    : `Your Round 2 plan didn’t beat Round 1 in expectation this time (${fmtM(dExp)}). Worth asking: which candidate did the Lab favour, and what did you choose instead? The instrument only pays when the distribution — not the average — drives the decision.`)
+    + ` In the two swan futures alone, Round 1 averaged <b>${fmtM(tailAvg(A.stressVals))}</b>; Round 2 <b>${fmtM(tailAvg(B.stressVals))}</b>.`;
+  show($('finalModal'));
+}
+function exportJSON(){
+  const data = {
+    game:'RECAP Mozcon Power (3D)', version:'v8-parity · dynamic-v1',
+    startedAt:G.startedAt, exportedAt:new Date().toISOString(),
+    config:{ price:CONFIG.price, penalty:CONFIG.penalty, forecast:CONFIG.forecast, msPerMonth:T.msPerMonth },
+    round1:G.r1 && { schedule:G.r1.schedule, final:G.r1.final, promise:G.r1.promise,
+      expected:G.r1.expected, p10:G.r1.p10, worst:G.r1.worst, severeFutures:G.r1.severeFuts,
+      swanFutures:G.r1.swans, consultant:G.r1.consult, buildTiming:G.r1.buildTiming, stressFinals:G.r1.stressVals },
+    round2:G.r2 && { schedule:G.r2.schedule, final:G.r2.final, promise:G.r2.promise,
+      expected:G.r2.expected, p10:G.r2.p10, worst:G.r2.worst, severeFutures:G.r2.severeFuts,
+      swanFutures:G.r2.swans, consultant:G.r2.consult, buildTiming:G.r2.buildTiming, stressFinals:G.r2.stressVals }
+  };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:'application/json'}));
+  a.download = 'recap-mozcon-session.json';
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ---- rounds / reset ----
+function startRound(n){
+  G.round = n; G.year = 1; G.phase = 'planning'; G.busy = false;
+  G.builds = freshBuilds(); G.results = []; G.cash = 0;
+  G.buildOrder = null; G.orderSrc = null; G.sawDrop = false; G.cinecam = false;
+  G.heatT = 0; G.advised = {}; G.blackoutBusy = false;
+  G.consult = { shown:0, taken:0, records:[] };
+  G.labCands = [{s:1,w:0},{s:0,w:1},{s:2,w:1},{s:0,w:0}];
+  T.running = false; T.speed = 1; T.month = 0; T.mprog = 0;
+  M = null;
+  clearAllPlacements();
+  removeDataCentre();
+  setTowerFloors(1);
+  env.solar = 1; env.wind = 1; envTgt.solar = 1; envTgt.wind = 1;
+  setSunAngle(0.12); setSky(SKY_DAWN.clone().lerp(SKY_DAY, 0.5));
+  windowMats.forEach(m=>m.emissiveIntensity=0.85);
+  $('monthNow').textContent = 'Plan';
+  renderAll();
+  showConsultant();
+}
+function resetAll(){
+  ['resultModal','futuresModal','debriefModal','labModal','finalModal'].forEach(id=>hide($(id)));
+  G.r1 = G.r2 = null;
+  $('log').innerHTML = '';
+  startRound(1);
+  show($('introModal'));
+}
+
+// ---- wiring ----
+function selectTech(t){
+  G.selectedTech = t;
+  $('techSolar').classList.toggle('sel', t==='solar');
+  $('techWind').classList.toggle('sel', t==='wind');
+}
+$('techSolar').onclick = ()=>selectTech('solar');
+$('techWind').onclick = ()=>selectTech('wind');
+$('undoBtn').onclick = undo;
+$('labBtn').onclick = openLab;
+$('playBtn').onclick = ()=>{
+  if(G.phase==='planning') startYear();
+  else if(G.phase==='running'){ audioInit(); T.running = !T.running; renderHUD(); }
+};
+$('speedBtn').onclick = ()=>{ T.speed = T.speed===1 ? 3 : 1; renderHUD(); };
+$('muteBtn').onclick = ()=>{ G.muted = !G.muted; $('muteBtn').textContent = G.muted ? '🔇' : '🔊'; };
+$('resGo').onclick = afterSummary;
+$('futGo').onclick = ()=>{ hide($('futuresModal')); showDebrief(); };
+$('dbGo').onclick = ()=>{
+  hide($('debriefModal'));
+  startRound(2);
+  toast('Round 2 — the Scenario Lab is unlocked. Test the move before you press ▶.');
+};
+$('labClose').onclick = ()=>hide($('labModal'));
+$('exportBtn').onclick = exportJSON;
+$('againBtn').onclick = resetAll;
+$('resetBtn').onclick = ()=>{ if(confirm('Restart the whole session? Both rounds will be lost.')) resetAll(); };
+$('introGo').onclick = ()=>hide($('introModal'));
+$('consultTake').onclick = ()=>{
+  const need = G._advice.need;
+  hideConsultant(true);
+  G.buildOrder = { s:need, w:0 }; G.orderSrc = 'consultant';
+  toast(need>0 ? `Advice noted: ${need} solar. The map is still yours.` : 'Advice noted: build nothing. The map is still yours.');
+  renderAll();
+};
+$('consultNo').onclick = ()=>hideConsultant(false);
+addEventListener('keydown', e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(e.code==='Space'){ e.preventDefault(); $('playBtn').click(); }
+  if(e.key==='1') selectTech('solar');
+  if(e.key==='2') selectTech('wind');
+  if(e.key==='u'||e.key==='U') undo();
+  if(e.key==='l'||e.key==='L') openLab();
+});
+
+// ---- boot ----
+startRound(1);
+animate();
+</script>
+</body>
+</html>

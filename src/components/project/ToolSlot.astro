@@ -1,9 +1,16 @@
 ---
+interface EmbedItem {
+  title: string;
+  embedUrl: string;
+  description?: string;
+  sourceUrl?: string;
+}
+
 type ToolData =
   | { state: 'none' }
   | { state: 'in-development'; note?: string }
   | { state: 'coming-soon'; note?: string }
-  | { state: 'embed'; embedUrl: string; title: string }
+  | { state: 'embed'; intro?: string; items: EmbedItem[] }
   | { state: 'link-out'; url: string; label: string };
 
 interface Props {
@@ -46,10 +53,39 @@ const statusNote =
 {
   tool.state === 'embed' && (
     <section aria-labelledby="tool-h" class="tool-slot">
-      <h2 id="tool-h">Tool</h2>
-      <div class="embed-frame">
-        <iframe src={tool.embedUrl} title={tool.title} loading="lazy" />
-      </div>
+      <h2 id="tool-h">{tool.items.length > 1 ? 'Models' : 'Tool'}</h2>
+      {tool.intro && <p class="intro">{tool.intro}</p>}
+      <ol class="models">
+        {tool.items.map((item, i) => (
+          <li>
+            <div class="model-head">
+              <span class="model-n label">{String(i + 1).padStart(2, '0')}</span>
+              <div class="model-meta">
+                <h3>{item.title}</h3>
+                {item.description && <p>{item.description}</p>}
+              </div>
+            </div>
+            <div class="embed-frame">
+              <iframe
+                src={item.embedUrl}
+                title={item.title}
+                loading="lazy"
+                allowfullscreen
+              />
+            </div>
+            <p class="model-links">
+              <a href={item.embedUrl} target="_blank" rel="noopener">
+                Open full screen <span class="arw" aria-hidden="true">↗</span>
+              </a>
+              {item.sourceUrl && (
+                <a href={item.sourceUrl} target="_blank" rel="noopener">
+                  Author's copy <span class="arw" aria-hidden="true">↗</span>
+                </a>
+              )}
+            </p>
+          </li>
+        ))}
+      </ol>
     </section>
   )
 }
@@ -79,8 +115,47 @@ const statusNote =
     margin-top: 18px;
   }
 
+  .intro {
+    color: var(--trace);
+    margin: 18px 0 0;
+    max-width: 62ch;
+  }
+
+  /* Each model reads as a numbered entry on a rule, matching the task and
+     milestone lists elsewhere on the page. */
+  .models {
+    list-style: none;
+    margin: 34px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 46px;
+  }
+
+  .model-head {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 16px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .model-n {
+    color: var(--signal);
+  }
+
+  .model-meta h3 {
+    font-size: 1.2rem;
+    margin: 0;
+  }
+
+  .model-meta p {
+    color: var(--trace);
+    margin: 8px 0 0;
+    max-width: 62ch;
+  }
+
   .embed-frame {
-    margin-top: 18px;
+    margin-top: 20px;
     border: 1px solid var(--rule);
     overflow: hidden;
     aspect-ratio: 16 / 10;
@@ -90,5 +165,36 @@ const statusNote =
     width: 100%;
     height: 100%;
     border: 0;
+    display: block;
+  }
+
+  .model-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    margin: 12px 0 0;
+  }
+
+  .model-links a {
+    color: var(--signal);
+    text-decoration: none;
+    font-family: var(--font-display);
+    font-variation-settings: var(--vf-ui);
+    font-size: 0.9rem;
+  }
+
+  .model-links a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 720px) {
+    .model-head {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .embed-frame {
+      aspect-ratio: 3 / 4;
+    }
   }
 </style>

@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solar Photovoltaic (PV) + Battery Energy Storage Systems (BESS) LCOE Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0f14;
+    --surface: #151920;
+    --surface-2: #1c2230;
+    --border: #2a3040;
+    --text: #e8e6e1;
+    --text-muted: #8a8f9a;
+    --accent: #f5a623;
+    --accent-dim: rgba(245,166,35,0.15);
+    --solar: #f5c842;
+    --battery: #4ecdc4;
+    --opex: #a78bfa;
+    --salvage: #f87171;
+    --green: #34d399;
+    --ea-color: #60a5fa;
+    --radius: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .simulator-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 3rem;
+  }
+
+  /* Header */
+  .sim-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.6s ease-out;
+  }
+  .sim-header .tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 0.3rem 0.8rem;
+    border-radius: 100px;
+    margin-bottom: 1rem;
+  }
+  .sim-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--text);
+  }
+  .sim-header h1 span { color: var(--accent); }
+  .sim-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.6rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Layout */
+  .sim-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    animation: fadeUp 0.6s 0.15s ease-out both;
+  }
+  @media (max-width: 768px) {
+    .sim-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Panels */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+  .panel-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .panel-title::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--accent);
+  }
+
+  /* Sliders */
+  .control-group { margin-bottom: 1.3rem; }
+  .control-group:last-child { margin-bottom: 0; }
+  .control-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.5rem;
+  }
+  .control-label span:first-child {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .control-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--surface-2);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--accent);
+    transition: transform 0.15s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--accent);
+    cursor: pointer;
+  }
+
+  /* Select dropdowns */
+  .control-select {
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .control-select:focus { border-color: var(--accent); }
+  .control-select option { background: var(--surface); }
+
+  /* Results panel */
+  .results-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  /* Big metric */
+  .metric-hero {
+    text-align: center;
+    padding: 1.8rem 1rem;
+    background: linear-gradient(135deg, var(--accent-dim), transparent 70%);
+    border-radius: var(--radius);
+    border: 1px solid rgba(245,166,35,0.1);
+  }
+  .metric-hero .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+  }
+  .metric-hero .value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .metric-hero .unit {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-top: 0.2rem;
+  }
+
+  /* Secondary metrics row */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+  }
+  .metric-card {
+    background: var(--surface-2);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .metric-card .label {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .metric-card .value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 0.3rem;
+  }
+  .metric-card .unit {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+
+  /* Cost breakdown bar */
+  .breakdown-wrap { margin-top: 0.5rem; }
+  .breakdown-bar {
+    display: flex;
+    height: 28px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 0.8rem;
+  }
+  .breakdown-bar div {
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+  .breakdown-bar div:first-child { border-radius: 6px 0 0 6px; }
+  .breakdown-bar div:last-child { border-radius: 0 6px 6px 0; }
+  .bar-solar { background: var(--solar); }
+  .bar-battery { background: var(--battery); }
+  .bar-opex { background: var(--opex); }
+  .bar-salvage { background: var(--salvage); }
+
+  .breakdown-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.2rem;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .legend-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Charts */
+  .gen-chart, .ea-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 80px;
+    margin-top: 0.6rem;
+  }
+  .gen-bar, .ea-bar {
+    flex: 1;
+    border-radius: 2px 2px 0 0;
+    opacity: 0.5;
+    transition: height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s;
+    cursor: default;
+  }
+  .gen-bar { background: var(--accent); }
+  .ea-bar { background: var(--ea-color); }
+  .gen-bar:hover, .ea-bar:hover { opacity: 1; }
+  .chart-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.3rem;
+  }
+  .chart-labels span {
+    font-size: 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+  }
+
+  .ea-chart-wrap {
+    position: relative;
+  }
+  .ea-avg-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1.5px dashed rgba(96, 165, 250, 0.5);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .ea-avg-label {
+    position: absolute;
+    right: 0;
+    top: -14px;
+    font-size: 0.58rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ea-color);
+  }
+
+  /* Info note */
+  .info-note {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    padding: 0.8rem;
+    background: var(--surface-2);
+    border-radius: 6px;
+    border-left: 3px solid var(--accent);
+  }
+
+  /* Full-width */
+  .full-panel { grid-column: 1 / -1; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="simulator-wrap">
+  <header class="sim-header">
+    <div class="tag">Interactive Tool</div>
+    <h1>Solar PV + BESS <span>LCOE</span> Simulator</h1>
+    <p>Estimate the Levelized Cost of Electricity for utility-scale solar PV coupled with battery storage in Portugal.</p>
+    <p style="font-size:0.75rem; margin-top:0.4rem; color:var(--text-muted); opacity:0.7;">Developed by J. Graça Gomes, M-A. Cardin, and B. Wu — Imperial College London.<br>The support of the Portuguese Science Foundation (FCT) Grant (2023.04622.BD) is greatly appreciated.</p>
+  </header>
+
+  <div class="sim-grid">
+
+    <!-- LEFT: Controls -->
+    <div class="panel">
+      <div class="panel-title">System Configuration</div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>PV Capacity</span>
+          <span class="control-value" id="pv-val">100 MW</span>
+        </div>
+        <input type="range" id="pv-cap" min="10" max="200" value="100" step="5">
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>BESS Power Capacity</span>
+          <span class="control-value" id="bess-val">60 MW</span>
+        </div>
+        <input type="range" id="bess-cap" min="0" max="120" value="60" step="5">
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Storage Duration</span>
+          <span class="control-value" id="hours-val">1 h</span>
+        </div>
+        <input type="range" id="storage-hours" min="1" max="4" value="1" step="1">
+      </div>
+
+      <div class="control-group">
+        <div class="control-label"><span>Module Technology</span></div>
+        <select class="control-select" id="module-type">
+          <option value="IBC">IBC — Interdigitated Back Contact</option>
+          <option value="Bifacial_SHJ">Bifacial SHJ — Silicon Heterojunction</option>
+          <option value="Bifacial_pert">Bifacial PERT</option>
+          <option value="PERC" selected>PERC — Passivated Emitter Rear</option>
+          <option value="Multi_perc">Multi-PERC</option>
+          <option value="Standard_AI_BSF">Standard Al-BSF</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label"><span>Mounting / Tracker</span></div>
+        <select class="control-select" id="tracker-type">
+          <option value="Fixed" selected>Fixed Mount</option>
+          <option value="OneAxis">Single-Axis Tracker</option>
+          <option value="DualAxis">Dual-Axis Tracker</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label"><span>Deployment Strategy</span></div>
+        <select class="control-select" id="deploy-strategy">
+          <option value="fixed">Fixed — All capacity in Year 0</option>
+          <option value="phased_75">Phased — 75% Year 0, 25% Year 1</option>
+          <option value="phased_50">Phased — 50% Year 0, 25% Years 1–2</option>
+          <option value="phased_25">Phased — 25% per year over 4 years</option>
+        </select>
+      </div>
+
+      <div class="panel-title" style="margin-top:1.5rem;">Financial &amp; Degradation Parameters</div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Discount Rate</span>
+          <span class="control-value" id="dr-val">3%</span>
+        </div>
+        <input type="range" id="discount-rate" min="1" max="12" value="3" step="0.5">
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Technology Learning Rate</span>
+          <span class="control-value" id="lr-val">20%</span>
+        </div>
+        <input type="range" id="learning-rate" min="5" max="40" value="20" step="1">
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>PV Degradation Rate</span>
+          <span class="control-value" id="deg-val">0.52%/yr</span>
+        </div>
+        <input type="range" id="degrad-rate" min="0.3" max="2" value="0.52" step="0.01">
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Battery Degradation Rate</span>
+          <span class="control-value" id="batt-deg-val">0.10%/yr</span>
+        </div>
+        <input type="range" id="batt-degrad-rate" min="0.05" max="2" value="0.10" step="0.01">
+      </div>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div class="panel results-panel">
+      <div class="panel-title">LCOE Result</div>
+
+      <div class="metric-hero">
+        <div class="label">Levelized Cost of Electricity</div>
+        <div class="value" id="lcoe-result">45.6</div>
+        <div class="unit">€ / MWh</div>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="label">LCOS</div>
+          <div class="value" id="lcos-result" style="color: var(--battery);">220.6</div>
+          <div class="unit">€ / MWh</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Total CAPEX</div>
+          <div class="value" id="capex-result" style="color: var(--solar);">82.3</div>
+          <div class="unit">M€</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Annual Generation</div>
+          <div class="value" id="gen-result" style="color: var(--green);">173</div>
+          <div class="unit">GWh / yr (avg)</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Capacity Factor</div>
+          <div class="value" id="cf-result" style="color: var(--opex);">19.7</div>
+          <div class="unit">%</div>
+        </div>
+      </div>
+
+      <div class="breakdown-wrap">
+        <div class="panel-title">Cost Breakdown</div>
+        <div class="breakdown-bar" id="cost-bar"></div>
+        <div class="breakdown-legend" id="cost-legend"></div>
+      </div>
+
+      <div>
+        <div class="panel-title">Generation Profile (20 Years)</div>
+        <div class="gen-chart" id="gen-chart"></div>
+        <div class="chart-labels">
+          <span>Year 1</span>
+          <span>Year 10</span>
+          <span>Year 20</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full-width: Effective Availability chart -->
+    <div class="panel full-panel">
+      <div class="panel-title">Effective Availability Over Lifetime</div>
+      <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.8rem;">
+        Effective Availability (EA) captures the combined effect of PV degradation, battery degradation, and the ratio of actual generation to maximum theoretical output each year.
+      </p>
+      <div class="ea-chart-wrap">
+        <div class="ea-chart" id="ea-chart"></div>
+        <div class="ea-avg-line" id="ea-avg-line"></div>
+      </div>
+      <div class="chart-labels">
+        <span>Year 1</span>
+        <span>Year 10</span>
+        <span>Year 20</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-top:0.5rem;">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--ea-color)"></div>Annual EA</div>
+        <div class="legend-item" style="border-left:1.5px dashed var(--ea-color); padding-left:0.5rem;">Average EA: <span class="legend-value" id="ea-avg-val" style="color:var(--ea-color);">85%</span></div>
+      </div>
+    </div>
+
+    <!-- Full-width: Data disclaimer -->
+    <div class="panel full-panel">
+      <div class="info-note">
+        Cost data used in this simulator is based on industry reports from circa 2020 (NREL, IRENA, BNEF). Current PV module and battery costs have declined further since then, so real-world LCOE values today would likely be slightly lower than what is shown here. Solar irradiation data is from Southern Portugal (2014–2023). LFP battery chemistry is assumed for BESS.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ============================================================
+// LCOE MODEL — Deterministic model for Solar PV+BESS
+// Calibrated against Table 2 in Gomes, Cardin & Wu (2025)
+// ============================================================
+
+const EUR_PER_USD = 0.9243;
+
+const MODULES = {
+  Standard_AI_BSF: { costPerWatt: 0.39 * EUR_PER_USD, efficiency: 1.0 },
+  PERC:            { costPerWatt: 0.38 * EUR_PER_USD, efficiency: 1.03 },
+  Multi_perc:      { costPerWatt: 0.37 * EUR_PER_USD, efficiency: 1.02 },
+  Bifacial_pert:   { costPerWatt: 0.40 * EUR_PER_USD, efficiency: 1.05 },
+  Bifacial_SHJ:    { costPerWatt: 0.40 * EUR_PER_USD, efficiency: 1.10 },
+  IBC:             { costPerWatt: 0.41 * EUR_PER_USD, efficiency: 1.12 }
+};
+
+const TRACKERS = {
+  Fixed:    { costs: { below5MW: 0.7*EUR_PER_USD, below10MW: 0.6*EUR_PER_USD, below50MW: 0.49*EUR_PER_USD, below100MW: 0.58*EUR_PER_USD }, mult: 1.0, opex: 17 },
+  OneAxis:  { costs: { below5MW: (1.22-0.34)*EUR_PER_USD, below10MW: (1.13-0.34)*EUR_PER_USD, below50MW: (0.98-0.34)*EUR_PER_USD, below100MW: (0.89-0.34)*EUR_PER_USD }, mult: 1.096, opex: 36 },
+  DualAxis: { costs: { below5MW: (1.13+1.015-0.34)*EUR_PER_USD, below10MW: (1.03+1.015-0.34)*EUR_PER_USD, below50MW: (0.91+1.015-0.34)*EUR_PER_USD, below100MW: (0.83+1.015-0.34)*EUR_PER_USD }, mult: 1.395, opex: 101 }
+};
+
+function getCostCategory(mw) {
+  if (mw < 6) return 'below5MW';
+  if (mw < 11) return 'below10MW';
+  if (mw < 51) return 'below50MW';
+  return 'below100MW';
+}
+
+// BESS costs from Table 1 — energy and power components (in EUR)
+// Source: DC cells + DC BOS + System Integration + Pre-development
+const BESS_ENERGY_EUR_KWH = 326.7;  // €/kWh (constant across durations)
+// Source: Power Equipment + Container Cost + Grid Integration
+const BESS_POWER_EUR_KW = 96.7;     // €/kW
+// OPEX: Fixed O&M
+const BESS_OPEX_EUR_KW = 6.568;     // €/kW-year
+
+// Economies of scale factors by capacity bracket
+const BESS_EOS = { small: 1.0, medium: 0.95, large: 0.90 };
+
+function bessBracket(mw) {
+  if (mw < 10) return 'small';
+  if (mw < 61) return 'medium';
+  return 'large';
+}
+
+const LAND_RENTING = 2342;
+const SALVAGE_PV = 28000 * EUR_PER_USD;
+const SALVAGE_BESS = 2.39;
+const BATTERY_EFFICIENCY = 0.83;
+const DOD = 0.8;
+const LEARNING_EXPERIENCE = 0.03;
+const LEARNING_BESS = 0.10;
+const CYCLES_PER_YEAR = 225;
+
+// Annual generation for 100 MW baseline (MWh) — Alentejo, Portugal solar data 2014–2023
+const BASE_ANNUAL_GEN = [
+  189640, 185790, 192720, 187880, 190850, 186120, 193710, 188430,
+  192060, 187110, 190080, 190740, 189090, 191620, 189860, 190410,
+  189750, 191180, 188870, 190190
+];
+
+function getDeploySchedule(strategy, totalMW) {
+  const pad = 24;
+  switch(strategy) {
+    case 'fixed':     return [totalMW, ...Array(pad).fill(0)];
+    case 'phased_75': return [totalMW*0.75, totalMW*0.25, ...Array(pad-1).fill(0)];
+    case 'phased_50': return [totalMW*0.50, totalMW*0.25, totalMW*0.25, ...Array(pad-2).fill(0)];
+    case 'phased_25': return [totalMW*0.25, totalMW*0.25, totalMW*0.25, totalMW*0.25, ...Array(pad-3).fill(0)];
+    default:          return [totalMW, ...Array(pad).fill(0)];
+  }
+}
+
+function getBessSchedule(strategy, totalMW) {
+  const pad = 24;
+  switch(strategy) {
+    case 'fixed':     return [totalMW, ...Array(pad).fill(0)];
+    case 'phased_75': return [totalMW*0.83, totalMW*0.17, ...Array(pad-1).fill(0)];
+    case 'phased_50': return [totalMW*0.33, totalMW*0.33, totalMW*0.34, ...Array(pad-2).fill(0)];
+    case 'phased_25': return [totalMW*0.17, totalMW*0.33, totalMW*0.50, ...Array(pad-2).fill(0)];
+    default:          return [totalMW, ...Array(pad).fill(0)];
+  }
+}
+
+function computeLCOE(params) {
+  const { pvCap, bessCap, storageHours, moduleType, trackerType, discountRate,
+          learningRateTech, degradRate, battDegradRate, deployStrategy } = params;
+
+  const mod = MODULES[moduleType];
+  const trk = TRACKERS[trackerType];
+  const pvSchedule = getDeploySchedule(deployStrategy, pvCap);
+  const bessSchedule = getBessSchedule(deployStrategy, bessCap);
+
+  // Extended lifetime: last installation year + 21
+  let lastInstallYear = 0;
+  for (let i = pvSchedule.length - 1; i >= 0; i--) {
+    if (pvSchedule[i] > 0 || (bessSchedule[i] || 0) > 0) { lastInstallYear = i; break; }
+  }
+  const extLifetime = lastInstallYear + 21;
+
+  let totalSolarCapex = 0, totalBatteryCapex = 0;
+  let npvNumLCOE = 0, npvDenLCOE = 0;
+  let npvNumLCOS = 0, npvDenLCOS = 0;
+  let cumPV = 0, cumBESS = 0;
+  const annualGen = [];
+  const annualGenPVOnly = [];
+  const annualEA = [];
+
+  const maxTheoreticalPV = (cap) => BASE_ANNUAL_GEN[0] * (cap / 100) * trk.mult * mod.efficiency;
+  const maxTheoreticalBESS = (cap) => cap * storageHours * BATTERY_EFFICIENCY * DOD * CYCLES_PER_YEAR;
+
+  for (let year = 0; year < extLifetime; year++) {
+    const df = year > 0 ? 1 / Math.pow(1 + discountRate/100, year) : 1;
+    const installedPV = pvSchedule[year] || 0;
+    const installedBESS = bessSchedule[year] || 0;
+
+    cumPV += installedPV;
+    cumBESS += installedBESS;
+
+    // PV CAPEX (installation years only)
+    if (installedPV > 0) {
+      const cat = getCostCategory(installedPV);
+      const lfTech = Math.pow(1 - learningRateTech/100, Math.max(0, year - 1));
+      const lfExp  = Math.pow(1 - LEARNING_EXPERIENCE, Math.max(0, year - 1));
+      const plantW = installedPV * 1e6;
+      totalSolarCapex += (plantW * mod.costPerWatt * lfTech + plantW * trk.costs[cat] * lfExp) * df;
+    }
+
+    // BESS CAPEX (installation years only, with EoS by capacity bracket)
+    if (installedBESS > 0) {
+      const eos = BESS_EOS[bessBracket(installedBESS)];
+      const lfBESS = Math.pow(1 - LEARNING_BESS, Math.max(0, year - 1));
+      const kwh = installedBESS * 1e3 * storageHours;
+      const kw  = installedBESS * 1e3;
+      totalBatteryCapex += (kwh * BESS_ENERGY_EUR_KWH * eos * lfBESS +
+                            kw  * BESS_POWER_EUR_KW * eos * lfBESS) * df;
+    }
+
+    // Generation (starts year 1; each batch produces for up to 20 years)
+    let pvGen = 0, battGen = 0;
+    if (year > 0) {
+      for (let py = 0; py <= year && py < pvSchedule.length; py++) {
+        const cap = pvSchedule[py];
+        if (cap > 0 && (year - py) <= 20) {
+          const degFactor = Math.pow(1 - degradRate/100, year - py);
+          pvGen += BASE_ANNUAL_GEN[Math.min(year - 1, BASE_ANNUAL_GEN.length - 1)] * (cap / 100) * trk.mult * mod.efficiency * degFactor;
+        }
+      }
+      for (let py = 0; py <= year && py < bessSchedule.length; py++) {
+        const cap = bessSchedule[py];
+        if (cap > 0 && (year - py) <= 20) {
+          const degBatt = Math.pow(1 - battDegradRate/100, year - py);
+          battGen += cap * storageHours * BATTERY_EFFICIENCY * DOD * degBatt * CYCLES_PER_YEAR;
+        }
+      }
+
+      // OPEX: PV uses cumulative capacity; BESS uses that year's installation only
+      const bessInstKW = installedBESS * 1e3;
+      npvNumLCOE += trk.opex * cumPV * 1e3 * df + (LAND_RENTING / 20) * installedPV * df + BESS_OPEX_EUR_KW * bessInstKW * df;
+      npvNumLCOS += BESS_OPEX_EUR_KW * bessInstKW * df;
+      npvDenLCOE += (pvGen + battGen) * df;
+      npvDenLCOS += battGen * df;
+    }
+
+    // Store for charts (cap at 20 entries for display)
+    if (year < 21) {
+      annualGen.push(pvGen + battGen);
+      annualGenPVOnly.push(pvGen);
+      if (year > 0 && cumPV > 0) {
+        const maxGen = maxTheoreticalPV(cumPV) + maxTheoreticalBESS(cumBESS);
+        annualEA.push(maxGen > 0 ? (pvGen + battGen) / maxGen : 0);
+      } else {
+        annualEA.push(0);
+      }
+    }
+  }
+
+  const dfEnd = 1 / Math.pow(1 + discountRate/100, 20);
+  const salvagePV = SALVAGE_PV * pvCap * dfEnd;
+  const salvageBESS = SALVAGE_BESS * 1e3 * storageHours * bessCap * dfEnd;
+
+  const totalCosts = totalSolarCapex + totalBatteryCapex + npvNumLCOE + salvagePV + salvageBESS;
+  const lcoe = npvDenLCOE > 0 ? totalCosts / npvDenLCOE : Infinity;
+  const lcos = npvDenLCOS > 0 ? (totalBatteryCapex + npvNumLCOS + salvageBESS) / npvDenLCOS : Infinity;
+  const genYears = annualGen.filter(g => g > 0);
+  const avgGen = genYears.length > 0 ? genYears.reduce((a,b) => a+b, 0) / genYears.length : 0;
+  const pvGenYears = annualGenPVOnly.filter(g => g > 0);
+  const cfPV = pvGenYears.length > 0 ? pvGenYears.reduce((a,b) => a+b, 0) / (pvGenYears.length * pvCap * 8760) * 100 : 0;
+
+  return {
+    lcoe, lcos,
+    totalCapex: (totalSolarCapex + totalBatteryCapex) / 1e6,
+    solarCapex: totalSolarCapex / 1e6,
+    batteryCapex: totalBatteryCapex / 1e6,
+    opex: npvNumLCOE / 1e6,
+    salvage: (salvagePV + salvageBESS) / 1e6,
+    avgGenGWh: avgGen / 1e3,
+    capacityFactor: cfPV,
+    annualGen,
+    annualEA
+  };
+}
+
+// ============================================================
+// UI
+// ============================================================
+
+function updateUI() {
+  const params = {
+    pvCap: +document.getElementById('pv-cap').value,
+    bessCap: +document.getElementById('bess-cap').value,
+    storageHours: +document.getElementById('storage-hours').value,
+    moduleType: document.getElementById('module-type').value,
+    trackerType: document.getElementById('tracker-type').value,
+    discountRate: +document.getElementById('discount-rate').value,
+    learningRateTech: +document.getElementById('learning-rate').value,
+    degradRate: +document.getElementById('degrad-rate').value,
+    battDegradRate: +document.getElementById('batt-degrad-rate').value,
+    deployStrategy: document.getElementById('deploy-strategy').value
+  };
+
+  document.getElementById('pv-val').textContent = params.pvCap + ' MW';
+  document.getElementById('bess-val').textContent = params.bessCap + ' MW';
+  document.getElementById('hours-val').textContent = params.storageHours + ' h';
+  document.getElementById('dr-val').textContent = params.discountRate + '%';
+  document.getElementById('lr-val').textContent = params.learningRateTech + '%';
+  document.getElementById('deg-val').textContent = params.degradRate + '%/yr';
+  document.getElementById('batt-deg-val').textContent = params.battDegradRate.toFixed(2) + '%/yr';
+
+  const r = computeLCOE(params);
+
+  document.getElementById('lcoe-result').textContent = r.lcoe.toFixed(1);
+  document.getElementById('lcos-result').textContent = r.lcos < 10000 ? r.lcos.toFixed(1) : '—';
+  document.getElementById('capex-result').textContent = r.totalCapex.toFixed(1);
+  document.getElementById('gen-result').textContent = r.avgGenGWh.toFixed(0);
+  document.getElementById('cf-result').textContent = r.capacityFactor.toFixed(1);
+
+  const totalNPVCost = r.solarCapex + r.batteryCapex + r.opex + r.salvage;
+  const pcts = {
+    solar: (r.solarCapex / totalNPVCost * 100),
+    battery: (r.batteryCapex / totalNPVCost * 100),
+    opex: (r.opex / totalNPVCost * 100),
+    salvage: (r.salvage / totalNPVCost * 100)
+  };
+
+  document.getElementById('cost-bar').innerHTML =
+    `<div class="bar-solar" style="width:${pcts.solar}%"></div>` +
+    `<div class="bar-battery" style="width:${pcts.battery}%"></div>` +
+    `<div class="bar-opex" style="width:${pcts.opex}%"></div>` +
+    `<div class="bar-salvage" style="width:${pcts.salvage}%"></div>`;
+
+  document.getElementById('cost-legend').innerHTML =
+    `<div class="legend-item"><div class="legend-dot" style="background:var(--solar)"></div>PV CAPEX <span class="legend-value">${r.solarCapex.toFixed(1)}M€</span></div>` +
+    `<div class="legend-item"><div class="legend-dot" style="background:var(--battery)"></div>BESS CAPEX <span class="legend-value">${r.batteryCapex.toFixed(1)}M€</span></div>` +
+    `<div class="legend-item"><div class="legend-dot" style="background:var(--opex)"></div>O&amp;M <span class="legend-value">${r.opex.toFixed(1)}M€</span></div>` +
+    `<div class="legend-item"><div class="legend-dot" style="background:var(--salvage)"></div>Decom. <span class="legend-value">${r.salvage.toFixed(1)}M€</span></div>`;
+
+  // Generation chart (skip year 0 which has no generation)
+  const genData = r.annualGen.slice(1);
+  const maxGen = Math.max(...genData.filter(v => v > 0), 1);
+  let genBars = '';
+  for (let i = 0; i < genData.length; i++) {
+    const h = genData[i] > 0 ? (genData[i] / maxGen * 100) : 0;
+    genBars += `<div class="gen-bar" style="height:${Math.max(h, 2)}%" title="Year ${i+1}: ${(genData[i]/1e3).toFixed(0)} GWh"></div>`;
+  }
+  document.getElementById('gen-chart').innerHTML = genBars;
+
+  // Effective Availability chart
+  const eaValues = r.annualEA.slice(1);
+  const eaFiltered = eaValues.filter(v => v > 0);
+  const avgEA = eaFiltered.length > 0 ? eaFiltered.reduce((a,b) => a+b, 0) / eaFiltered.length : 0;
+  const eaMin = 0.6, eaMax = 1.05;
+  let eaBars = '';
+  for (let i = 0; i < eaValues.length; i++) {
+    const ea = eaValues[i] || 0;
+    const h = Math.max(0, (ea - eaMin) / (eaMax - eaMin) * 100);
+    eaBars += `<div class="ea-bar" style="height:${Math.max(h, ea > 0 ? 2 : 0)}%" title="Year ${i+1}: EA = ${(ea*100).toFixed(1)}%"></div>`;
+  }
+  document.getElementById('ea-chart').innerHTML = eaBars;
+
+  const avgLinePos = Math.max(0, (avgEA - eaMin) / (eaMax - eaMin) * 100);
+  const eaLine = document.getElementById('ea-avg-line');
+  eaLine.style.bottom = avgLinePos + '%';
+  eaLine.innerHTML = `<span class="ea-avg-label">avg ${(avgEA*100).toFixed(1)}%</span>`;
+  document.getElementById('ea-avg-val').textContent = (avgEA*100).toFixed(1) + '%';
+}
+
+document.querySelectorAll('input[type="range"], select').forEach(el => {
+  el.addEventListener('input', updateUI);
+});
+
+updateUI();
+</script>
+
+</body>
+</html>
