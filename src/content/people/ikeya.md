@@ -18,6 +18,7 @@ bio: >
   Engineering from the University of Michigan (2022) and an MEng in
   Engineering Sciences and Design from Tokyo Institute of Technology, now
   Institute of Science Tokyo (2020).
+email: k.ikeya22@imperial.ac.uk
 projectSlugs:
   - ikeya-isru-deployment
 order: 1
