@@ -3,6 +3,8 @@ name: Dr Michel-Alexandre Cardin
 initials: MC
 role: Associate Professor in Engineering Systems Design
 careerStage: director
+photo: /images/people/cardin.jpg
+photoAlt: Portrait of Dr Michel-Alexandre Cardin
 bio: >
   Associate Professor in Engineering Systems Design at the Dyson School of
   Design Engineering and Director of the Strategic Engineering Laboratory.
